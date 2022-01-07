@@ -150,7 +150,6 @@ class VideoItem(QStyledItemDelegate):
             if pME.button() == Qt.LeftButton:
                 ro = self.getCheckboxRect(option)
                 pte = pME.pos()
-                print(ro, pte)
                 if ro.contains(pte):
                     value = bool(index.data(Qt.CheckStateRole))
                     model.setData(index, not value, Qt.CheckStateRole)
