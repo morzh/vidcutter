@@ -626,10 +626,10 @@ static CYTHON_INLINE float __PYX_NAN() {
 /* Early includes */
 #include <string.h>
 #include <stdlib.h>
-#include "mpv/client.h"
-#include "mpv/opengl_cb.h"
-#include "mpv/render.h"
-#include "mpv/render_gl.h"
+#include "/home/morzh/work/vidcutter/vidcutter/libs/pympv/include/mpv/client.h"
+#include "/home/morzh/work/vidcutter/vidcutter/libs/pympv/include/mpv/opengl_cb.h"
+#include "/home/morzh/work/vidcutter/vidcutter/libs/pympv/include/mpv/render.h"
+#include "/home/morzh/work/vidcutter/vidcutter/libs/pympv/include/mpv/render_gl.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */

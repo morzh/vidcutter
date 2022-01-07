@@ -190,6 +190,7 @@ class VCFrameCounter(QWidget):
         self.currentframe.setValue(frame)
 
     def setFrameCount(self, count: int) -> None:
+        # print('frame count', count)
         self.framecount.setText(str(count))
         self.setMaximum(count)
 
@@ -363,6 +364,40 @@ class VCInputDialog(QDialog):
         layout.addWidget(buttons)
         self.setLayout(layout)
         self.setWindowTitle(title)
+        self.setFixedSize(350, self.sizeHint().height())
+
+
+class VCChapterInputDialog(QDialog):
+    def __init__(self, parent: QWidget, text: str, time_start: QTime, time_end: QTimeEdit):
+        super(VCChapterInputDialog, self).__init__(parent, Qt.Dialog | Qt.WindowCloseButtonHint)
+        self.input = QLineEdit(text, self)
+        self.input.setStyle(QStyleFactory.create('Fusion'))
+        self.input.setClearButtonEnabled(True)
+        self.input.selectAll()
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+
+        self.start = QTimeEdit(self)
+        self.start.setTime(time_start)
+        self.start.setDisplayFormat('hh:mm:ss')
+        self.start_label = QLabel('Start Time')
+
+        self.end = QTimeEdit(self)
+        self.end.setTime(time_end)
+        self.end.setDisplayFormat('hh:mm:ss')
+        self.end_label = QLabel('End Time')
+
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('Chapter name:', self))
+        layout.addWidget(self.input)
+        layout.addWidget(self.start_label)
+        layout.addWidget(self.start)
+        layout.addWidget(self.end_label)
+        layout.addWidget(self.end)
+        layout.addWidget(buttons)
+        self.setLayout(layout)
+        self.setWindowTitle('Edit Chapter')
         self.setFixedSize(350, self.sizeHint().height())
 
 

@@ -24,11 +24,14 @@
 
 import os
 import sys
+import copy
 
-from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime
+from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
 from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent
 from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QProgressBar, QSizePolicy, QStyle,
-                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem)
+                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication)
+
+# import PyQt5.QtCore.
 
 from vidcutter.libs.graphicseffects import OpacityEffect
 
@@ -58,6 +61,7 @@ class VideoList(QListWidget):
         self.opacityEffect = OpacityEffect(0.3)
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
+        # self.setItemWidget(QCheckBox)
 
     def renderClips(self, cliptimes: list) -> int:
         self.clear()
@@ -74,6 +78,7 @@ class VideoList(QListWidget):
                 externalCount += 1
             if self.parent.createChapters:
                 chapterName = clip[4] if clip[4] is not None else 'Chapter {}'.format(index + 1)
+
             listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             listitem.setTextAlignment(Qt.AlignVCenter)
             listitem.setData(Qt.DecorationRole + 1, clip[2])
@@ -81,7 +86,9 @@ class VideoList(QListWidget):
             listitem.setData(Qt.UserRole + 1, endItem)
             listitem.setData(Qt.UserRole + 2, clip[3])
             listitem.setData(Qt.UserRole + 3, chapterName)
-            listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled)
+            listitem.setData(Qt.CheckStateRole, Qt.Checked)
+            listitem.setCheckState(Qt.CheckState(2))
+            listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
             self.addItem(listitem)
             if isinstance(clip[1], QTime) and not len(clip[3]):
                 self.parent.seekSlider.addRegion(clip[0].msecsSinceStartOfDay(), clip[1].msecsSinceStartOfDay())
@@ -126,7 +133,7 @@ class VideoList(QListWidget):
         self.parent.listheader.setFixedWidth(self.width())
 
     def clearSelection(self) -> None:
-        self.parent.seekSlider.selectRegion(-1)
+        # self.parent.seekSlider.selectRegion(-1)
         self.parent.removeItemAction.setEnabled(False)
         super(VideoList, self).clearSelection()
 
@@ -136,6 +143,25 @@ class VideoItem(QStyledItemDelegate):
         super(VideoItem, self).__init__(parent)
         self.parent = parent
         self.theme = self.parent.theme
+
+    def editorEvent(self, event, model, option, index) -> bool:
+        if event.type() == QEvent.MouseButtonRelease:
+            pME = QMouseEvent(event)
+            if pME.button() == Qt.LeftButton:
+                ro = self.getCheckboxRect(option)
+                pte = pME.pos()
+                print(ro, pte)
+                if ro.contains(pte):
+                    value = bool(index.data(Qt.CheckStateRole))
+                    model.setData(index, not value, Qt.CheckStateRole)
+                    return True
+        return QStyledItemDelegate.editorEvent(event, model, option, index)
+
+    def getCheckboxRect(self, option: QStyleOptionViewItem) -> QRect:
+        opt_button = QStyleOptionButton()
+        opt_button.QStyleOption = option
+        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, opt_button)
+        return option.rect.adjusted(165, -85, checker_rect.width(), checker_rect.height())
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
         r = option.rect
@@ -156,6 +182,18 @@ class VideoItem(QStyledItemDelegate):
         endtime = index.data(Qt.UserRole + 1)
         externalPath = index.data(Qt.UserRole + 2)
         chapterName = index.data(Qt.UserRole + 3)
+
+        cbOpt = QStyleOptionButton()
+        cbOpt.QStyleOption = option
+        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, cbOpt)
+        cbOpt.rect = option.rect.adjusted(165, -85, checker_rect.width(), checker_rect.height())
+        isChecked = bool(index.data(Qt.CheckStateRole))
+
+        if isChecked:
+            cbOpt.state |= QStyle.State_On
+        else:
+            cbOpt.state |= QStyle.State_Off
+
         painter.setPen(QPen(pencolor, 1, Qt.SolidLine))
         if len(chapterName):
             offset = 20
@@ -168,6 +206,9 @@ class VideoItem(QStyledItemDelegate):
         else:
             offset = 0
             r = option.rect.adjusted(5, 0, 0, 0)
+
+        # r = option.rect.adjusted(5+offset, 5, 0, 0)
+        # painter.drawText(r, Qt.AlignRight, "Viz" + str(checkVisibility))
         thumbicon.paint(painter, r, Qt.AlignVCenter | Qt.AlignLeft)
         r = option.rect.adjusted(110, 10 + offset, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
@@ -185,6 +226,8 @@ class VideoItem(QStyledItemDelegate):
             r = option.rect.adjusted(110, 60 + offset, 0, 0)
             painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Normal))
             painter.drawText(r, Qt.AlignLeft, endtime)
+
+        QApplication.style().drawControl(QStyle.CE_CheckBox, cbOpt, painter)
 
     def clipText(self, text: str, painter: QPainter, chapter: bool=False) -> str:
         metrics = painter.fontMetrics()

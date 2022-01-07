@@ -60,7 +60,7 @@ from vidcutter.libs.notifications import JobCompleteNotification
 from vidcutter.libs.taskbarprogress import TaskbarProgress
 from vidcutter.libs.videoservice import VideoService
 from vidcutter.libs.widgets import (ClipErrorsDialog, VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction,
-                                    VCFrameCounter, VCInputDialog, VCMessageBox, VCProgressDialog, VCTimeCounter,
+                                    VCFrameCounter, VCInputDialog,  VCChapterInputDialog, VCMessageBox, VCProgressDialog, VCTimeCounter,
                                     VCToolBarButton, VCVolumeSlider)
 
 import vidcutter
@@ -139,6 +139,7 @@ class VideoCutter(QWidget):
         self._initNoVideo()
 
         self.cliplist = VideoList(self)
+        self.cliplist.doubleClicked.connect(self.editChapter)
         self.cliplist.customContextMenuRequested.connect(self.itemMenu)
         self.cliplist.currentItemChanged.connect(self.selectClip)
         self.cliplist.model().rowsInserted.connect(self.setProjectDirty)
@@ -554,7 +555,7 @@ class VideoCutter(QWidget):
                                         statusTip='Remove selected clip from list', enabled=False)
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList,
                                        statusTip='Remove all clips from list', enabled=False)
-        self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter name', self, triggered=self.editChapter,
+        self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.editChapter,
                                          statusTip='Edit the selected chapter name', enabled=False)
         self.streamsAction = QAction(self.streamsIcon, 'Media streams', self, triggered=self.selectStreams,
                                      statusTip='Select the media streams to be included', enabled=False)
@@ -606,6 +607,7 @@ class VideoCutter(QWidget):
         self.appmenu.addAction(self.openProjectAction)
         self.appmenu.addAction(self.saveProjectAction)
         self.appmenu.addSeparator()
+
         self.appmenu.addMenu(self._filtersMenu)
         self.appmenu.addSeparator()
         self.appmenu.addAction(self.fullscreenAction)
@@ -624,13 +626,13 @@ class VideoCutter(QWidget):
         self.appmenu.addSeparator()
         self.appmenu.addAction(self.quitAction)
 
-        self.clipindex_contextmenu.addAction(self.editChapterAction)
-        self.clipindex_contextmenu.addSeparator()
+        # self.clipindex_contextmenu.addAction(self.editChapterAction)
+        # self.clipindex_contextmenu.addSeparator()
         self.clipindex_contextmenu.addAction(self.moveItemUpAction)
         self.clipindex_contextmenu.addAction(self.moveItemDownAction)
         self.clipindex_contextmenu.addSeparator()
         self.clipindex_contextmenu.addAction(self.removeItemAction)
-        self.clipindex_contextmenu.addAction(self.removeAllAction)
+        # self.clipindex_contextmenu.addAction(self.removeAllAction)
 
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
@@ -707,7 +709,7 @@ class VideoCutter(QWidget):
 
     def itemMenu(self, pos: QPoint) -> None:
         globalPos = self.cliplist.mapToGlobal(pos)
-        self.editChapterAction.setEnabled(False)
+        # self.editChapterAction.setEnabled(False)
         self.moveItemUpAction.setEnabled(False)
         self.moveItemDownAction.setEnabled(False)
         self.initRemoveMenu()
@@ -726,11 +728,16 @@ class VideoCutter(QWidget):
         index = self.cliplist.currentRow()
         name = self.clipTimes[index][4]
         name = name if name is not None else 'Chapter {}'.format(index + 1)
-        dialog = VCInputDialog(self, 'Edit chapter name', 'Chapter name:', name)
-        dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.input.text()))
+        time_start = self.clipTimes[index][0]
+        time_end = self.clipTimes[index][1]
+        dialog = VCChapterInputDialog(self, name, time_start, time_end)
+        dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
         dialog.exec_()
 
-    def on_editChapter(self, index: int, text: str) -> None:
+    def on_editChapter(self, index: int, start: QTime, end: QTime, text: str) -> None:
+        print(self.clipTimes[index])
+        self.clipTimes[index][0] = start
+        self.clipTimes[index][1] = end
         self.clipTimes[index][4] = text
         self.renderClipIndex()
 
@@ -1250,6 +1257,7 @@ class VideoCutter(QWidget):
 
     def clipStart(self) -> None:
         starttime = self.delta2QTime(self.seekSlider.value())
+        print(self.seekSlider.value())
         self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', None])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()

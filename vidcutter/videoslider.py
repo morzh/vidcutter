@@ -26,13 +26,21 @@ import logging
 import math
 import sys
 
-from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot, QPoint
 from PyQt5.QtGui import QColor, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent
 from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle,
-                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget)
+                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication)
 
 from vidcutter.libs.videoservice import VideoService
 
+FREE_STATE = 1
+BUILDING_SQUARE = 2
+BEGIN_SIDE_EDIT = 3
+END_SIDE_EDIT = 4
+
+CURSOR_ON_BEGIN_SIDE = 1
+CURSOR_ON_END_SIDE = 2
+CURSOR_INSIDE = 3
 
 class VideoSlider(QSlider):
     def __init__(self, parent=None):
@@ -90,6 +98,22 @@ class VideoSlider(QSlider):
         self.valueChanged.connect(self.on_valueChanged)
         self.rangeChanged.connect(self.on_rangeChanged)
         self.installEventFilter(self)
+
+        self.free_cursor_on_side = 0
+        self.state = FREE_STATE
+        self.begin = QPoint()
+        self.end = QPoint()
+        self.rect_index = -1
+
+        self.widgetWidth = None
+        self.frameCounterMaximum = -1
+
+        self.modifierPressed = QApplication.keyboardModifiers()
+
+    def initSliderParameters(self) -> None:
+        self.widgetWidth = self.parent.sliderWidget.width()
+        self.frameCounterMaximum = self.parent.frameCounter.maximum()
+        print(self.widgetWidth, self.frameCounterMaximum)
 
     def initStyle(self) -> None:
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
@@ -185,20 +209,104 @@ class VideoSlider(QSlider):
             for rect in self._regions:
                 rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
                 rect.setHeight(self._regionHeight)
-                brushcolor = QColor(150, 190, 78, 200) if self._regions.index(rect) == self._regionSelected \
-                    else QColor(237, 242, 255, 200)
+                brushcolor = QColor(150, 190, 78, 150) if self._regions.index(rect) == self._regionSelected else QColor(237, 242, 255, 150)
                 painter.setBrush(brushcolor)
                 painter.setPen(QColor(50, 50, 50, 170))
                 painter.drawRect(rect)
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
 
+        if not self.free_cursor_on_side:
+            return
+
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+            if self.free_cursor_on_side == CURSOR_ON_BEGIN_SIDE:
+                end = QPoint(self.end)
+                end.setX(self.begin.x())
+                painter.drawLine(self.begin, end)
+            elif self.free_cursor_on_side == CURSOR_ON_END_SIDE:
+                begin = QPoint(self.begin)
+                begin.setX(self.end.x())
+                painter.drawLine(self.end, begin)
+            elif self.free_cursor_on_side == CURSOR_INSIDE:
+                rect = QRect()
+                rect.setTopLeft(self.begin)
+                rect.setBottomRight(self.end)
+                painter.drawRect(rect)
+
+    def apply_event(self, event):
+        if self.state == BEGIN_SIDE_EDIT:
+            rectangle_left_value = max(event.x(), 0)
+            self._regions[self.rect_index].setLeft(rectangle_left_value)
+            value = int(float(rectangle_left_value / (self.width() - 1)) * self.maximum())
+            time = self.parent.delta2QTime(value)
+            self.parent.clipTimes[self.rect_index][0] = time
+        elif self.state == END_SIDE_EDIT:
+            rectangle_right_value = min(event.x(), self.width()-1)
+            self._regions[self.rect_index].setRight(rectangle_right_value)
+            value = int(float(rectangle_right_value / (self.width()-1)) * self.maximum())
+            time = self.parent.delta2QTime(value)
+            self.parent.clipTimes[self.rect_index][1] = time
+
+    def cursor_on_side(self, e_pos) -> int:
+        if len(self._regions) > 0:
+            for region_idx in range(len(self._regions)):
+                self.begin = self._regions[region_idx].topLeft()
+                self.end = self._regions[region_idx].bottomRight()
+                y1, y2 = sorted([self.begin.y(), self.end.y()])
+                if y1 <= e_pos.y() <= y2:
+                    self.rect_index = region_idx
+                    # 5 resolution, more easy to pick than 1px
+                    if abs(self.begin.x() - e_pos.x()) <= 5:
+                        return CURSOR_ON_BEGIN_SIDE
+                    elif abs(self.end.x() - e_pos.x()) <= 5:
+                        return CURSOR_ON_END_SIDE
+                    elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
+                        return CURSOR_INSIDE
+        return 0
+
+    def mouseMoveEvent(self, event):
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            if self.state == FREE_STATE:
+                self.free_cursor_on_side = self.cursor_on_side(event.pos())
+                if self.free_cursor_on_side:
+                    self.setCursor(Qt.SizeHorCursor)
+                else:
+                    self.unsetCursor()
+                self.update()
+            else:
+                self.apply_event(event)
+                self.update()
+        else:
+            self.unsetCursor()
+            self.update()
+
+    def mousePressEvent(self, event):
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            side = self.cursor_on_side(event.pos())
+            if side == CURSOR_ON_BEGIN_SIDE:
+                self.state = BEGIN_SIDE_EDIT
+            elif side == CURSOR_ON_END_SIDE:
+                self.state = END_SIDE_EDIT
+        else:
+            self.state = FREE_STATE
+
+    def mouseReleaseEvent(self, event):
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            self.apply_event(event)
+        self.state = FREE_STATE
+        self.parent.renderClipIndex()
+
+
     def addRegion(self, start: int, end: int) -> None:
-        x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset,
-                                                 self.width() - (self.offset * 2))
+        x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
         y = int((self.height() - self._regionHeight) / 2)
-        width = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset,
-                                                     self.width() - (self.offset * 2)) - x
+        width = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2)) - x
         height = self._regionHeight
         self._regions.append(QRect(x + self.offset, y - 8, width, height))
         self.update()
@@ -317,6 +425,7 @@ class VideoSlider(QSlider):
         self.parent.sliderWidget.addWidget(thumbnails)
         self.thumbnailsOn = True
         self.initStyle()
+
         self.parent.sliderWidget.setLoader(False)
         if self.parent.newproject:
             self.parent.renderClipIndex()
@@ -384,10 +493,10 @@ class VideoSlider(QSlider):
     #     super(VideoSlider, self).mouseMoveEvent(event)
 
     def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
-        if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+        modifierPressed = QApplication.keyboardModifiers()
+        if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton and (modifierPressed & Qt.ControlModifier) != Qt.ControlModifier:
             if self.parent.mediaAvailable and self.isEnabled():
-                newpos = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset,
-                                                        self.width() - (self.offset * 2))
+                newpos = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 self.setValue(newpos)
                 self.parent.setPosition(newpos)
                 self.parent.parent.mousePressEvent(event)
