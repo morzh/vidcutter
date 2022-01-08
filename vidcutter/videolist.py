@@ -27,7 +27,7 @@ import sys
 import copy
 
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
-from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent
+from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent
 from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QProgressBar, QSizePolicy, QStyle,
                              QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication)
 
@@ -39,6 +39,7 @@ from vidcutter.libs.graphicseffects import OpacityEffect
 class VideoList(QListWidget):
     def __init__(self, parent=None):
         super(VideoList, self).__init__(parent)
+        self.itemClicked.connect(self.on_item_clicked)
         self.parent = parent
         self.theme = self.parent.theme
         self._progressbars = []
@@ -62,6 +63,17 @@ class VideoList(QListWidget):
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
         # self.setItemWidget(QCheckBox)
+
+    def mousePressEvent(self, event):
+        self._mouse_button = event.button()
+        super(VideoList, self).mousePressEvent(event)
+
+    def on_item_clicked(self, item):
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            item_index = self.row(item)
+            item_start_time = self.parent.clipTimes[item_index][0]
+            self.parent.setPosition(item_start_time.msecsSinceStartOfDay())
 
     def renderClips(self, cliptimes: list) -> int:
         self.clear()

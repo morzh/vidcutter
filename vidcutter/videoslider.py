@@ -300,8 +300,8 @@ class VideoSlider(QSlider):
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self.apply_event(event)
         self.state = FREE_STATE
+        self.parent.clipTimes[self.rect_index][2] = self.parent.captureImage(self.parent.currentMedia, self.parent.clipTimes[self.rect_index][0])
         self.parent.renderClipIndex()
-
 
     def addRegion(self, start: int, end: int) -> None:
         x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))

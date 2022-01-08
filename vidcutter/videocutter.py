@@ -146,6 +146,7 @@ class VideoCutter(QWidget):
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
+        # self.cliplist.model().
 
         self.listHeaderButtonL = QPushButton(self)
         self.listHeaderButtonL.setObjectName('listheaderbutton-left')
@@ -1082,7 +1083,7 @@ class VideoCutter(QWidget):
                 self.cliplist.item(row).setSelected(True)
             if not len(self.clipTimes[row][3]):
                 self.seekSlider.selectRegion(row)
-                self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
+                # self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
         except Exception:
             self.doPass()
 
@@ -1223,16 +1224,14 @@ class VideoCutter(QWidget):
                     lastItem = self.clipTimes[len(self.clipTimes) - 1]
                     file4Test = lastItem[3] if len(lastItem[3]) else self.currentMedia
                     if self.videoService.testJoin(file4Test, file):
-                        self.clipTimes.append([QTime(0, 0), self.videoService.duration(file),
-                                               self.captureImage(file, QTime(0, 0, second=2), True), file])
+                        self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file])
                         filesadded = True
                     else:
                         cliperrors.append((file,
                                            (self.videoService.lastError if len(self.videoService.lastError) else '')))
                         self.videoService.lastError = ''
                 else:
-                    self.clipTimes.append([QTime(0, 0), self.videoService.duration(file),
-                                           self.captureImage(file, QTime(0, 0, second=2), True), file])
+                    self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file])
                     filesadded = True
             if len(cliperrors):
                 detailedmsg = '''<p>The file(s) listed were found to be incompatible for inclusion to the clip index as
@@ -1257,7 +1256,7 @@ class VideoCutter(QWidget):
 
     def clipStart(self) -> None:
         starttime = self.delta2QTime(self.seekSlider.value())
-        print(self.seekSlider.value())
+        # print(self.seekSlider.value())
         self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', None])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
@@ -1317,6 +1316,8 @@ class VideoCutter(QWidget):
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
+
+
 
     @staticmethod
     def delta2QTime(msecs: Union[float, int]) -> QTime:

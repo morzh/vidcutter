@@ -165,8 +165,7 @@ class VideoService(QObject):
             self.spaceWarningDelivered = True
 
     @staticmethod
-    def captureFrame(settings: QSettings, source: str, frametime: str, thumbsize: QSize=None,
-                     external: bool=False) -> QPixmap:
+    def captureFrame(settings: QSettings, source: str, frametime: str, thumbsize: QSize=None, external: bool=False) -> QPixmap:
         if thumbsize is None:
             thumbsize = VideoService.config.thumbnails['INDEX']
         capres = QPixmap()
