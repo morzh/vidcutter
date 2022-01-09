@@ -63,6 +63,13 @@ class VideoList(QListWidget):
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
         # self.setItemWidget(QCheckBox)
+        self.itemChanged.connect(self.on_item_changed)
+
+
+    # def on_listImages_itemChanged(self, item_changed):
+    #     checked = item_changed.checkState() == Qt.Checked
+    #     index = self.row(item)
+    #     Qt.QMessageBox.information("Clicked", "You " + Qt.QString(checked ? "checked" : "unchecked") + " item " + QString::number(index + 1) + ".")
 
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
@@ -74,6 +81,11 @@ class VideoList(QListWidget):
             item_index = self.row(item)
             item_start_time = self.parent.clipTimes[item_index][0]
             self.parent.setPosition(item_start_time.msecsSinceStartOfDay())
+
+    def on_item_changed(self, item):
+        item_index = self.row(item)
+        # print(item_index, item.checkState())
+        self.parent.seekSlider.setRegionVizivility(item_index, item.checkState())
 
     def renderClips(self, cliptimes: list) -> int:
         self.clear()

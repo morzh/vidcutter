@@ -77,6 +77,7 @@ class VideoSlider(QSlider):
         }}'''
         self._progressbars = []
         self._regions = []
+        self._regionsVisibility = []
         self._regionHeight = 32
         self._regionSelected = -1
         self._handleHover = False
@@ -206,13 +207,16 @@ class VideoSlider(QSlider):
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
         if not len(self._progressbars) and (not self.parent.thumbnailsButton.isChecked() or self.thumbnailsOn):
-            for rect in self._regions:
-                rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
-                rect.setHeight(self._regionHeight)
-                brushcolor = QColor(150, 190, 78, 150) if self._regions.index(rect) == self._regionSelected else QColor(237, 242, 255, 150)
-                painter.setBrush(brushcolor)
-                painter.setPen(QColor(50, 50, 50, 170))
-                painter.drawRect(rect)
+            if len(self._regions) == len(self._regionsVisibility):
+                for rect, rectViz in zip(self._regions, self._regionsVisibility):
+                    if rectViz == 0:
+                        continue
+                    rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
+                    rect.setHeight(self._regionHeight)
+                    brushcolor = QColor(150, 190, 78, 150) if self._regions.index(rect) == self._regionSelected else QColor(237, 242, 255, 150)
+                    painter.setBrush(brushcolor)
+                    painter.setPen(QColor(50, 50, 50, 170))
+                    painter.drawRect(rect)
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
 
@@ -235,6 +239,11 @@ class VideoSlider(QSlider):
                 rect.setTopLeft(self.begin)
                 rect.setBottomRight(self.end)
                 painter.drawRect(rect)
+
+    def setRegionVizivility(self, index, state):
+        if len(self._regionsVisibility) > 0:
+            self._regionsVisibility[index] = state
+            self.update()
 
     def apply_event(self, event):
         if self.state == BEGIN_SIDE_EDIT:
@@ -309,11 +318,14 @@ class VideoSlider(QSlider):
         width = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2)) - x
         height = self._regionHeight
         self._regions.append(QRect(x + self.offset, y - 8, width, height))
+        self._regionsVisibility.append(2)
         self.update()
 
     def switchRegions(self, index1: int, index2: int) -> None:
-        reg = self._regions.pop(index1)
-        self._regions.insert(index2, reg)
+        region = self._regions.pop(index1)
+        regionVisibility = self._regionsVisibility.pop(index1)
+        self._regions.insert(index2, region)
+        self._regionsVisibility.insert(index2, regionVisibility)
         self.update()
 
     def selectRegion(self, clipindex: int) -> None:
@@ -322,6 +334,7 @@ class VideoSlider(QSlider):
 
     def clearRegions(self) -> None:
         self._regions.clear()
+        self._regionsVisibility.clear()
         self._regionSelected = -1
         self.update()
 
