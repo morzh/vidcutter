@@ -62,45 +62,11 @@ class VideoList(QListWidget):
         self.opacityEffect = OpacityEffect(0.3)
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
-        # self.setItemWidget(QCheckBox)
-        # self.itemChanged.connect(self.on_item_changed)
 
-
-    # def on_listImages_itemChanged(self, item_changed):
-    #     checked = item_changed.checkState() == Qt.Checked
-    #     index = self.row(item)
-    #     Qt.QMessageBox.information("Clicked", "You " + Qt.QString(checked ? "checked" : "unchecked") + " item " + QString::number(index + 1) + ".")
 
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
         super(VideoList, self).mousePressEvent(event)
-
-    def on_item_clicked(self, item):
-        pass
-        # modifierPressed = QApplication.keyboardModifiers()
-        # if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-        #     item_index = self.row(item)
-        #     item_start_time = self.parent.clipTimes[item_index][0]
-        #     self.parent.setPosition(item_start_time.msecsSinceStartOfDay())
-
-    def on_tagList_itemClicked(self, item):
-        print('on_tagList_itemClicked')
-        if item == None:
-            return
-        if item.data(Qt.CheckStateRole) != Qt.Checked:
-            item.setData(Qt.CheckStateRole, Qt.Checked)
-        else:
-            item.setData(Qt.CheckStateRole, Qt.Unchecked)
-
-    def on_item_changed(self, item):
-        item_index = self.row(item)
-        item_state = item.checkState()
-        print('on_item_changed', item_index, item_state)
-        # print(item_index, item.checkState())
-        # self.parent.seekSlider.setRegionVizivility(item_index, item_state)
-        # print(self.parent.clipsTimes[item_index])
-        # self.parent.clipsTimes[item_index][5] = item_state
-        # self.parent.update()
 
     def renderClips(self, cliptimes: list) -> int:
         self.clear()
@@ -125,8 +91,8 @@ class VideoList(QListWidget):
             listitem.setData(Qt.UserRole + 1, endItem)
             listitem.setData(Qt.UserRole + 2, clip[3])
             listitem.setData(Qt.UserRole + 3, chapterName)
-            listitem.setData(Qt.CheckStateRole, clip[5])
-            listitem.setCheckState(clip[5])
+            listitem.setData(Qt.CheckStateRole, 2)
+            listitem.setCheckState(2)
             listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
             self.addItem(listitem)
             if isinstance(clip[1], QTime) and not len(clip[3]):

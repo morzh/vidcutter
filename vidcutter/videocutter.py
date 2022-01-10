@@ -141,7 +141,7 @@ class VideoCutter(QWidget):
         self.cliplist = VideoList(self)
         self.cliplist.doubleClicked.connect(self.editChapter)
         self.cliplist.customContextMenuRequested.connect(self.itemMenu)
-        # self.cliplist.currentItemChanged.connect(self.selectClip)
+        self.cliplist.itemChanged.connect(self.printCheckbox)
         self.cliplist.clicked.connect(self.selectClip)
         self.cliplist.model().rowsInserted.connect(self.setProjectDirty)
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
@@ -1086,6 +1086,14 @@ class VideoCutter(QWidget):
             self.renderClipIndex()
         except Exception:
             self.doPass()
+
+    @pyqtSlot()
+    @pyqtSlot(QListWidgetItem)
+    def printCheckbox(self, item) -> None:
+        index_row = self.cliplist.row(item)
+        self.clipTimes[index_row][5] = item.checkState()
+        print(self.clipTimes[index_row][5])
+
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
