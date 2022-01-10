@@ -100,7 +100,7 @@ class VideoList(QListWidget):
             listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
             self.addItem(listitem)
             if isinstance(clip[1], QTime) and not len(clip[3]):
-                self.parent.seekSlider.addRegion(clip[0].msecsSinceStartOfDay(), clip[1].msecsSinceStartOfDay())
+                self.parent.seekSlider.addRegion(clip[0].msecsSinceStartOfDay(), clip[1].msecsSinceStartOfDay(), clip[5])
         self.clipsHasRendered = True
         return externalCount
 

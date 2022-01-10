@@ -315,13 +315,13 @@ class VideoSlider(QSlider):
         # self.parent.cliplist.update()
         self.parent.renderClipIndex()
 
-    def addRegion(self, start: int, end: int) -> None:
+    def addRegion(self, start: int, end: int, visibility=2) -> None:
         x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
         y = int((self.height() - self._regionHeight) / 2)
         width = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2)) - x
         height = self._regionHeight
         self._regions.append(QRect(x + self.offset, y - 8, width, height))
-        self._regionsVisibility.append(2)
+        self._regionsVisibility.append(visibility)
         self.update()
 
     def switchRegions(self, index1: int, index2: int) -> None:

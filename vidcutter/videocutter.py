@@ -59,8 +59,7 @@ from vidcutter.libs.munch import Munch
 from vidcutter.libs.notifications import JobCompleteNotification
 from vidcutter.libs.taskbarprogress import TaskbarProgress
 from vidcutter.libs.videoservice import VideoService
-from vidcutter.libs.widgets import (ClipErrorsDialog, VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction,
-                                    VCFrameCounter, VCInputDialog,  VCChapterInputDialog, VCMessageBox, VCProgressDialog, VCTimeCounter,
+from vidcutter.libs.widgets import (ClipErrorsDialog, VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCChapterInputDialog, VCMessageBox, VCProgressDialog, VCTimeCounter,
                                     VCToolBarButton, VCVolumeSlider)
 
 import vidcutter
@@ -737,9 +736,12 @@ class VideoCutter(QWidget):
 
     def on_editChapter(self, index: int, start: QTime, end: QTime, text: str) -> None:
         print(self.clipTimes[index])
+        if end < start:
+            end = start.addSecs(1)
         self.clipTimes[index][0] = start
         self.clipTimes[index][1] = end
         self.clipTimes[index][4] = text
+        # print(self.clipTimes[index][5])
         self.renderClipIndex()
 
     def moveItemUp(self) -> None:
