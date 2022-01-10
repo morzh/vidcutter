@@ -1090,10 +1090,14 @@ class VideoCutter(QWidget):
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
     def printCheckbox(self, item) -> None:
-        index_row = self.cliplist.row(item)
-        self.clipTimes[index_row][5] = item.checkState()
-        print(self.clipTimes[index_row][5])
-
+        # print('printCheckbox', item)
+        if self.cliplist.clipsHasRendered:
+            item_index = self.cliplist.row(item)
+            item_state = item.checkState()
+            self.clipTimes[item_index][5] = item_state
+            self.seekSlider.setRegionVizivility(item_index, item_state)
+            # print(self.clipTimes[item_index][5])
+            self.seekSlider.update()
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
@@ -1249,8 +1253,7 @@ class VideoCutter(QWidget):
                         self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file, 2])
                         filesadded = True
                     else:
-                        cliperrors.append((file,
-                                           (self.videoService.lastError if len(self.videoService.lastError) else '')))
+                        cliperrors.append((file, (self.videoService.lastError if len(self.videoService.lastError) else '')))
                         self.videoService.lastError = ''
                 else:
                     self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file, 2])
@@ -1294,6 +1297,7 @@ class VideoCutter(QWidget):
 
     def clipEnd(self) -> None:
         item = self.clipTimes[len(self.clipTimes) - 1]
+        # print('clipEnd', item)
         endtime = self.delta2QTime(self.seekSlider.value())
         if endtime.__lt__(item[0]):
             QMessageBox.critical(self.parent, 'Invalid END Time',

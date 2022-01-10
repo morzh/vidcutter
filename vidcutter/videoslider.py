@@ -311,6 +311,8 @@ class VideoSlider(QSlider):
             self.apply_event(event)
         self.state = FREE_STATE
         self.parent.clipTimes[self.rect_index][2] = self.parent.captureImage(self.parent.currentMedia, self.parent.clipTimes[self.rect_index][0])
+        # self.update()
+        # self.parent.cliplist.update()
         self.parent.renderClipIndex()
 
     def addRegion(self, start: int, end: int) -> None:

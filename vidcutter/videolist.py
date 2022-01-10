@@ -62,6 +62,7 @@ class VideoList(QListWidget):
         self.opacityEffect = OpacityEffect(0.3)
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
+        self.clipsHasRendered = False
 
 
     def mousePressEvent(self, event):
@@ -69,9 +70,12 @@ class VideoList(QListWidget):
         super(VideoList, self).mousePressEvent(event)
 
     def renderClips(self, cliptimes: list) -> int:
+        self.clipsHasRendered = False
         self.clear()
+        # print('renderClips', cliptimes)
         externalCount = 0
         for index, clip in enumerate(cliptimes):
+            # print(clip[5])
             chapterName, endItem = '', ''
             if isinstance(clip[1], QTime):
                 endItem = clip[1].toString(self.parent.timeformat)
@@ -81,9 +85,9 @@ class VideoList(QListWidget):
             if len(clip[3]):
                 listitem.setToolTip(clip[3])
                 externalCount += 1
+            # print(clip[5])
             if self.parent.createChapters:
                 chapterName = clip[4] if clip[4] is not None else 'Chapter {}'.format(index + 1)
-
             listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             listitem.setTextAlignment(Qt.AlignVCenter)
             listitem.setData(Qt.DecorationRole + 1, clip[2])
@@ -91,12 +95,13 @@ class VideoList(QListWidget):
             listitem.setData(Qt.UserRole + 1, endItem)
             listitem.setData(Qt.UserRole + 2, clip[3])
             listitem.setData(Qt.UserRole + 3, chapterName)
-            listitem.setData(Qt.CheckStateRole, 2)
-            listitem.setCheckState(2)
+            listitem.setData(Qt.CheckStateRole, clip[5])
+            listitem.setCheckState(clip[5])
             listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
             self.addItem(listitem)
             if isinstance(clip[1], QTime) and not len(clip[3]):
                 self.parent.seekSlider.addRegion(clip[0].msecsSinceStartOfDay(), clip[1].msecsSinceStartOfDay())
+        self.clipsHasRendered = True
         return externalCount
 
     def showProgress(self, steps: int) -> None:
