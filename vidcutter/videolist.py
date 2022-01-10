@@ -39,7 +39,7 @@ from vidcutter.libs.graphicseffects import OpacityEffect
 class VideoList(QListWidget):
     def __init__(self, parent=None):
         super(VideoList, self).__init__(parent)
-        self.itemClicked.connect(self.on_item_clicked)
+        # self.itemClicked.connect(self.on_item_clicked)
         self.parent = parent
         self.theme = self.parent.theme
         self._progressbars = []
@@ -63,7 +63,7 @@ class VideoList(QListWidget):
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
         # self.setItemWidget(QCheckBox)
-        self.itemChanged.connect(self.on_item_changed)
+        # self.itemChanged.connect(self.on_item_changed)
 
 
     # def on_listImages_itemChanged(self, item_changed):
@@ -76,16 +76,31 @@ class VideoList(QListWidget):
         super(VideoList, self).mousePressEvent(event)
 
     def on_item_clicked(self, item):
-        modifierPressed = QApplication.keyboardModifiers()
-        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-            item_index = self.row(item)
-            item_start_time = self.parent.clipTimes[item_index][0]
-            self.parent.setPosition(item_start_time.msecsSinceStartOfDay())
+        pass
+        # modifierPressed = QApplication.keyboardModifiers()
+        # if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+        #     item_index = self.row(item)
+        #     item_start_time = self.parent.clipTimes[item_index][0]
+        #     self.parent.setPosition(item_start_time.msecsSinceStartOfDay())
+
+    def on_tagList_itemClicked(self, item):
+        print('on_tagList_itemClicked')
+        if item == None:
+            return
+        if item.data(Qt.CheckStateRole) != Qt.Checked:
+            item.setData(Qt.CheckStateRole, Qt.Checked)
+        else:
+            item.setData(Qt.CheckStateRole, Qt.Unchecked)
 
     def on_item_changed(self, item):
         item_index = self.row(item)
+        item_state = item.checkState()
+        print('on_item_changed', item_index, item_state)
         # print(item_index, item.checkState())
-        self.parent.seekSlider.setRegionVizivility(item_index, item.checkState())
+        # self.parent.seekSlider.setRegionVizivility(item_index, item_state)
+        # print(self.parent.clipsTimes[item_index])
+        # self.parent.clipsTimes[item_index][5] = item_state
+        # self.parent.update()
 
     def renderClips(self, cliptimes: list) -> int:
         self.clear()
@@ -110,8 +125,8 @@ class VideoList(QListWidget):
             listitem.setData(Qt.UserRole + 1, endItem)
             listitem.setData(Qt.UserRole + 2, clip[3])
             listitem.setData(Qt.UserRole + 3, chapterName)
-            listitem.setData(Qt.CheckStateRole, Qt.Checked)
-            listitem.setCheckState(Qt.CheckState(2))
+            listitem.setData(Qt.CheckStateRole, clip[5])
+            listitem.setCheckState(clip[5])
             listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
             self.addItem(listitem)
             if isinstance(clip[1], QTime) and not len(clip[3]):

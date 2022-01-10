@@ -141,12 +141,12 @@ class VideoCutter(QWidget):
         self.cliplist = VideoList(self)
         self.cliplist.doubleClicked.connect(self.editChapter)
         self.cliplist.customContextMenuRequested.connect(self.itemMenu)
-        self.cliplist.currentItemChanged.connect(self.selectClip)
+        # self.cliplist.currentItemChanged.connect(self.selectClip)
+        self.cliplist.clicked.connect(self.selectClip)
         self.cliplist.model().rowsInserted.connect(self.setProjectDirty)
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
-        # self.cliplist.model().
 
         self.listHeaderButtonL = QPushButton(self)
         self.listHeaderButtonL.setObjectName('listheaderbutton-left')
@@ -878,7 +878,7 @@ class VideoCutter(QWidget):
                                     chapter = None
                             else:
                                 chapter = None
-                            self.clipTimes.append([clip_start, clip_end, clip_image, '', chapter])
+                            self.clipTimes.append([clip_start, clip_end, clip_image, '', chapter, 2])
                         else:
                             qApp.restoreOverrideCursor()
                             QMessageBox.critical(self.parent, 'Invalid project file',
@@ -1073,18 +1073,32 @@ class VideoCutter(QWidget):
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
 
+
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
-    def selectClip(self, item: QListWidgetItem = None) -> None:
-        # noinspection PyBroadException
+    def editClip(self, item: QListWidgetItem = None) -> None:
+        print('editClip')
         try:
-            row = self.cliplist.row(item) if item is not None else 0
-            if item is None:
-                self.cliplist.item(row).setSelected(True)
-            if not len(self.clipTimes[row][3]):
-                self.seekSlider.selectRegion(row)
-                # self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
+            item_index = self.cliplist.row(item)
+            item_state = item.checkState()
+            self.clipTimes[item_index][5] = item_state
+            print(self.clipTimes[item_index][5])
+            self.renderClipIndex()
         except Exception:
+            self.doPass()
+
+    @pyqtSlot()
+    @pyqtSlot(QListWidgetItem)
+    def selectClip(self) -> None:
+        try:
+            modifierPressed = QApplication.keyboardModifiers()
+            row = self.cliplist.currentRow()
+            if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+                self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
+            else:
+                if not len(self.clipTimes[row][3]):
+                    self.seekSlider.selectRegion(row)
+        except:
             self.doPass()
 
     def muteAudio(self) -> None:
@@ -1164,7 +1178,7 @@ class VideoCutter(QWidget):
     def addScenes(self, scenes: List[list]) -> None:
         if len(scenes):
             [
-                self.clipTimes.append([scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', None])
+                self.clipTimes.append([scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', None, 2])
                 for scene in scenes if len(scene)
             ]
             self.renderClipIndex()
@@ -1224,14 +1238,14 @@ class VideoCutter(QWidget):
                     lastItem = self.clipTimes[len(self.clipTimes) - 1]
                     file4Test = lastItem[3] if len(lastItem[3]) else self.currentMedia
                     if self.videoService.testJoin(file4Test, file):
-                        self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file])
+                        self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file, 2])
                         filesadded = True
                     else:
                         cliperrors.append((file,
                                            (self.videoService.lastError if len(self.videoService.lastError) else '')))
                         self.videoService.lastError = ''
                 else:
-                    self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file])
+                    self.clipTimes.append([QTime(0, 0), self.videoService.duration(file), self.captureImage(file, QTime(0, 0, second=2), True), file, 2])
                     filesadded = True
             if len(cliperrors):
                 detailedmsg = '''<p>The file(s) listed were found to be incompatible for inclusion to the clip index as
@@ -1257,7 +1271,7 @@ class VideoCutter(QWidget):
     def clipStart(self) -> None:
         starttime = self.delta2QTime(self.seekSlider.value())
         # print(self.seekSlider.value())
-        self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', None])
+        self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', None, 2])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
         self.toolbar_start.setDisabled(True)
@@ -1317,8 +1331,6 @@ class VideoCutter(QWidget):
             self.saveProjectAction.setEnabled(False)
         self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
 
-
-
     @staticmethod
     def delta2QTime(msecs: Union[float, int]) -> QTime:
         if isinstance(msecs, float):
@@ -1343,8 +1355,7 @@ class VideoCutter(QWidget):
 
     def saveMedia(self) -> None:
         clips = len(self.clipTimes)
-        source_file, source_ext = os.path.splitext(self.currentMedia if self.currentMedia is not None
-                                                   else self.clipTimes[0][3])
+        source_file, source_ext = os.path.splitext(self.currentMedia if self.currentMedia is not None else self.clipTimes[0][3])
         suggestedFilename = '{0}_EDIT{1}'.format(source_file, source_ext)
         filefilter = 'Video files (*{0})'.format(source_ext)
         if clips > 0:

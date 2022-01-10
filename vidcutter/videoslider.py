@@ -245,6 +245,7 @@ class VideoSlider(QSlider):
             self._regionsVisibility[index] = state
             self.update()
 
+
     def apply_event(self, event):
         if self.state == BEGIN_SIDE_EDIT:
             rectangle_left_value = max(event.x(), 0)
