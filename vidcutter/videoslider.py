@@ -25,6 +25,7 @@
 import logging
 import math
 import sys
+from enum import Enum
 
 from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot, QPoint
 from PyQt5.QtGui import QColor, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent
@@ -41,6 +42,19 @@ END_SIDE_EDIT = 4
 CURSOR_ON_BEGIN_SIDE = 1
 CURSOR_ON_END_SIDE = 2
 CURSOR_INSIDE = 3
+CURSOR_OFF = 4
+
+class CursorStates(Enum):
+    BEGIN_SIDE = 1
+    END_SIDE = 2
+    INSIDE = 3
+    FREE = 4
+
+class RectangleEditState(Enum):
+    FREE = 1
+    BUILDING_SQUARE = 2
+    BEGIN_SIDE = 3
+    END_SIDE = 4
 
 class VideoSlider(QSlider):
     def __init__(self, parent=None):
@@ -263,18 +277,19 @@ class VideoSlider(QSlider):
     def cursor_on_side(self, e_pos) -> int:
         if len(self._regions) > 0:
             for region_idx in range(len(self._regions)):
-                self.begin = self._regions[region_idx].topLeft()
-                self.end = self._regions[region_idx].bottomRight()
-                y1, y2 = sorted([self.begin.y(), self.end.y()])
-                if y1 <= e_pos.y() <= y2:
-                    self.rect_index = region_idx
-                    # 5 resolution, more easy to pick than 1px
-                    if abs(self.begin.x() - e_pos.x()) <= 5:
-                        return CURSOR_ON_BEGIN_SIDE
-                    elif abs(self.end.x() - e_pos.x()) <= 5:
-                        return CURSOR_ON_END_SIDE
-                    elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
-                        return CURSOR_INSIDE
+                if self._regionsVisibility[region_idx]:
+                    self.begin = self._regions[region_idx].topLeft()
+                    self.end = self._regions[region_idx].bottomRight()
+                    y1, y2 = sorted([self.begin.y(), self.end.y()])
+                    if y1 <= e_pos.y() <= y2:
+                        self.rect_index = region_idx
+                        # 5 resolution, more easy to pick than 1px
+                        if abs(self.begin.x() - e_pos.x()) <= 5:
+                            return CURSOR_ON_BEGIN_SIDE
+                        elif abs(self.end.x() - e_pos.x()) <= 5:
+                            return CURSOR_ON_END_SIDE
+                        elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
+                            return CURSOR_INSIDE
         return 0
 
     def mouseMoveEvent(self, event):
@@ -311,8 +326,6 @@ class VideoSlider(QSlider):
             self.apply_event(event)
         self.state = FREE_STATE
         self.parent.clipTimes[self.rect_index][2] = self.parent.captureImage(self.parent.currentMedia, self.parent.clipTimes[self.rect_index][0])
-        # self.update()
-        # self.parent.cliplist.update()
         self.parent.renderClipIndex()
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
