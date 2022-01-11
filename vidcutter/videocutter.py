@@ -138,10 +138,10 @@ class VideoCutter(QWidget):
         self._initNoVideo()
 
         self.cliplist = VideoList(self)
-        self.cliplist.doubleClicked.connect(self.editChapter)
+        self.cliplist.doubleClicked.connect(self.videoListDoubleClick)
         self.cliplist.customContextMenuRequested.connect(self.itemMenu)
-        self.cliplist.itemChanged.connect(self.printCheckbox)
-        self.cliplist.clicked.connect(self.selectClip)
+        self.cliplist.itemChanged.connect(self.videosVisibility)
+        self.cliplist.clicked.connect(self.videoListSingleClick)
         self.cliplist.model().rowsInserted.connect(self.setProjectDirty)
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
@@ -547,57 +547,34 @@ class VideoCutter(QWidget):
 
     # noinspection PyArgumentList
     def _initActions(self) -> None:
-        self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list',
-                                        triggered=self.moveItemUp, enabled=False)
-        self.moveItemDownAction = QAction(self.downIcon, 'Move clip down', self, triggered=self.moveItemDown,
-                                          statusTip='Move clip position down in list', enabled=False)
-        self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem,
-                                        statusTip='Remove selected clip from list', enabled=False)
-        self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList,
-                                       statusTip='Remove all clips from list', enabled=False)
-        self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.editChapter,
-                                         statusTip='Edit the selected chapter name', enabled=False)
-        self.streamsAction = QAction(self.streamsIcon, 'Media streams', self, triggered=self.selectStreams,
-                                     statusTip='Select the media streams to be included', enabled=False)
-        self.mediainfoAction = QAction(self.mediaInfoIcon, 'Media information', self, triggered=self.mediaInfo,
-                                       statusTip='View technical details about current media', enabled=False)
-        self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject,
-                                         statusTip='Open a previously saved project file (*.vcp or *.edl)',
-                                         enabled=True)
-        self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject,
-                                         statusTip='Save current work to a project file (*.vcp or *.edl)',
-                                         enabled=False)
-        self.changelogAction = QAction(self.changelogIcon, 'View changelog', self, triggered=self.viewChangelog,
-                                       statusTip='View log of changes')
-        self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs,
-                                      statusTip='View the application\'s log file')
-        self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self,
-                                         statusTip='Check for application updates', triggered=self.updater.check)
+        self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list', triggered=self.moveItemUp, enabled=False)
+        self.moveItemDownAction = QAction(self.downIcon, 'Move clip down', self, triggered=self.moveItemDown, statusTip='Move clip position down in list', enabled=False)
+        self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem, statusTip='Remove selected clip from list', enabled=False)
+        self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips from list', enabled=False)
+        self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
+        self.streamsAction = QAction(self.streamsIcon, 'Media streams', self, triggered=self.selectStreams, statusTip='Select the media streams to be included', enabled=False)
+        self.mediainfoAction = QAction(self.mediaInfoIcon, 'Media information', self, triggered=self.mediaInfo, statusTip='View technical details about current media', enabled=False)
+        self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
+        self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
+        self.changelogAction = QAction(self.changelogIcon, 'View changelog', self, triggered=self.viewChangelog, statusTip='View log of changes')
+        self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs, statusTip='View the application\'s log file')
+        self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
         self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
-        self.aboutAction = QAction('About {}'.format(qApp.applicationName()), self, triggered=self.aboutApp,
-                                   statusTip='About {}'.format(qApp.applicationName()))
-        self.keyRefAction = QAction(self.keyRefIcon, 'Keyboard shortcuts', self, triggered=self.showKeyRef,
-                                    statusTip='View shortcut key bindings')
-        self.settingsAction = QAction(self.settingsIcon, 'Settings', self, triggered=self.showSettings,
-                                      statusTip='Configure application settings')
-        self.fullscreenAction = QAction(self.fullscreenIcon, 'Toggle fullscreen', self, triggered=self.toggleFullscreen,
-                                        statusTip='Toggle fullscreen display mode', enabled=False)
-        self.quitAction = QAction(self.quitIcon, 'Quit', self, triggered=self.parent.close,
-                                  statusTip='Quit the application')
+        self.aboutAction = QAction('About {}'.format(qApp.applicationName()), self, triggered=self.aboutApp, statusTip='About {}'.format(qApp.applicationName()))
+        self.keyRefAction = QAction(self.keyRefIcon, 'Keyboard shortcuts', self, triggered=self.showKeyRef, statusTip='View shortcut key bindings')
+        self.settingsAction = QAction(self.settingsIcon, 'Settings', self, triggered=self.showSettings, statusTip='Configure application settings')
+        self.fullscreenAction = QAction(self.fullscreenIcon, 'Toggle fullscreen', self, triggered=self.toggleFullscreen, statusTip='Toggle fullscreen display mode', enabled=False)
+        self.quitAction = QAction(self.quitIcon, 'Quit', self, triggered=self.parent.close, statusTip='Quit the application')
 
     @property
     def _filtersMenu(self) -> QMenu:
         menu = QMenu('Video filters', self)
-        self.blackdetectAction = VCFilterMenuAction(QPixmap(':/images/blackdetect.png'), 'BLACKDETECT',
-                                                    'Create clips via black frame detection',
-                                                    'Useful for skipping commercials or detecting scene transitions',
-                                                    self)
+        self.blackdetectAction = VCFilterMenuAction(QPixmap(':/images/blackdetect.png'), 'BLACKDETECT', 'Create clips via black frame detection',
+                                                    'Useful for skipping commercials or detecting scene transitions', self)
         if sys.platform == 'darwin':
-            self.blackdetectAction.triggered.connect(lambda: self.configFilters(VideoFilter.BLACKDETECT),
-                                                     Qt.QueuedConnection)
+            self.blackdetectAction.triggered.connect(lambda: self.configFilters(VideoFilter.BLACKDETECT), Qt.QueuedConnection)
         else:
-            self.blackdetectAction.triggered.connect(lambda: self.configFilters(VideoFilter.BLACKDETECT),
-                                                     Qt.DirectConnection)
+            self.blackdetectAction.triggered.connect(lambda: self.configFilters(VideoFilter.BLACKDETECT), Qt.DirectConnection)
         self.blackdetectAction.setEnabled(False)
         menu.setIcon(self.filtersIcon)
         menu.addAction(self.blackdetectAction)
@@ -724,15 +701,19 @@ class VideoCutter(QWidget):
                     self.moveItemDownAction.setEnabled(True)
         self.clipindex_contextmenu.exec_(globalPos)
 
-    def editChapter(self) -> None:
+    def videoListDoubleClick(self) -> None:
         index = self.cliplist.currentRow()
-        name = self.clipTimes[index][4]
-        name = name if name is not None else 'Chapter {}'.format(index + 1)
-        time_start = self.clipTimes[index][0]
-        time_end = self.clipTimes[index][1]
-        dialog = VCChapterInputDialog(self, name, time_start, time_end)
-        dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
-        dialog.exec_()
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            self.setPosition(self.clipTimes[index][1].msecsSinceStartOfDay())
+        else:
+            name = self.clipTimes[index][4]
+            name = name if name is not None else 'Chapter {}'.format(index + 1)
+            time_start = self.clipTimes[index][0]
+            time_end = self.clipTimes[index][1]
+            dialog = VCChapterInputDialog(self, name, time_start, time_end)
+            dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
+            dialog.exec_()
 
     def on_editChapter(self, index: int, start: QTime, end: QTime, text: str) -> None:
         print(self.clipTimes[index])
@@ -741,7 +722,6 @@ class VideoCutter(QWidget):
         self.clipTimes[index][0] = start
         self.clipTimes[index][1] = end
         self.clipTimes[index][4] = text
-        # print(self.clipTimes[index][5])
         self.renderClipIndex()
 
     def moveItemUp(self) -> None:
@@ -893,7 +873,7 @@ class VideoCutter(QWidget):
             self.blackdetectAction.setEnabled(True)
             self.inCut = False
             self.newproject = True
-            QTimer.singleShot(2000, self.selectClip)
+            QTimer.singleShot(2000, self.videoListSingleClick)
             qApp.restoreOverrideCursor()
             if project_file != os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE):
                 self.showText('project loaded')
@@ -1091,7 +1071,7 @@ class VideoCutter(QWidget):
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
-    def printCheckbox(self, item) -> None:
+    def videosVisibility(self, item) -> None:
         # print('printCheckbox', item)
         if self.cliplist.clipsHasRendered:
             item_index = self.cliplist.row(item)
@@ -1103,7 +1083,7 @@ class VideoCutter(QWidget):
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
-    def selectClip(self) -> None:
+    def videoListSingleClick(self) -> None:
         try:
             modifierPressed = QApplication.keyboardModifiers()
             row = self.cliplist.currentRow()
