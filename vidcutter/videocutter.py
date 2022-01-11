@@ -132,7 +132,7 @@ class VideoCutter(QWidget):
         self._initActions()
 
         self.appmenu = QMenu(self.parent)
-        self.clipindex_removemenu, self.clipindex_contextmenu = QMenu(self), QMenu(self)
+        self.clipindex_removemenu = QMenu(self)
 
         self._initMenus()
         self._initNoVideo()
@@ -179,13 +179,20 @@ class VideoCutter(QWidget):
         self.runtimeLabel.setToolTip('total runtime: 00:00:00')
         self.runtimeLabel.setStatusTip('total running time: 00:00:00')
 
-        self.clipindex_add = QPushButton(self)
-        self.clipindex_add.setObjectName('clipadd')
-        self.clipindex_add.clicked.connect(self.addExternalClips)
-        self.clipindex_add.setToolTip('Add clips')
-        self.clipindex_add.setStatusTip('Add one or more files to an existing project or an empty list if you are only '
-                                        'joining files')
-        self.clipindex_add.setCursor(Qt.PointingHandCursor)
+        self.clipindex_move_up = QPushButton(self)
+        self.clipindex_move_up.setObjectName('clip_move_up')
+        self.clipindex_move_up.clicked.connect(self.moveItemUp)
+        self.clipindex_move_up.setToolTip('Move clip up')
+        self.clipindex_move_up.setStatusTip('Moves clip one row up')
+        self.clipindex_move_up.setCursor(Qt.PointingHandCursor)
+
+        self.clipindex_move_down = QPushButton(self)
+        self.clipindex_move_down.setObjectName('clip_move_down')
+        self.clipindex_move_down.clicked.connect(self.moveItemDown)
+        self.clipindex_move_down.setToolTip('Move clip down')
+        self.clipindex_move_down.setStatusTip('Moves clip one row down')
+        self.clipindex_move_down.setCursor(Qt.PointingHandCursor)
+
         self.clipindex_remove = QPushButton(self)
         self.clipindex_remove.setObjectName('clipremove')
         self.clipindex_remove.setToolTip('Remove clips')
@@ -193,16 +200,20 @@ class VideoCutter(QWidget):
         self.clipindex_remove.setLayoutDirection(Qt.RightToLeft)
         self.clipindex_remove.setMenu(self.clipindex_removemenu)
         self.clipindex_remove.setCursor(Qt.PointingHandCursor)
+
         if sys.platform in {'win32', 'darwin'}:
-            self.clipindex_add.setStyle(QStyleFactory.create('Fusion'))
+            self.clipindex_move_up.setStyle(QStyleFactory.create('Fusion'))
+            self.clipindex_move_down.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_remove.setStyle(QStyleFactory.create('Fusion'))
 
         clipindex_layout = QHBoxLayout()
         clipindex_layout.setSpacing(1)
         clipindex_layout.setContentsMargins(0, 0, 0, 0)
-        clipindex_layout.addWidget(self.clipindex_add)
-        clipindex_layout.addSpacing(1)
+        clipindex_layout.addWidget(self.clipindex_move_up)
+        clipindex_layout.addWidget(self.clipindex_move_down)
+        clipindex_layout.addSpacing(15)
         clipindex_layout.addWidget(self.clipindex_remove)
+
         clipindexTools = QWidget(self)
         clipindexTools.setObjectName('clipindextools')
         clipindexTools.setLayout(clipindex_layout)
@@ -267,8 +278,7 @@ class VideoCutter(QWidget):
         self.videoplayerWidget.setLayout(self.videoplayerLayout)
 
         # noinspection PyArgumentList
-        self.thumbnailsButton = QPushButton(self, flat=True, checkable=True, objectName='thumbnailsButton',
-                                            statusTip='Toggle timeline thumbnails', cursor=Qt.PointingHandCursor,
+        self.thumbnailsButton = QPushButton(self, flat=True, checkable=True, objectName='thumbnailsButton',  statusTip='Toggle timeline thumbnails', cursor=Qt.PointingHandCursor,
                                             toolTip='Toggle thumbnails')
         self.thumbnailsButton.setFixedSize(32, 29 if self.theme == 'dark' else 31)
         self.thumbnailsButton.setChecked(self.timelineThumbs)
@@ -277,16 +287,13 @@ class VideoCutter(QWidget):
             self.seekSlider.setObjectName('nothumbs')
 
         # noinspection PyArgumentList
-        self.osdButton = QPushButton(self, flat=True, checkable=True, objectName='osdButton', toolTip='Toggle OSD',
-                                     statusTip='Toggle on-screen display', cursor=Qt.PointingHandCursor)
+        self.osdButton = QPushButton(self, flat=True, checkable=True, objectName='osdButton', toolTip='Toggle OSD', statusTip='Toggle on-screen display', cursor=Qt.PointingHandCursor)
         self.osdButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
         self.osdButton.setChecked(self.enableOSD)
         self.osdButton.toggled.connect(self.toggleOSD)
 
         # noinspection PyArgumentList
-        self.consoleButton = QPushButton(self, flat=True, checkable=True, objectName='consoleButton',
-                                         statusTip='Toggle console window', toolTip='Toggle console',
-                                         cursor=Qt.PointingHandCursor)
+        self.consoleButton = QPushButton(self, flat=True, checkable=True, objectName='consoleButton', statusTip='Toggle console window', toolTip='Toggle console', cursor=Qt.PointingHandCursor)
         self.consoleButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
         self.consoleButton.setChecked(self.showConsole)
         self.consoleButton.toggled.connect(self.toggleConsole)
@@ -296,56 +303,40 @@ class VideoCutter(QWidget):
             self.parent.console.show()
 
         # noinspection PyArgumentList
-        self.chaptersButton = QPushButton(self, flat=True, checkable=True, objectName='chaptersButton',
-                                          statusTip='Automatically create chapters per clip', toolTip='Create chapters',
+        self.chaptersButton = QPushButton(self, flat=True, checkable=True, objectName='chaptersButton', statusTip='Automatically create chapters per clip', toolTip='Create chapters',
                                           cursor=Qt.PointingHandCursor)
         self.chaptersButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
         self.chaptersButton.setChecked(self.createChapters)
         self.chaptersButton.toggled.connect(self.toggleChapters)
 
         # noinspection PyArgumentList
-        self.smartcutButton = QPushButton(self, flat=True, checkable=True, objectName='smartcutButton',
-                                          toolTip='Toggle SmartCut', statusTip='Toggle frame accurate cutting',
+        self.smartcutButton = QPushButton(self, flat=True, checkable=True, objectName='smartcutButton', toolTip='Toggle SmartCut', statusTip='Toggle frame accurate cutting',
                                           cursor=Qt.PointingHandCursor)
         self.smartcutButton.setFixedSize(32, 29 if self.theme == 'dark' else 31)
         self.smartcutButton.setChecked(self.smartcut)
         self.smartcutButton.toggled.connect(self.toggleSmartCut)
 
         # noinspection PyArgumentList
-        self.muteButton = QPushButton(objectName='muteButton', icon=self.unmuteIcon, flat=True, toolTip='Mute',
-                                      statusTip='Toggle audio mute', iconSize=QSize(16, 16), clicked=self.muteAudio,
+        self.muteButton = QPushButton(objectName='muteButton', icon=self.unmuteIcon, flat=True, toolTip='Mute', statusTip='Toggle audio mute', iconSize=QSize(16, 16), clicked=self.muteAudio,
                                       cursor=Qt.PointingHandCursor)
-
         # noinspection PyArgumentList
-        self.volSlider = VCVolumeSlider(orientation=Qt.Horizontal, toolTip='Volume', statusTip='Adjust volume level',
-                                        cursor=Qt.PointingHandCursor, value=self.parent.startupvol, minimum=0,
+        self.volSlider = VCVolumeSlider(orientation=Qt.Horizontal, toolTip='Volume', statusTip='Adjust volume level', cursor=Qt.PointingHandCursor, value=self.parent.startupvol, minimum=0,
                                         maximum=130, minimumHeight=22, sliderMoved=self.setVolume)
-
         # noinspection PyArgumentList
-        self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True,
-                                            toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
-                                            iconSize=QSize(14, 14), clicked=self.toggleFullscreen,
-                                            cursor=Qt.PointingHandCursor, enabled=False)
-
+        self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True, toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
+                                            iconSize=QSize(14, 14), clicked=self.toggleFullscreen, cursor=Qt.PointingHandCursor, enabled=False)
         # noinspection PyArgumentList
-        self.settingsButton = QPushButton(self, toolTip='Settings', cursor=Qt.PointingHandCursor, flat=True,
-                                          statusTip='Configure application settings',
+        self.settingsButton = QPushButton(self, toolTip='Settings', cursor=Qt.PointingHandCursor, flat=True, statusTip='Configure application settings',
                                           objectName='settingsButton', clicked=self.showSettings)
         self.settingsButton.setFixedSize(QSize(33, 32))
-
         # noinspection PyArgumentList
-        self.streamsButton = QPushButton(self, toolTip='Media streams', cursor=Qt.PointingHandCursor, flat=True,
-                                         statusTip='Select the media streams to be included',
-                                         objectName='streamsButton', clicked=self.selectStreams,
-                                         enabled=False)
+        self.streamsButton = QPushButton(self, toolTip='Media streams', cursor=Qt.PointingHandCursor, flat=True, statusTip='Select the media streams to be included',
+                                         objectName='streamsButton', clicked=self.selectStreams, enabled=False)
         self.streamsButton.setFixedSize(QSize(33, 32))
-
         # noinspection PyArgumentList
-        self.mediainfoButton = QPushButton(self, toolTip='Media information', cursor=Qt.PointingHandCursor, flat=True,
-                                           statusTip='View technical details about current media',
+        self.mediainfoButton = QPushButton(self, toolTip='Media information', cursor=Qt.PointingHandCursor, flat=True, statusTip='View technical details about current media',
                                            objectName='mediainfoButton', clicked=self.mediaInfo, enabled=False)
         self.mediainfoButton.setFixedSize(QSize(33, 32))
-
         # noinspection PyArgumentList
         self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True,
                                       objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
@@ -545,6 +536,7 @@ class VideoCutter(QWidget):
         self.settingsIcon = QIcon(':/images/settings.png')
         self.quitIcon = QIcon(':/images/quit.png')
 
+
     # noinspection PyArgumentList
     def _initActions(self) -> None:
         self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list', triggered=self.moveItemUp, enabled=False)
@@ -602,14 +594,6 @@ class VideoCutter(QWidget):
         self.appmenu.addAction(self.aboutAction)
         self.appmenu.addSeparator()
         self.appmenu.addAction(self.quitAction)
-
-        # self.clipindex_contextmenu.addAction(self.editChapterAction)
-        # self.clipindex_contextmenu.addSeparator()
-        self.clipindex_contextmenu.addAction(self.moveItemUpAction)
-        self.clipindex_contextmenu.addAction(self.moveItemDownAction)
-        self.clipindex_contextmenu.addSeparator()
-        self.clipindex_contextmenu.addAction(self.removeItemAction)
-        # self.clipindex_contextmenu.addAction(self.removeAllAction)
 
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
@@ -1269,7 +1253,7 @@ class VideoCutter(QWidget):
         self.frameCounter.lockMinimum()
         self.toolbar_start.setDisabled(True)
         self.toolbar_end.setEnabled(True)
-        self.clipindex_add.setDisabled(True)
+        self.clipindex_move_up.setDisabled(True)
         self.seekSlider.setRestrictValue(self.seekSlider.value(), True)
         self.blackdetectAction.setDisabled(True)
         self.inCut = True
@@ -1288,7 +1272,7 @@ class VideoCutter(QWidget):
         item[1] = endtime
         self.toolbar_start.setEnabled(True)
         self.toolbar_end.setDisabled(True)
-        self.clipindex_add.setEnabled(True)
+        self.clipindex_move_up.setEnabled(True)
         self.timeCounter.setMinimum()
         self.seekSlider.setRestrictValue(0, False)
         self.blackdetectAction.setEnabled(True)

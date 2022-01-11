@@ -74,6 +74,8 @@
         <file>images/dark/clipindex-remove.png</file>
         <file>images/dark/clipindex-remove-disabled.png</file>
         <file>images/dark/clipindex-remove-on.png</file>
+        <file>images/dark/button-up.png</file>
+        <file>images/dark/button-down.png</file>
         <file>images/dark/console-disabled.png</file>
         <file>images/dark/console-hover.png</file>
         <file>images/dark/console-off.png</file>
@@ -156,6 +158,8 @@
         <file>images/light/clipindex-remove.png</file>
         <file>images/light/clipindex-remove-disabled.png</file>
         <file>images/light/clipindex-remove-on.png</file>
+        <file>images/light/button-up.png</file>
+        <file>images/light/button-down.png</file>
         <file>images/light/chapters-disabled.png</file>
         <file>images/light/chapters-hover.png</file>
         <file>images/light/chapters-off.png</file>

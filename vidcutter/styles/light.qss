@@ -298,16 +298,39 @@ QPushButton#resetpathsbutton {
 #clipindextools QPushButton#clipremove, #clipindextools QPushButton:hover#clipremove {
     background-image: url(:images/light/clipindex-remove.png);
     background-repeat: no-repeat;
-    background-position: right center;
+    background-position: center center;
 }
-
 #clipindextools QPushButton:pressed#clipremove {
     background-image: url(:images/light/clipindex-remove-on.png);
 }
-
 #clipindextools QPushButton:disabled#clipremove {
     background-image: url(:images/light/clipindex-remove-disabled.png);
 }
+
+#clipindextools QPushButton#clipremove, #clipindextools QPushButton:hover#clip_move_up {
+    background-image: url(:images/light/button-up.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+#clipindextools QPushButton:pressed#clip_move_up {
+    background-image: url(:images/light/bottom-up.png);
+}
+#clipindextools QPushButton:disabled#clip_move_up {
+    background-image: url(:images/light/button-up.png);
+}
+
+#clipindextools QPushButton#clipremove, #clipindextools QPushButton:hover#clip_move_down {
+    background-image: url(:images/light/button-down.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+#clipindextools QPushButton:pressed#clip_move_down {
+    background-image: url(:images/light/button-down.png);
+}
+#clipindextools QPushButton:disabled#clip_move_down {
+    background-image: url(:images/light/button-down.png);
+}
+
 
 QDialogButtonBox QPushButton:hover,
 QDialog#mediainfo QPushButton, QDialog#notification QPushButton:hover,
