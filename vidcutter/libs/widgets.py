@@ -348,6 +348,20 @@ class VCVolumeSlider(QSlider):
         QToolTip.showText(globalPos, str('{0}%'.format(value)), self)
 
 
+class VCConfirmDialog(QDialog):
+    def __init__(self, parent: QWidget, title: str, label: str):
+        super(VCConfirmDialog, self).__init__(parent, Qt.Dialog | Qt.WindowCloseButtonHint)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel(label, self))
+        layout.addWidget(buttons)
+        self.setLayout(layout)
+        self.setWindowTitle(title)
+        self.setFixedSize(350, self.sizeHint().height())
+
+
 class VCInputDialog(QDialog):
     def __init__(self, parent: QWidget, title: str, label: str, text: str):
         super(VCInputDialog, self).__init__(parent, Qt.Dialog | Qt.WindowCloseButtonHint)

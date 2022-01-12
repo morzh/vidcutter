@@ -65,6 +65,7 @@ class VideoList(QListWidget):
         self.clipsHasRendered = False
 
 
+
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
         super(VideoList, self).mousePressEvent(event)

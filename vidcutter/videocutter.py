@@ -36,7 +36,7 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget)
+                             QVBoxLayout, QWidget, QDialogButtonBox)
 
 import sip
 
@@ -60,7 +60,7 @@ from vidcutter.libs.notifications import JobCompleteNotification
 from vidcutter.libs.taskbarprogress import TaskbarProgress
 from vidcutter.libs.videoservice import VideoService
 from vidcutter.libs.widgets import (ClipErrorsDialog, VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCChapterInputDialog, VCMessageBox, VCProgressDialog, VCTimeCounter,
-                                    VCToolBarButton, VCVolumeSlider)
+                                    VCToolBarButton, VCVolumeSlider, VCConfirmDialog)
 
 import vidcutter
 
@@ -429,7 +429,7 @@ class VideoCutter(QWidget):
         if sys.platform != 'darwin':
             controlsLayout.addSpacing(5)
 
-        layout = QVBoxLayout()  
+        layout = QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(10, 10, 10, 0)
         layout.addLayout(self.videoLayout)
@@ -535,7 +535,6 @@ class VideoCutter(QWidget):
         self.fullscreenIcon = QIcon(':/images/{}/fullscreen.png'.format(self.theme))
         self.settingsIcon = QIcon(':/images/settings.png')
         self.quitIcon = QIcon(':/images/quit.png')
-
 
     # noinspection PyArgumentList
     def _initActions(self) -> None:
@@ -740,6 +739,12 @@ class VideoCutter(QWidget):
         self.renderClipIndex()
 
     def clearList(self) -> None:
+        dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all clips?')
+        dialog.accepted.connect(lambda: self.on_clearList())
+        dialog.exec_()
+
+
+    def on_clearList(self) -> None:
         self.clipTimes.clear()
         self.cliplist.clear()
         self.showText('all clips cleared')
@@ -1038,7 +1043,6 @@ class VideoCutter(QWidget):
         self.seekSlider.setRange(0, int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
-
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
