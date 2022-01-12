@@ -316,7 +316,7 @@ QPushButton#resetpathsbutton {
     background-image: url(:images/light/button-up-pressed.png);
 }
 #clipindextools QPushButton:disabled#clip_move_up {
-    background-image: url(:images/light/button-up.png);
+    background-image: url(:images/light/button-up-disable.png);
 }
 
 #clipindextools QPushButton#clip_move_down, #clipindextools QPushButton:hover#clip_move_down {
@@ -325,10 +325,10 @@ QPushButton#resetpathsbutton {
     background-position: center center;
 }
 #clipindextools QPushButton:pressed#clip_move_down {
-    background-image: url(:images/light/button-down.png);
+    background-image: url(:images/light/button-down-pressed.png);
 }
 #clipindextools QPushButton:disabled#clip_move_down {
-    background-image: url(:images/light/button-down.png);
+    background-image: url(:images/light/button-down-disable.png);
 }
 
 

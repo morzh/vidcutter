@@ -329,7 +329,7 @@ QPushButton#resetpathsbutton {
     background-position: center center;
 }
 #clipindextools QPushButton:pressed#clip_move_down {
-    background-image: url(:images/dark/button-down.png);
+    background-image: url(:images/dark/button-down-pressed.png);
 }
 #clipindextools QPushButton:disabled#clip_move_down {
     background-image: url(:images/dark/button-down-disable.png);

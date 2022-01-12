@@ -747,7 +747,7 @@ class VideoCutter(QWidget):
         self.renderClipIndex()
 
     def clearList(self) -> None:
-        dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all clips?')
+        dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all the clips?')
         dialog.accepted.connect(lambda: self.on_clearList())
         dialog.exec_()
 
