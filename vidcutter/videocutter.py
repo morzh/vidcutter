@@ -734,10 +734,14 @@ class VideoCutter(QWidget):
                 self.initMediaControls()
         elif len(self.clipTimes) == 0:
             self.initMediaControls(False)
+
+        del self.clipTimes[index]
+
+        if len(self.clipTimes) == 0:
             self.clipindex_clips_remove.setDisabled(True)
             self.clipindex_move_up.setDisabled(True)
             self.clipindex_move_down.setDisabled(True)
-        del self.clipTimes[index]
+
         self.cliplist.takeItem(index)
         self.showText('clip removed')
         self.renderClipIndex()
