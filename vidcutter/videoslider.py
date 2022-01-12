@@ -123,8 +123,6 @@ class VideoSlider(QSlider):
         self.widgetWidth = None
         self.frameCounterMaximum = -1
 
-        self.modifierPressed = QApplication.keyboardModifiers()
-
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()
@@ -534,6 +532,30 @@ class VideoSlider(QSlider):
                 self.parent.setPosition(newpos)
                 self.parent.parent.mousePressEvent(event)
         return super(VideoSlider, self).eventFilter(obj, event)
+
+    # bool ft::MainWindow::eventFilter(QObject * watched, QEvent * event)
+    # {
+    # if (watched == ui->menuBar)
+    # {
+    #     if (event->type() == QEvent::MouseButtonPress)
+    #     {
+    #         QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
+    #         if (mouse_event->button() == Qt::LeftButton)
+    #         {
+    #             dragPosition = mouse_event->globalPos() - ui->menuBar->mapToGlobal(QPoint(0,0));
+    #             return false;
+    #         }
+    #     }
+    #     else if (event->type() == QEvent::MouseMove)
+    #     {
+    #         QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
+    #         if (mouse_event->buttons() & Qt::LeftButton)
+    #         {
+    #             move( mouse_event->globalPos() - dragPosition);
+    #             return false;
+    #         }
+    #     }
+    # }
 
 
 class SliderProgress(QProgressBar):

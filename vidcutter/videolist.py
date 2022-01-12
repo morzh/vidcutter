@@ -64,8 +64,6 @@ class VideoList(QListWidget):
         self.setGraphicsEffect(self.opacityEffect)
         self.clipsHasRendered = False
 
-
-
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
         super(VideoList, self).mousePressEvent(event)
