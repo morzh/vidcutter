@@ -302,7 +302,7 @@ QPushButton#resetpathsbutton {
 #clipindextools QPushButton#clipremove, #clipindextools QPushButton:hover#clipremove {
     background-image: url(:images/dark/clipindex-remove.png);
     background-repeat: no-repeat;
-    background-position: right center;
+    background-position: center center;
 }
 #clipindextools QPushButton:pressed#clipremove {
     background-image: url(:images/dark/clipindex-remove-on.png);
@@ -320,7 +320,7 @@ QPushButton#resetpathsbutton {
     background-image: url(:images/dark/button-up.png);
 }
 #clipindextools QPushButton:disabled#clip_move_up {
-    background-image: url(:images/dark/button-up.png);
+    background-image: url(:images/dark/button-up-disable.png);
 }
 
 #clipindextools QPushButton#clipremove, #clipindextools QPushButton:hover#clip_move_down {
@@ -332,7 +332,7 @@ QPushButton#resetpathsbutton {
     background-image: url(:images/dark/button-down.png);
 }
 #clipindextools QPushButton:disabled#clip_move_down {
-    background-image: url(:images/dark/button-down.png);
+    background-image: url(:images/dark/button-down-disable.png);
 }
 
 
