@@ -242,18 +242,15 @@ class VideoSlider(QSlider):
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
             if self.free_cursor_on_side == CURSOR_ON_BEGIN_SIDE:
-                end = QPoint(self.end)
-                end.setX(self.begin.x())
-                painter.drawLine(self.begin, end)
+                begin = self._regions[self.current_rectangle_index].topLeft()
+                end = self._regions[self.current_rectangle_index].bottomLeft()
+                painter.drawLine(begin, end)
             elif self.free_cursor_on_side == CURSOR_ON_END_SIDE:
-                begin = QPoint(self.begin)
-                begin.setX(self.end.x())
-                painter.drawLine(self.end, begin)
+                begin = self._regions[self.current_rectangle_index].topRight()
+                end = self._regions[self.current_rectangle_index].bottomRight()
+                painter.drawLine(begin, end)
             elif self.free_cursor_on_side == CURSOR_IS_INSIDE:
-                rect = QRect()
-                rect.setTopLeft(self.begin)
-                rect.setBottomRight(self.end)
-                painter.drawRect(rect)
+                painter.drawRect(self._regions[self.current_rectangle_index])
 
     def setRegionVizivility(self, index, state):
         if len(self._regionsVisibility) > 0:
@@ -555,6 +552,7 @@ class VideoSlider(QSlider):
                     self.setValue(new_position)
                     self.parent.setPosition(new_position)
                     self.parent.parent.mousePressEvent(event)
+                self.update()
 
         return super(VideoSlider, self).eventFilter(obj, event)
 

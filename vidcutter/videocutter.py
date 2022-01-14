@@ -1289,8 +1289,9 @@ class VideoCutter(QWidget):
         item[1] = endtime
         self.toolbar_start.setEnabled(True)
         self.toolbar_end.setDisabled(True)
-        self.clipindex_move_up.setEnabled(True)
-        self.clipindex_move_down.setEnabled(True)
+        if len(self.clipTimes) > 1:
+            self.clipindex_move_up.setEnabled(True)
+            self.clipindex_move_down.setEnabled(True)
         self.clipindex_clips_remove.setEnabled(True)
         self.timeCounter.setMinimum()
         self.seekSlider.setRestrictValue(0, False)
