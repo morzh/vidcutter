@@ -524,26 +524,12 @@ class VideoSlider(QSlider):
     def keyPressEvent(self, event: QKeyEvent) -> None:
         qApp.sendEvent(self.parent, event)
 
-    # def mouseMoveEvent(self, event: QMouseEvent) -> None:
-    #     opt = QStyleOptionSlider()
-    #     self.initStyleOption(opt)
-    #     handle = self.style().subControlRect(QStyle.CC_Slider, opt, QStyle.SC_SliderHandle, self)
-    #     if handle.x() <= event.pos().x() <= (handle.x() + handle.width()):
-    #         self.setCursor(Qt.PointingHandCursor)
-    #         self._handleHover = True
-    #     else:
-    #         self.unsetCursor()
-    #         self._handleHover = False
-    #     self.initStyle()
-    #     super(VideoSlider, self).mouseMoveEvent(event)
-
     def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
                 self.dragPosition = event.pos()
                 self.dragRectPosition = self._regions[self.current_rectangle_index].topLeft()
-
                 side = self.cursor_on_side(event.pos())
                 if side == CURSOR_ON_BEGIN_SIDE:
                     self.state = BEGIN_SIDE_EDIT
@@ -571,30 +557,6 @@ class VideoSlider(QSlider):
                     self.parent.parent.mousePressEvent(event)
 
         return super(VideoSlider, self).eventFilter(obj, event)
-
-    # bool ft::MainWindow::eventFilter(QObject * watched, QEvent * event)
-    # {
-    # if (watched == ui->menuBar)
-    # {
-    #     if (event->type() == QEvent::MouseButtonPress)
-    #     {
-    #         QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-    #         if (mouse_event->button() == Qt::LeftButton)
-    #         {
-    #             dragPosition = mouse_event->globalPos() - ui->menuBar->mapToGlobal(QPoint(0,0));
-    #             return false;
-    #         }
-    #     }
-    #     else if (event->type() == QEvent::MouseMove)
-    #     {
-    #         QMouseEvent* mouse_event = dynamic_cast<QMouseEvent*>(event);
-    #         if (mouse_event->buttons() & Qt::LeftButton)
-    #         {
-    #             move( mouse_event->globalPos() - dragPosition);
-    #             return false;
-    #         }
-    #     }
-    # }
 
 
 class SliderProgress(QProgressBar):
