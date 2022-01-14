@@ -737,7 +737,7 @@ class VideoCutter(QWidget):
 
         del self.clipTimes[index]
 
-        if len(self.clipTimes) == 0:
+        if len(self.clipTimes) <= 1:
             self.clipindex_clips_remove.setDisabled(True)
             self.clipindex_move_up.setDisabled(True)
             self.clipindex_move_down.setDisabled(True)

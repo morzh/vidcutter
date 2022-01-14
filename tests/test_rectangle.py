@@ -11,15 +11,18 @@ FREE_STATE = 1
 BUILDING_SQUARE = 2
 BEGIN_SIDE_EDIT = 3
 END_SIDE_EDIT = 4
+INSIDE_EDIT = 5
 
 
 CURSOR_ON_BEGIN_SIDE = 1
 CURSOR_ON_END_SIDE = 2
+CURSOR_INSIDE = 3
 
 
 class MyWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.dragPosition = QPoint()
         self.setGeometry(30, 30, 600, 400)
         self.begin = QPoint()
         self.end = QPoint()
@@ -49,28 +52,37 @@ class MyWidget(QWidget):
             begin.setX(self.end.x())
             qp.drawLine(self.end, begin)
 
+        elif self.free_cursor_on_side == CURSOR_INSIDE:
+            rect = QRect()
+            rect.setTopLeft(self.begin)
+            rect.setBottomRight(self.end)
+            qp.drawRect(rect)
+
     def cursor_on_side(self, e_pos) -> int:
         if not self.begin.isNull() and not self.end.isNull():
             y1, y2 = sorted([self.begin.y(), self.end.y()])
             if y1 <= e_pos.y() <= y2:
-
                 # 5 resolution, more easy to pick than 1px
                 if abs(self.begin.x() - e_pos.x()) <= 5:
                     return CURSOR_ON_BEGIN_SIDE
                 elif abs(self.end.x() - e_pos.x()) <= 5:
                     return CURSOR_ON_END_SIDE
+                elif self.begin.x() < e_pos.x() < self.end.x():
+                    return CURSOR_INSIDE
 
         return 0
 
     def mousePressEvent(self, event):
         side = self.cursor_on_side(event.pos())
+        self.dragPosition = event.pos()
         if side == CURSOR_ON_BEGIN_SIDE:
             self.state = BEGIN_SIDE_EDIT
         elif side == CURSOR_ON_END_SIDE:
             self.state = END_SIDE_EDIT
+        elif side == CURSOR_INSIDE:
+            self.state = INSIDE_EDIT
         else:
             self.state = BUILDING_SQUARE
-
             self.begin = event.pos()
             self.end = event.pos()
             self.update()
@@ -98,6 +110,9 @@ class MyWidget(QWidget):
     def mouseReleaseEvent(self, event):
         self.apply_event(event)
         self.state = FREE_STATE
+
+    def eventFilter(self, a0: 'QObject', a1: 'QEvent') -> bool:
+        pass
 
 
 if __name__ == '__main__':
