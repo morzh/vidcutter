@@ -340,8 +340,7 @@ class VideoCutter(QWidget):
                                            objectName='mediainfoButton', clicked=self.mediaInfo, enabled=False)
         self.mediainfoButton.setFixedSize(QSize(33, 32))
         # noinspection PyArgumentList
-        self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True,
-                                      objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
+        self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True, objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
         self.menuButton.setFixedSize(QSize(33, 32))
 
         audioLayout = QHBoxLayout()
