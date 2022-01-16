@@ -1058,7 +1058,6 @@ class VideoCutter(QWidget):
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
     def editClip(self, item: QListWidgetItem = None) -> None:
-        print('editClip')
         try:
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
@@ -1071,13 +1070,11 @@ class VideoCutter(QWidget):
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
     def videosVisibility(self, item) -> None:
-        # print('printCheckbox', item)
         if self.cliplist.clipsHasRendered:
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
             self.clipTimes[item_index][5] = item_state
             self.seekSlider.setRegionVizivility(item_index, item_state)
-            # print(self.clipTimes[item_index][5])
             self.seekSlider.update()
 
     @pyqtSlot()
@@ -1262,8 +1259,9 @@ class VideoCutter(QWidget):
 
     def clipStart(self) -> None:
         starttime = self.delta2QTime(self.seekSlider.value())
-        # print(self.seekSlider.value())
-        self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', None, 2])
+        clipsNumber = len(self.clipTimes)
+        defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
+        self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', defaultClipName, 2])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
         self.clipindex_clips_remove.setDisabled(True)
@@ -1283,8 +1281,7 @@ class VideoCutter(QWidget):
         # print('clipEnd', item)
         endtime = self.delta2QTime(self.seekSlider.value())
         if endtime.__lt__(item[0]):
-            QMessageBox.critical(self.parent, 'Invalid END Time',
-                                 'The clip end time must come AFTER it\'s start time. Please try again.')
+            QMessageBox.critical(self.parent, 'Invalid END Time', 'The clip end time must come AFTER it\'s start time. Please try again.')
             return
         item[1] = endtime
         self.toolbar_start.setEnabled(True)

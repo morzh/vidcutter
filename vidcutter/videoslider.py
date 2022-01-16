@@ -263,7 +263,7 @@ class VideoSlider(QSlider):
             self.parent.clipTimes[self.current_rectangle_index][0] = self.parent.delta2QTime(value_begin)
             self.parent.clipTimes[self.current_rectangle_index][1] = self.parent.delta2QTime(value_end)
 
-    def cursor_on_side(self, e_pos) -> int:
+    def cursorOnSide(self, e_pos) -> int:
         if len(self._regions) > 0:
             for region_idx in range(len(self._regions)):
                 if self._regionsVisibility[region_idx]:
@@ -272,7 +272,6 @@ class VideoSlider(QSlider):
                     y1, y2 = sorted([self.begin.y(), self.end.y()])
                     if y1 <= e_pos.y() <= y2:
                         self.current_rectangle_index = region_idx
-                        # 5 resolution, more easy to pick than 1px
                         if abs(self.begin.x() - e_pos.x()) <= 5:
                             return CursorStates.CURSOR_ON_BEGIN_SIDE
                         elif abs(self.end.x() - e_pos.x()) <= 5:
@@ -462,10 +461,10 @@ class VideoSlider(QSlider):
     def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
         modifierPressed = QApplication.keyboardModifiers()
         if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
-            if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
+            if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            elif self.parent.mediaAvailable and self.isEnabled() and (int(modifierPressed) & Qt.ControlModifier) != Qt.ControlModifier:
+            elif self.parent.mediaAvailable and self.isEnabled() and ((modifierPressed & Qt.ControlModifier) != Qt.ControlModifier):
                 new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 self.setValue(new_position)
                 self.parent.setPosition(new_position)
@@ -485,7 +484,7 @@ class VideoSlider(QSlider):
             if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
                 self.dragPosition = event.pos()
                 self.dragRectPosition = self._regions[self.current_rectangle_index].topLeft()
-                side = self.cursor_on_side(event.pos())
+                side = self.cursorOnSide(event.pos())
                 if side == CursorStates.CURSOR_ON_BEGIN_SIDE:
                     self.state = RectangleEditState.BEGIN_SIDE_EDIT
                 elif side == CursorStates.CURSOR_ON_END_SIDE:
@@ -500,7 +499,7 @@ class VideoSlider(QSlider):
         elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress:
             if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
                 if self.state == RectangleEditState.FREE_STATE:
-                    self.free_cursor_on_side = self.cursor_on_side(event.pos())
+                    self.free_cursor_on_side = self.cursorOnSide(event.pos())
                     if self.free_cursor_on_side:
                         self.setCursor(Qt.SizeHorCursor)
                     else:
