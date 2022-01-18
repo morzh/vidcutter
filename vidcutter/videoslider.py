@@ -243,13 +243,13 @@ class VideoSlider(QSlider):
         if self.state == RectangleEditState.BEGIN_SIDE_EDIT:
             rectangle_left_value = max(event.x(), 0)
             self._regions[self.current_rectangle_index].setLeft(rectangle_left_value)
-            value = int(float(rectangle_left_value / (self.width() - 1)) * self.maximum())
-            time = self.parent.delta2QTime(value)
+            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            time = self.parent.delta2QTime(value_begin)
             self.parent.clipTimes[self.current_rectangle_index][0] = time
         elif self.state == RectangleEditState.END_SIDE_EDIT:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.current_rectangle_index].setRight(rectangle_right_value)
-            value = int(float(rectangle_right_value / (self.width() - 1)) * self.maximum())
+            value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value)
             self.parent.clipTimes[self.current_rectangle_index][1] = time
         elif self.state == RectangleEditState.RECTANGLE_MOVE:
@@ -258,8 +258,8 @@ class VideoSlider(QSlider):
             self._regions[self.current_rectangle_index].moveLeft(shift_value)
             rectangle_left_value = max(self._regions[self.current_rectangle_index].left(), 0)
             rectangle_right_value = min(self._regions[self.current_rectangle_index].right(), self.width() - 1)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value, self.width() - (self.offset * 2))
-            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value, self.width() - (self.offset * 2))
+            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             self.parent.clipTimes[self.current_rectangle_index][0] = self.parent.delta2QTime(value_begin)
             self.parent.clipTimes[self.current_rectangle_index][1] = self.parent.delta2QTime(value_end)
 
