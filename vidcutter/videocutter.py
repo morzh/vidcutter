@@ -89,9 +89,12 @@ class VideoCutter(QWidget):
         self.updater = Updater(self.parent)
 
         self.seekSlider = VideoSlider(self)
-        self.seekSlider.sliderMoved.connect(self.setPosition)
+        # self.seekSlider.setTracking(False)
+        # self.seekSlider.setMouseTracking(False)
+        # self.seekSlider.sliderMoved.connect(self.setPosition)
         self.sliderWidget = VideoSliderWidget(self, self.seekSlider)
         self.sliderWidget.setLoader(True)
+        self.sliderWidget.setMouseTracking(False)
 
         self.taskbar = TaskbarProgress(self.parent)
 
@@ -138,10 +141,10 @@ class VideoCutter(QWidget):
         self._initNoVideo()
 
         self.cliplist = VideoList(self)
+        self.cliplist.clicked.connect(self.videoListSingleClick)
         self.cliplist.doubleClicked.connect(self.videoListDoubleClick)
         self.cliplist.customContextMenuRequested.connect(self.itemMenu)
         self.cliplist.itemChanged.connect(self.videosVisibility)
-        self.cliplist.clicked.connect(self.videoListSingleClick)
         self.cliplist.model().rowsInserted.connect(self.setProjectDirty)
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)

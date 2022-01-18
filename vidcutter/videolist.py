@@ -71,10 +71,8 @@ class VideoList(QListWidget):
     def renderClips(self, cliptimes: list) -> int:
         self.clipsHasRendered = False
         self.clear()
-        # print('renderClips', cliptimes)
         externalCount = 0
         for index, clip in enumerate(cliptimes):
-            # print(clip[5])
             chapterName, endItem = '', ''
             if isinstance(clip[1], QTime):
                 endItem = clip[1].toString(self.parent.timeformat)
@@ -84,7 +82,6 @@ class VideoList(QListWidget):
             if len(clip[3]):
                 listitem.setToolTip(clip[3])
                 externalCount += 1
-            # print(clip[5])
             if self.parent.createChapters:
                 chapterName = clip[4] if clip[4] is not None else 'Chapter {}'.format(index + 1)
             listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
