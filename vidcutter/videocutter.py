@@ -268,6 +268,8 @@ class VideoCutter(QWidget):
         countersWidget.setMaximumHeight(28)
 
         self.mpvWidget = self.getMPV(self)
+        self.clipIsPlaying = False
+        self.clipIsPlayingIndex = -1
 
         self.videoplayerLayout = QVBoxLayout()
         self.videoplayerLayout.setSpacing(0)
@@ -1000,11 +1002,24 @@ class VideoCutter(QWidget):
 
     def playMedia(self) -> None:
         playstate = self.mpvWidget.property('pause')
+        print('playstate', playstate)
         self.setPlayButton(playstate)
         self.taskbar.setState(playstate)
         self.timeCounter.clearFocus()
         self.frameCounter.clearFocus()
         self.mpvWidget.pause()
+
+    def playMediaTimeClip(self, index) -> None:
+        if not len(self.clipTimes):
+            return
+        playstate = self.mpvWidget.property('pause')
+        self.setPosition(self.clipTimes[index][0].msecsSinceStartOfDay())
+        if playstate:
+            self.setPlayButton(True)
+            self.taskbar.setState(True)
+            self.timeCounter.clearFocus()
+            self.frameCounter.clearFocus()
+            self.mpvWidget.pause()
 
     def showText(self, text: str, duration: int = 3, override: bool = False) -> None:
         if self.mediaAvailable:
@@ -1088,6 +1103,8 @@ class VideoCutter(QWidget):
             row = self.cliplist.currentRow()
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
+            elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+                self.playMediaTimeClip(row)
             else:
                 if not len(self.clipTimes[row][3]):
                     self.seekSlider.selectRegion(row)
