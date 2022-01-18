@@ -1002,7 +1002,6 @@ class VideoCutter(QWidget):
 
     def playMedia(self) -> None:
         playstate = self.mpvWidget.property('pause')
-        print('playstate', playstate)
         self.setPlayButton(playstate)
         self.taskbar.setState(playstate)
         self.timeCounter.clearFocus()
@@ -1013,6 +1012,8 @@ class VideoCutter(QWidget):
         if not len(self.clipTimes):
             return
         playstate = self.mpvWidget.property('pause')
+        self.clipIsPlaying = True
+        self.clipIsPlayingIndex = index
         self.setPosition(self.clipTimes[index][0].msecsSinceStartOfDay())
         if playstate:
             self.setPlayButton(True)
@@ -1058,6 +1059,7 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
+        # print(progress)
         progress *= 1000
         if self.seekSlider.restrictValue < progress or progress == 0:
             self.seekSlider.setValue(int(progress))
@@ -1065,6 +1067,11 @@ class VideoCutter(QWidget):
             self.frameCounter.setFrame(frame)
             if self.seekSlider.maximum() > 0:
                 self.taskbar.setProgress(float(progress / self.seekSlider.maximum()), True)
+            if self.clipIsPlayingIndex >= 0:
+                current_clip_end = QTime(0, 0, 0).msecsTo(self.clipTimes[self.clipIsPlayingIndex][1])
+                if progress > current_clip_end:
+                    self.playMedia()
+
 
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
