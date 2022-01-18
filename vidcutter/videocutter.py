@@ -1022,6 +1022,7 @@ class VideoCutter(QWidget):
             self.frameCounter.clearFocus()
             self.mpvWidget.pause()
 
+
     def showText(self, text: str, duration: int = 3, override: bool = False) -> None:
         if self.mediaAvailable:
             if not self.osdButton.isChecked() and not override:
@@ -1061,6 +1062,7 @@ class VideoCutter(QWidget):
     def on_positionChanged(self, progress: float, frame: int) -> None:
         # print(progress)
         progress *= 1000
+        modifierPressed = QApplication.keyboardModifiers()
         if self.seekSlider.restrictValue < progress or progress == 0:
             self.seekSlider.setValue(int(progress))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
@@ -1071,6 +1073,8 @@ class VideoCutter(QWidget):
                 current_clip_end = QTime(0, 0, 0).msecsTo(self.clipTimes[self.clipIsPlayingIndex][1])
                 if progress > current_clip_end:
                     self.playMedia()
+                    self.clipIsPlaying = False
+                    self.clipIsPlayingIndex = -1
 
 
     @pyqtSlot(float, int)
