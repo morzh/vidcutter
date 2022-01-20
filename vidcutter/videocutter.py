@@ -98,6 +98,7 @@ class VideoCutter(QWidget):
 
         self.taskbar = TaskbarProgress(self.parent)
 
+
         self.clipTimes = []
         self.inCut, self.newproject = False, False
         self.finalFilename = ''
