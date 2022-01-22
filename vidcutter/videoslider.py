@@ -465,11 +465,19 @@ class VideoSlider(QSlider):
                 self.applyEvent(event)
                 self.unsetCursor()
 
-            self.parent.clipTimes[self.current_rectangle_index][2] = self.parent.captureImage(self.parent.currentMedia, self.parent.clipTimes[self.current_rectangle_index][0])
             time_start = min(self.parent.clipTimes[self.current_rectangle_index][0], self.parent.clipTimes[self.current_rectangle_index][1])
             time_end = max(self.parent.clipTimes[self.current_rectangle_index][0], self.parent.clipTimes[self.current_rectangle_index][1])
+            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.clipTimes[self.current_rectangle_index][0])
+
+            self.parent.clipTimes[self.current_rectangle_index][2] = thumbnail
             self.parent.clipTimes[self.current_rectangle_index][0] = time_start
             self.parent.clipTimes[self.current_rectangle_index][1] = time_end
+
+            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videos[0].clips[self.current_rectangle_index].timeStart)
+            self.parent.videos[0].clips[self.current_rectangle_index].timeStart = time_start
+            self.parent.videos[0].clips[self.current_rectangle_index].timeEnd = time_end
+            self.parent.videos[0].clips[self.current_rectangle_index].thumbnail = thumbnail
+
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0

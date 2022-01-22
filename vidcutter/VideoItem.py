@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime, QTimer, QUrl)
-from VideoClipItem import VideoClipItem
+from vidcutter.VideoClipItem import VideoClipItem
 
 class VideoItem:
     def __init__(self, *args):
@@ -13,11 +13,20 @@ class VideoItem:
             self.thumb = args[0]
             self.filepath = args[1]
 
-    def appendClip(self, clipItem: VideoClipItem):
+    def clipsAppend(self, clipItem: VideoClipItem):
         self.clips.append(clipItem)
 
-    def popClip(self):
+    def clipsPop(self):
         self.clips.pop()
+
+    def clipsLast(self):
+        if len(self.clips):
+            return self.clips[-1]
+        else:
+            raise Exception
+
+    def clipsClear(self):
+        self.clips.clear()
 
     def clipsLength(self):
         return len(self.clips)

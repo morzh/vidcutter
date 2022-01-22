@@ -10,13 +10,15 @@ class VideoClipItem:
             self._thumbnail = QPixmap()
             self._clipName = ''
             self._visibility = True
-            self.clipClass = 'squat'  # for future challenges
 
-        if len(args) == 4:
-            self.timeStart = args[0]
-            self.timeEnd = args[1]
-            self.thumb = args[2]
-            self.clipName = args[3]
+        if len(args) == 5:
+            self._timeStart = args[0]
+            self._timeEnd = args[1]
+            self._thumbnail = args[2]
+            self._clipName = args[3]
+            self._visibility = args[4]
+
+        self._clipClass = 'squat'  # for future challenges
 
     @property
     def timeStart(self) -> QTime:
@@ -43,8 +45,12 @@ class VideoClipItem:
         self._timeStart = time
 
     @timeEnd.setter
-    def timeEnd(self, time: QTime):
-        self._timeEnd = time
+    def timeEnd(self, timeEnd: QTime):
+        if timeEnd.__lt__(self._timeStart):
+            self._timeEnd = self._timeStart
+            self._timeStart = timeEnd
+        else:
+            self._timeEnd = timeEnd
 
     @thumbnail.setter
     def thumbnail(self, thumb: QPixmap):
