@@ -34,6 +34,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QP
 # import PyQt5.QtCore.
 
 from vidcutter.libs.graphicseffects import OpacityEffect
+from vidcutter.VideoClipItem import VideoClipItem
 
 
 class VideoList(QListWidget):
@@ -67,6 +68,33 @@ class VideoList(QListWidget):
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
         super(VideoList, self).mousePressEvent(event)
+
+    def renderVideoClips(self, videoClipItems: list) -> int:
+        self.clipsHasRendered = False
+        self.clear()
+        externalCount = 0
+        for index, videoClip in enumerate(videoClipItems):
+            listitem = QListWidgetItem(self)
+            listitem.setToolTip('Drag to reorder clips')
+            endItem = videoClip.timeEnd.toString(self.parent.timeformat)
+            if len(videoClip.description):
+                listitem.setToolTip(videoClip.description)
+                externalCount += 1
+            listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
+            listitem.setTextAlignment(Qt.AlignVCenter)
+            listitem.setData(Qt.DecorationRole + 1, videoClip.thumbnail)
+            listitem.setData(Qt.DisplayRole + 1, videoClip.timeStart.toString(self.parent.timeformat))
+            listitem.setData(Qt.UserRole + 1, endItem)
+            listitem.setData(Qt.UserRole + 2, videoClip.description)
+            listitem.setData(Qt.UserRole + 3, videoClip.name)
+            listitem.setData(Qt.CheckStateRole, videoClip.visibility)
+            listitem.setCheckState(videoClip.visibility)
+            listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
+            self.addItem(listitem)
+            self.parent.seekSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+        self.clipsHasRendered = True
+        return externalCount
+
 
     def renderClips(self, cliptimes: list) -> int:
         self.clipsHasRendered = False

@@ -701,10 +701,9 @@ class VideoCutter(QWidget):
             self.setPosition(self.clipTimes[index][1].msecsSinceStartOfDay())
             self.setPosition(self.videos[self.currentVideoIndex].clips[index].timeEnd.msecsSinceStartOfDay())
         else:
-
-            name = self.videos[self.currentVideoIndex].name
-            time_start = self.videos[self.currentVideoIndex].timeStart
-            time_end = self.videos[self.currentVideoIndex].timeEnd
+            name = self.videos[self.currentVideoIndex].clips[index].name
+            time_start = self.videos[self.currentVideoIndex].clips[index].timeStart
+            time_end = self.videos[self.currentVideoIndex].clips[index].timeEnd
 
             name = self.clipTimes[index][4]
             name = name if name is not None else 'Chapter {}'.format(index + 1)
@@ -724,7 +723,7 @@ class VideoCutter(QWidget):
 
         self.videos[self.currentVideoIndex].timeStart = start
         self.videos[self.currentVideoIndex].timeEnd = end
-        self.videos[self.currentVideoIndex].clipName = clipName
+        self.videos[self.currentVideoIndex].name = clipName
 
         self.renderClipIndex()
 

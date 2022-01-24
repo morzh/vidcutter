@@ -10,6 +10,7 @@ class VideoClipItem:
             self._thumbnail = QPixmap()
             self._name = ''
             self._visibility = 2
+            self._description = ''
 
         if len(args) == 5:
             self._timeStart = args[0]
@@ -29,16 +30,20 @@ class VideoClipItem:
         return self._timeEnd
 
     @property
-    def thumbnail(self):
+    def thumbnail(self) -> QPixmap:
         return self._thumbnail
 
     @property
-    def visibility(self):
+    def visibility(self) -> int:
         return self._visibility
 
     @property
-    def clipName(self):
+    def name(self) -> str:
         return self._name
+
+    @property
+    def description(self) -> str:
+        return self._description
 
     @timeStart.setter
     def timeStart(self, time: QTime):
@@ -57,9 +62,13 @@ class VideoClipItem:
         self._thumbnail = thumb
 
     @visibility.setter
-    def visibility(self, value: bool):
+    def visibility(self, value: int):
         self._visibility = value
 
-    @clipName.setter
-    def clipName(self, name: str):
+    @name.setter
+    def name(self, name: str):
         self._name = name
+
+    @description.setter
+    def description(self, description: str):
+        self._description = description

@@ -113,7 +113,7 @@ class VideoSlider(QSlider):
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()
-        print(self.widgetWidth, self.frameCounterMaximum)
+        # print(self.widgetWidth, self.frameCounterMaximum)
 
     def initStyle(self) -> None:
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
