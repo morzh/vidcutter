@@ -13,20 +13,12 @@ class VideoItem:
             self.thumb = args[0]
             self.filepath = args[1]
 
-    def clipsAppend(self, clipItem: VideoClipItem):
-        self.clips.append(clipItem)
-
-    def clipsPop(self):
-        self.clips.pop()
 
     def clipsLast(self):
         if len(self.clips):
             return self.clips[-1]
         else:
             raise Exception
-
-    def clipsClear(self):
-        self.clips.clear()
 
     def clipsLength(self):
         return len(self.clips)
