@@ -756,6 +756,27 @@ class VideoCutter(QWidget):
             self.showText('clip moved down')
             self.renderClipIndex()
 
+    def removeVideoClipItem(self) -> None:
+        index = self.cliplist.currentRow()
+        if self.mediaAvailable:
+            if self.inCut and index == self.cliplist.count() - 1:
+                self.inCut = False
+                self.initMediaControls()
+        elif len(self.clipTimes) == 0:
+            self.initMediaControls(False)
+
+        del self.videos[self.currentVideoIndex].clips[index]
+
+        if len(self.videos[self.currentVideoIndex].clips) <= 1:
+            self.clipindex_move_up.setDisabled(True)
+            self.clipindex_move_down.setDisabled(True)
+        if not len(self.videos[self.currentVideoIndex].clips):
+            self.clipindex_clips_remove.setDisabled(True)
+
+        self.cliplist.takeItem(index)
+        self.showText('clip removed')
+        self.renderClipIndex()
+
     def removeItem(self) -> None:
         index = self.cliplist.currentRow()
         if self.mediaAvailable:
