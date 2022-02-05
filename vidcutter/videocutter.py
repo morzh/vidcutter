@@ -952,6 +952,51 @@ class VideoCutter(QWidget):
             if project_file != os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE):
                 self.showText('project loaded')
 
+    def saveProjectNew(self, reboot: bool = False) -> None: #should replace saveProject
+        if self.currentMedia is None:
+            return
+        project_file, _ = os.path.splitext(self.currentMedia)
+        if reboot:
+            project_save = os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE)
+            ptype = 'VidCutter Project (*.vcp)'
+        else:
+            project_save, ptype = QFileDialog.getSaveFileName(
+                parent=self.parent,
+                caption='Save project',
+                directory='{}.vcp'.format(project_file),
+                filter=self.projectFilters(True),
+                initialFilter='VidCutter Project (*.vcp)',
+                options=self.getFileDialogOptions())
+        if project_save is not None and len(project_save.strip()):
+            file = QFile(project_save)
+            if not file.open(QFile.WriteOnly | QFile.Text):
+                QMessageBox.critical(self.parent, 'Cannot save project',
+                                     'Cannot save project file at {0}:\n\n{1}'.format(project_save, file.errorString()))
+                return
+            qApp.setOverrideCursor(Qt.WaitCursor)
+            if ptype == 'VidCutter Project (*.vcp)':
+                # noinspection PyUnresolvedReferences
+                QTextStream(file) << '{}\n'.format(self.currentMedia)
+            for clip in self.videos[self.currentVideoIndex].clips:
+                start_time = timedelta(hours=clip.startTime.hour(), minutes=clip.startTime.minute(), seconds=clip.startTime.second(), milliseconds=clip.startTime.msec())
+                stop_time = timedelta(hours=clip.endTime.hour(), minutes=clip.endTime.minute(), seconds=clip.endTime.second(), milliseconds=clip.endTime.msec())
+                if ptype == 'VidCutter Project (*.vcp)':
+                    if self.createChapters:
+                        chapter = '"{}"'.format(clip.name) if clip.name is not None else '""'
+                    else:
+                        chapter = ''
+                    # noinspection PyUnresolvedReferences
+                    QTextStream(file) << '{0}\t{1}\t{2}\t{3}\n'.format(self.delta2String(start_time),
+                                                                       self.delta2String(stop_time), 0, chapter)
+                else:
+                    # noinspection PyUnresolvedReferences
+                    QTextStream(file) << '{0}\t{1}\t{2}\n'.format(self.delta2String(start_time),
+                                                                  self.delta2String(stop_time), 0)
+            qApp.restoreOverrideCursor()
+            self.projectSaved = True
+            if not reboot:
+                self.showText('project file saved')
+
     def saveProject(self, reboot: bool = False) -> None:
         if self.currentMedia is None:
             return
@@ -1216,6 +1261,7 @@ class VideoCutter(QWidget):
             self.parent.console.hide()
         self.saveSetting('showConsole', self.showConsole)
 
+    '''
     @pyqtSlot(bool)
     def toggleChapters(self, checked: bool) -> None:
         self.createChapters = checked
@@ -1236,6 +1282,7 @@ class VideoCutter(QWidget):
                     for clip in self.clipTimes:
                         clip[4] = None
         self.renderClipIndex()
+    '''
 
     @pyqtSlot(bool)
     def toggleSmartCut(self, checked: bool) -> None:
@@ -1349,6 +1396,17 @@ class VideoCutter(QWidget):
 
     # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
     @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
+    def syncVideoClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None: #should replace syncClipList
+        index = row - 1 if start < row else row
+        clip = self.videos[self.currentVideoIndex].clips.pop(start)
+        self.videos[self.currentVideoIndex].clips.insert(index, clip)
+        if not len(clip[3]):
+            self.seekSlider.switchRegions(start, index)
+        self.showText('clip order updated')
+        self.renderVideoClipIndex()
+
+    # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
+    @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
     def syncClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None:
         index = row - 1 if start < row else row
         clip = self.clipTimes.pop(start)
@@ -1357,6 +1415,18 @@ class VideoCutter(QWidget):
             self.seekSlider.switchRegions(start, index)
         self.showText('clip order updated')
         self.renderClipIndex()
+
+    def renderVideoClipIndex(self) -> None: #should replace renderClipIndex()
+        self.seekSlider.clearRegions()
+        self.totalRuntime = 0
+        externals = self.cliplist.renderVideoClips(self.videos[self.currentVideoIndex].clips)
+        if len(self.videos[self.currentVideoIndex].clips) and not self.inCut and externals != 1:
+            self.toolbar_save.setEnabled(True)
+            self.saveProjectAction.setEnabled(True)
+        if self.inCut or len(self.videos[self.currentVideoIndex].clips) == 0 or not self.videos[self.currentVideoIndex].clips[0].endTime.isNull():
+            self.toolbar_save.setEnabled(False)
+            self.saveProjectAction.setEnabled(False)
+        self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
 
     def renderClipIndex(self) -> None:
         self.seekSlider.clearRegions()
@@ -1379,8 +1449,7 @@ class VideoCutter(QWidget):
 
     @staticmethod
     def qtime2delta(qtime: QTime) -> float:
-        return timedelta(hours=qtime.hour(), minutes=qtime.minute(), seconds=qtime.second(),
-                         milliseconds=qtime.msec()).total_seconds()
+        return timedelta(hours=qtime.hour(), minutes=qtime.minute(), seconds=qtime.second(), milliseconds=qtime.msec()).total_seconds()
 
     @staticmethod
     def delta2String(td: timedelta) -> str:
@@ -1446,7 +1515,7 @@ class VideoCutter(QWidget):
                                              'at our <a href="{}">GitHub Issues page</a> so that it can be fixed.</p>'
                                              .format(vidcutter.__bugreport__))
                         return
-            # self.joinMedia(filelist)
+            self.joinMedia(filelist)
 
     '''
     def smartcutter(self, file: str, source_file: str, source_ext: str) -> None:

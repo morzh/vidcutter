@@ -96,11 +96,11 @@ class VideoList(QListWidget):
         return externalCount
 
 
-    def renderClips(self, cliptimes: list) -> int:
+    def renderClips(self, clipTimes: list) -> int:
         self.clipsHasRendered = False
         self.clear()
         externalCount = 0
-        for index, clip in enumerate(cliptimes):
+        for index, clip in enumerate(clipTimes):
             chapterName, endItem = '', ''
             if isinstance(clip[1], QTime):
                 endItem = clip[1].toString(self.parent.timeformat)
