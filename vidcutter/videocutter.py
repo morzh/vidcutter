@@ -315,18 +315,18 @@ class VideoCutter(QWidget):
 
         # noinspection PyArgumentList
 
-        self.chaptersButton = QPushButton(self, flat=True, checkable=True, objectName='chaptersButton', statusTip='Automatically create chapters per clip', toolTip='Create chapters',
-                                          cursor=Qt.PointingHandCursor)
-        self.chaptersButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
-        self.chaptersButton.setChecked(self.createChapters)
-        self.chaptersButton.toggled.connect(self.toggleChapters)
+        # self.chaptersButton = QPushButton(self, flat=True, checkable=True, objectName='chaptersButton', statusTip='Automatically create chapters per clip', toolTip='Create chapters',
+        #                                   cursor=Qt.PointingHandCursor)
+        # self.chaptersButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
+        # self.chaptersButton.setChecked(self.createChapters)
+        # self.chaptersButton.toggled.connect(self.toggleChapters)
 
         # noinspection PyArgumentList
-        self.smartcutButton = QPushButton(self, flat=True, checkable=True, objectName='smartcutButton', toolTip='Toggle SmartCut', statusTip='Toggle frame accurate cutting',
-                                          cursor=Qt.PointingHandCursor)
-        self.smartcutButton.setFixedSize(32, 29 if self.theme == 'dark' else 31)
-        self.smartcutButton.setChecked(self.smartcut)
-        self.smartcutButton.toggled.connect(self.toggleSmartCut)
+        # self.smartcutButton = QPushButton(self, flat=True, checkable=True, objectName='smartcutButton', toolTip='Toggle SmartCut', statusTip='Toggle frame accurate cutting',
+        #                                   cursor=Qt.PointingHandCursor)
+        # self.smartcutButton.setFixedSize(32, 29 if self.theme == 'dark' else 31)
+        # self.smartcutButton.setChecked(self.smartcut)
+        # self.smartcutButton.toggled.connect(self.toggleSmartCut)
 
         # noinspection PyArgumentList
         self.muteButton = QPushButton(objectName='muteButton', icon=self.unmuteIcon, flat=True, toolTip='Mute', statusTip='Toggle audio mute', iconSize=QSize(16, 16), clicked=self.muteAudio,
@@ -338,17 +338,17 @@ class VideoCutter(QWidget):
         self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True, toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
                                             iconSize=QSize(14, 14), clicked=self.toggleFullscreen, cursor=Qt.PointingHandCursor, enabled=False)
         # noinspection PyArgumentList
-        self.settingsButton = QPushButton(self, toolTip='Settings', cursor=Qt.PointingHandCursor, flat=True, statusTip='Configure application settings',
-                                          objectName='settingsButton', clicked=self.showSettings)
-        self.settingsButton.setFixedSize(QSize(33, 32))
+        # self.settingsButton = QPushButton(self, toolTip='Settings', cursor=Qt.PointingHandCursor, flat=True, statusTip='Configure application settings',
+        #                                   objectName='settingsButton', clicked=self.showSettings)
+        # self.settingsButton.setFixedSize(QSize(33, 32))
         # noinspection PyArgumentList
-        self.streamsButton = QPushButton(self, toolTip='Media streams', cursor=Qt.PointingHandCursor, flat=True, statusTip='Select the media streams to be included',
-                                         objectName='streamsButton', clicked=self.selectStreams, enabled=False)
-        self.streamsButton.setFixedSize(QSize(33, 32))
+        # self.streamsButton = QPushButton(self, toolTip='Media streams', cursor=Qt.PointingHandCursor, flat=True, statusTip='Select the media streams to be included',
+        #                                  objectName='streamsButton', clicked=self.selectStreams, enabled=False)
+        # self.streamsButton.setFixedSize(QSize(33, 32))
         # noinspection PyArgumentList
-        self.mediainfoButton = QPushButton(self, toolTip='Media information', cursor=Qt.PointingHandCursor, flat=True, statusTip='View technical details about current media',
-                                           objectName='mediainfoButton', clicked=self.mediaInfo, enabled=False)
-        self.mediainfoButton.setFixedSize(QSize(33, 32))
+        # self.mediainfoButton = QPushButton(self, toolTip='Media information', cursor=Qt.PointingHandCursor, flat=True, statusTip='View technical details about current media',
+        #                                    objectName='mediainfoButton', clicked=self.mediaInfo, enabled=False)
+        # self.mediainfoButton.setFixedSize(QSize(33, 32))
         # noinspection PyArgumentList
         self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True, objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
         self.menuButton.setFixedSize(QSize(33, 32))
@@ -398,24 +398,29 @@ class VideoCutter(QWidget):
 
         self.setToolBarStyle(self.settings.value('toolbarLabels', 'beside', type=str))
 
-        togglesLayout = QHBoxLayout()
-        togglesLayout.setSpacing(0)
-        togglesLayout.setContentsMargins(0, 0, 0, 0)
-        togglesLayout.addWidget(self.consoleButton)
-        togglesLayout.addWidget(self.osdButton)
-        togglesLayout.addWidget(self.thumbnailsButton)
+        # togglesLayout = QHBoxLayout()
+        # togglesLayout.setSpacing(0)
+        # togglesLayout.setContentsMargins(0, 0, 0, 0)
+        # togglesLayout.addWidget(self.consoleButton)
+        # togglesLayout.addWidget(self.osdButton)
+        # togglesLayout.addWidget(self.thumbnailsButton)
         # togglesLayout.addWidget(self.chaptersButton)
-        togglesLayout.addWidget(self.smartcutButton)
-        togglesLayout.addStretch(1)
+        # togglesLayout.addWidget(self.smartcutButton)
+        # togglesLayout.addStretch(1)
 
         settingsLayout = QHBoxLayout()
         settingsLayout.setSpacing(0)
         settingsLayout.setContentsMargins(0, 0, 0, 0)
-        settingsLayout.addWidget(self.settingsButton)
-        settingsLayout.addSpacing(5)
-        settingsLayout.addWidget(self.streamsButton)
-        settingsLayout.addSpacing(5)
-        settingsLayout.addWidget(self.mediainfoButton)
+        # settingsLayout.addWidget(self.settingsButton)
+        # settingsLayout.addSpacing(5)
+        # settingsLayout.addWidget(self.streamsButton)
+        # settingsLayout.addSpacing(5)
+        # settingsLayout.addWidget(self.mediainfoButton)
+
+        settingsLayout.addWidget(self.consoleButton)
+        settingsLayout.addWidget(self.osdButton)
+        settingsLayout.addWidget(self.thumbnailsButton)
+
         settingsLayout.addSpacing(5)
         settingsLayout.addWidget(self.menuButton)
 
@@ -430,7 +435,7 @@ class VideoCutter(QWidget):
             controlsLayout.addSpacing(5)
         else:
             controlsLayout.setContentsMargins(10, 10, 10, 0)
-        controlsLayout.addLayout(togglesLayout)
+        # controlsLayout.addLayout(togglesLayout)
         controlsLayout.addSpacing(20)
         controlsLayout.addStretch(1)
         controlsLayout.addWidget(self.toolbarGroup)
@@ -738,6 +743,7 @@ class VideoCutter(QWidget):
             tmpItem = self.clipTimes[index]
             del self.clipTimes[index]
             self.clipTimes.insert(index - 1, tmpItem)
+
             self.showText('clip moved up')
             self.renderClipIndex()
 
@@ -762,7 +768,7 @@ class VideoCutter(QWidget):
             if self.inCut and index == self.cliplist.count() - 1:
                 self.inCut = False
                 self.initMediaControls()
-        elif len(self.clipTimes) == 0:
+        elif len(self.videos[self.currentVideoIndex].clips) == 0:
             self.initMediaControls(False)
 
         del self.videos[self.currentVideoIndex].clips[index]
@@ -803,7 +809,6 @@ class VideoCutter(QWidget):
         dialog.accepted.connect(lambda: self.on_clearList())
         dialog.exec_()
 
-
     def on_clearList(self) -> None:
         self.clipTimes.clear()
         self.cliplist.clear()
@@ -815,6 +820,7 @@ class VideoCutter(QWidget):
             self.initMediaControls(True)
         else:
             self.initMediaControls(False)
+
         self.clipindex_clips_remove.setDisabled(True)
         self.clipindex_move_up.setDisabled(True)
         self.clipindex_move_down.setDisabled(True)
@@ -1038,9 +1044,7 @@ class VideoCutter(QWidget):
         self.mpvWidget.pause()
 
     def playMediaTimeClip(self, index) -> None:
-        if not len(self.clipTimes):
-            return
-        if not self.videos[self.currentVideoIndex].clipsLength():
+        if not len(self.clipTimes) or not self.videos[self.currentVideoIndex].clipsLength():
             return
 
         playstate = self.mpvWidget.property('pause')
@@ -1407,7 +1411,7 @@ class VideoCutter(QWidget):
                 self.seekSlider.showProgress(6 if clips > 1 else 5)
                 self.parent.lock_gui(True)
                 self.videoService.smartinit(clips)
-                self.smartcutter(file, source_file, source_ext)
+                # self.smartcutter(file, source_file, source_ext)
                 return
             steps = 3 if clips > 1 else 2
             self.seekSlider.showProgress(steps)
@@ -1438,6 +1442,7 @@ class VideoCutter(QWidget):
                         return
             # self.joinMedia(filelist)
 
+    '''
     def smartcutter(self, file: str, source_file: str, source_ext: str) -> None:
         self.smartcut_monitor = Munch(clips=[], results=[], externals=0)
         for index, clip in enumerate(self.clipTimes):
@@ -1458,7 +1463,7 @@ class VideoCutter(QWidget):
                                            start=VideoCutter.qtime2delta(clip[0]),
                                            end=VideoCutter.qtime2delta(clip[1]),
                                            allstreams=True)
-
+    '''
     @pyqtSlot(bool, str)
     def smartmonitor(self, success: bool = None, outputfile: str = None) -> None:
         if success is not None:
