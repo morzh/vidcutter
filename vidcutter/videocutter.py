@@ -304,10 +304,13 @@ class VideoCutter(QWidget):
         self.osdButton.toggled.connect(self.toggleOSD)
 
         # noinspection PyArgumentList
+        '''
         self.consoleButton = QPushButton(self, flat=True, checkable=True, objectName='consoleButton', statusTip='Toggle console window', toolTip='Toggle console', cursor=Qt.PointingHandCursor)
         self.consoleButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
         self.consoleButton.setChecked(self.showConsole)
         self.consoleButton.toggled.connect(self.toggleConsole)
+        '''
+        # self.showConsole = True
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
             os.environ['DEBUG'] = '1'
@@ -416,8 +419,7 @@ class VideoCutter(QWidget):
         # settingsLayout.addWidget(self.streamsButton)
         # settingsLayout.addSpacing(5)
         # settingsLayout.addWidget(self.mediainfoButton)
-
-        settingsLayout.addWidget(self.consoleButton)
+        # settingsLayout.addWidget(self.consoleButton)
         settingsLayout.addWidget(self.osdButton)
         settingsLayout.addWidget(self.thumbnailsButton)
 
@@ -559,18 +561,20 @@ class VideoCutter(QWidget):
         self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem, statusTip='Remove selected clip from list', enabled=False)
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips from list', enabled=False)
         self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
-        self.streamsAction = QAction(self.streamsIcon, 'Media streams', self, triggered=self.selectStreams, statusTip='Select the media streams to be included', enabled=False)
-        self.mediainfoAction = QAction(self.mediaInfoIcon, 'Media information', self, triggered=self.mediaInfo, statusTip='View technical details about current media', enabled=False)
+
+        # self.streamsAction = QAction(self.streamsIcon, 'Media streams', self, triggered=self.selectStreams, statusTip='Select the media streams to be included', enabled=False)
+        # self.mediainfoAction = QAction(self.mediaInfoIcon, 'Media information', self, triggered=self.mediaInfo, statusTip='View technical details about current media', enabled=False)
         self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
-        self.changelogAction = QAction(self.changelogIcon, 'View changelog', self, triggered=self.viewChangelog, statusTip='View log of changes')
+        # self.changelogAction = QAction(self.changelogIcon, 'View changelog', self, triggered=self.viewChangelog, statusTip='View log of changes')
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs, statusTip='View the application\'s log file')
         self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
-        self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
+        # self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
         self.aboutAction = QAction('About {}'.format(qApp.applicationName()), self, triggered=self.aboutApp, statusTip='About {}'.format(qApp.applicationName()))
         self.keyRefAction = QAction(self.keyRefIcon, 'Keyboard shortcuts', self, triggered=self.showKeyRef, statusTip='View shortcut key bindings')
         self.settingsAction = QAction(self.settingsIcon, 'Settings', self, triggered=self.showSettings, statusTip='Configure application settings')
-        self.fullscreenAction = QAction(self.fullscreenIcon, 'Toggle fullscreen', self, triggered=self.toggleFullscreen, statusTip='Toggle fullscreen display mode', enabled=False)
+        self.fullscreenAction = QAction(self.changelogIcon, 'Toggle fullscreen', self, triggered=self.toggleFullscreen, statusTip='Toggle fullscreen display mode', enabled=False)
+        self.toggleConsoleAction = QAction(self.changelogIcon, 'Toggle console', self, triggered=self.toggleConsole, statusTip='Toggle console', enabled=True)
         self.quitAction = QAction(self.quitIcon, 'Quit', self, triggered=self.parent.close, statusTip='Quit the application')
 
     @property
@@ -592,20 +596,21 @@ class VideoCutter(QWidget):
         self.appmenu.addAction(self.saveProjectAction)
         self.appmenu.addSeparator()
 
-        self.appmenu.addMenu(self._filtersMenu)
-        self.appmenu.addSeparator()
+        # self.appmenu.addMenu(self._filtersMenu)
+        # self.appmenu.addSeparator()
         self.appmenu.addAction(self.fullscreenAction)
-        self.appmenu.addAction(self.streamsAction)
-        self.appmenu.addAction(self.mediainfoAction)
+        # self.appmenu.addAction(self.streamsAction)
+        # self.appmenu.addAction(self.mediainfoAction)
         self.appmenu.addAction(self.keyRefAction)
         self.appmenu.addSeparator()
         self.appmenu.addAction(self.settingsAction)
         self.appmenu.addSeparator()
         self.appmenu.addAction(self.viewLogsAction)
+        self.appmenu.addAction(self.toggleConsoleAction)
         self.appmenu.addAction(self.updateCheckAction)
-        self.appmenu.addSeparator()
-        self.appmenu.addAction(self.changelogAction)
-        self.appmenu.addAction(self.aboutQtAction)
+        # self.appmenu.addSeparator()
+        # self.appmenu.addAction(self.changelogAction)
+        # self.appmenu.addAction(self.aboutQtAction)
         self.appmenu.addAction(self.aboutAction)
         self.appmenu.addSeparator()
         self.appmenu.addAction(self.quitAction)
@@ -1196,10 +1201,11 @@ class VideoCutter(QWidget):
             self.seekSlider.initStyle()
 
     @pyqtSlot(bool)
-    def toggleConsole(self, checked: bool) -> None:
+    def toggleConsole(self) -> None:
+        self.showConsole = not self.showConsole
         if not hasattr(self, 'debugonstart'):
             self.debugonstart = os.getenv('DEBUG', False)
-        if checked:
+        if self.showConsole:
             self.mpvWidget.setLogLevel('v')
             os.environ['DEBUG'] = '1'
             self.parent.console.show()
@@ -1208,7 +1214,7 @@ class VideoCutter(QWidget):
                 os.environ['DEBUG'] = '0'
                 self.mpvWidget.setLogLevel('error')
             self.parent.console.hide()
-        self.saveSetting('showConsole', checked)
+        self.saveSetting('showConsole', self.showConsole)
 
     @pyqtSlot(bool)
     def toggleChapters(self, checked: bool) -> None:
