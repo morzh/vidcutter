@@ -77,9 +77,9 @@ class VideoList(QListWidget):
             listitem = QListWidgetItem(self)
             listitem.setToolTip('Drag to reorder clips')
             endItem = videoClip.timeEnd.toString(self.parent.timeformat)
-            if len(videoClip.description):
-                listitem.setToolTip(videoClip.description)
-                externalCount += 1
+            # if len(videoClip.description):
+            #     listitem.setToolTip(videoClip.description)
+            #     externalCount += 1
             listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             listitem.setTextAlignment(Qt.AlignVCenter)
             listitem.setData(Qt.DecorationRole + 1, videoClip.thumbnail)

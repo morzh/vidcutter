@@ -319,11 +319,7 @@ class VideoService(QObject):
 
     def smartinit(self, clips: int):
         self.smartcut_jobs = []
-        # noinspection PyUnusedLocal
-        [
-            self.smartcut_jobs.append(Munch(output='', bitrate=0, allstreams=True, procs={}, files={}, results={}))
-            for index in range(clips)
-        ]
+        [self.smartcut_jobs.append(Munch(output='', bitrate=0, allstreams=True, procs={}, files={}, results={})) for index in range(clips)]
 
     def smartcut(self, index: int, source: str, output: str, start: float, end: float, allstreams: bool = True) -> None:
         output_file, output_ext = os.path.splitext(output)

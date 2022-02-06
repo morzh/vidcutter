@@ -724,19 +724,17 @@ class VideoCutter(QWidget):
             dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
             dialog.exec_()
 
-    def on_editChapter(self, index: int, start: QTime, end: QTime, clipName: str) -> None:
-        if end < start:
-            end = start.addSecs(1)
+    def on_editChapter(self, index: int, timeStart: QTime, end: QTime, clipName: str) -> None:
+        if end < timeStart:
+            end = timeStart.addSecs(1)
         # self.clipTimes[index][0] = start
         # self.clipTimes[index][1] = end
         # self.clipTimes[index][4] = clipName
-
-        self.videos[self.currentVideoIndex].clips[index].timeStart = start
+        self.videos[self.currentVideoIndex].clips[index].timeStart = timeStart
         self.videos[self.currentVideoIndex].clips[index].timeEnd = end
         self.videos[self.currentVideoIndex].clips[index].name = clipName
-
+        self.videos[self.currentVideoIndex].clips[index].thumbnail = self.captureImage(self.currentMedia, timeStart)
         self.renderClipIndex()
-        # self.renderVideoClipIndex()
 
     def moveItemUp(self) -> None:
         index = self.cliplist.currentRow()
@@ -1345,7 +1343,7 @@ class VideoCutter(QWidget):
         clipsNumber = len(self.videos[self.currentVideoIndex].clips)
         # clipsNumber = len(self.clipTimes)
         defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
-        clip = VideoClipItem(starttime, QTime(), self.captureImage(self.currentMedia, starttime), defaultClipName, 2)
+        clip = VideoClipItem(starttime, QTime(), self.captureImage(self.currentMedia, starttime), defaultClipName, 0)
         self.videos[self.currentVideoIndex].clips.append(clip)
         # self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', defaultClipName, 2])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
@@ -1371,6 +1369,7 @@ class VideoCutter(QWidget):
         #     clipItemLast.timeStart = endTime
         # else:
         clipItemLast.timeEnd = endTime
+        clipItemLast.visibility = 2
 
         '''
         if endtime.__lt__(item[0]):

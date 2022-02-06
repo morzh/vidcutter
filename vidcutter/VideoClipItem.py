@@ -52,7 +52,7 @@ class VideoClipItem:
 
     @timeEnd.setter
     def timeEnd(self, timeEnd: QTime):
-        if timeEnd.__lt__(self._timeStart):
+        if not timeEnd.isNull() and timeEnd.__lt__(self._timeStart):
             self._timeEnd = self._timeStart
             self._timeStart = timeEnd
         else:
