@@ -18,6 +18,7 @@ class VideoClipItem:
             self._thumbnail = args[2]
             self._name = args[3]
             self._visibility = args[4]
+            self._description = ''
 
         self._clipClass = 'squat'  # for future challenges
 
@@ -72,3 +73,7 @@ class VideoClipItem:
     @description.setter
     def description(self, description: str):
         self._description = description
+
+    def print(self):
+        print('start time', self._timeStart, ' time end:',  self._timeEnd, ' name:',  self._name, ' visibility:',  self._visibility, ' description:',  self._description)
+

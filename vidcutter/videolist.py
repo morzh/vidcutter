@@ -69,7 +69,7 @@ class VideoList(QListWidget):
         self._mouse_button = event.button()
         super(VideoList, self).mousePressEvent(event)
 
-    def renderVideoClips(self, videoClipItems: list) -> int:
+    def renderClips(self, videoClipItems: list) -> int:
         self.clipsHasRendered = False
         self.clear()
         externalCount = 0
@@ -95,7 +95,7 @@ class VideoList(QListWidget):
         self.clipsHasRendered = True
         return externalCount
 
-
+    '''
     def renderClips(self, clipTimes: list) -> int:
         self.clipsHasRendered = False
         self.clear()
@@ -127,7 +127,7 @@ class VideoList(QListWidget):
                 self.parent.seekSlider.addRegion(clip[0].msecsSinceStartOfDay(), clip[1].msecsSinceStartOfDay(), clip[5])
         self.clipsHasRendered = True
         return externalCount
-
+    '''
     def showProgress(self, steps: int) -> None:
         for row in range(self.count()):
             item = self.item(row)
