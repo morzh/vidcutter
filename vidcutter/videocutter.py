@@ -102,7 +102,7 @@ class VideoCutter(QWidget):
 
         self.videos = []
         self.currentVideoIndex = 0
-        self.clipTimes = []
+        # self.clipTimes = []
         self.inCut, self.newproject = False, False
         self.finalFilename = ''
         self.totalRuntime, self.frameRate = 0, 0
@@ -126,7 +126,7 @@ class VideoCutter(QWidget):
 
         self.videoService = VideoService(self.settings, self)
         self.videoService.progress.connect(self.seekSlider.updateProgress)
-        self.videoService.finished.connect(self.smartmonitor)
+        # self.videoService.finished.connect(self.smartmonitor)
         self.videoService.error.connect(self.completeOnError)
         self.videoService.addScenes.connect(self.addScenes)
 
@@ -708,18 +708,18 @@ class VideoCutter(QWidget):
         index = self.cliplist.currentRow()
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-            self.setPosition(self.clipTimes[index][1].msecsSinceStartOfDay())
+            # self.setPosition(self.clipTimes[index][1].msecsSinceStartOfDay())
             self.setPosition(self.videos[self.currentVideoIndex].clips[index].timeEnd.msecsSinceStartOfDay())
         else:
             name = self.videos[self.currentVideoIndex].clips[index].name
             time_start = self.videos[self.currentVideoIndex].clips[index].timeStart
             time_end = self.videos[self.currentVideoIndex].clips[index].timeEnd
-
+            '''
             name = self.clipTimes[index][4]
             name = name if name is not None else 'Chapter {}'.format(index + 1)
             time_start = self.clipTimes[index][0]
             time_end = self.clipTimes[index][1]
-
+            '''
             dialog = VCChapterInputDialog(self, name, time_start, time_end)
             dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
             dialog.exec_()
@@ -727,15 +727,16 @@ class VideoCutter(QWidget):
     def on_editChapter(self, index: int, start: QTime, end: QTime, clipName: str) -> None:
         if end < start:
             end = start.addSecs(1)
-        self.clipTimes[index][0] = start
-        self.clipTimes[index][1] = end
-        self.clipTimes[index][4] = clipName
+        # self.clipTimes[index][0] = start
+        # self.clipTimes[index][1] = end
+        # self.clipTimes[index][4] = clipName
 
         self.videos[self.currentVideoIndex].timeStart = start
         self.videos[self.currentVideoIndex].timeEnd = end
         self.videos[self.currentVideoIndex].name = clipName
 
-        self.renderClipIndex()
+        # self.renderClipIndex()
+        self.renderVideoClipIndex()
 
     def moveItemUp(self) -> None:
         index = self.cliplist.currentRow()
@@ -744,11 +745,11 @@ class VideoCutter(QWidget):
             tempVideoItem = self.videos[self.currentVideoIndex].clips[index]
             del self.videos[self.currentVideoIndex].clips[index]
             self.videos[self.currentVideoIndex].clips.insert(index - 1, tempVideoItem)
-
+            '''
             tmpItem = self.clipTimes[index]
             del self.clipTimes[index]
             self.clipTimes.insert(index - 1, tmpItem)
-
+            '''
             self.showText('clip moved up')
             self.renderClipIndex()
 
@@ -759,15 +760,16 @@ class VideoCutter(QWidget):
             tempVideoItem = self.videos[self.currentVideoIndex].clips[index]
             del self.videos[self.currentVideoIndex].clips[index]
             self.videos[self.currentVideoIndex].clips.insert(index + 1, tempVideoItem)
-
+            '''
             tmpItem = self.clipTimes[index]
             del self.clipTimes[index]
             self.clipTimes.insert(index + 1, tmpItem)
-
+            '''
             self.showText('clip moved down')
             self.renderClipIndex()
 
-    def removeVideoClipItem(self) -> None:
+    # def removeVideoClipItem(self) -> None:
+    def removeItem(self) -> None:
         index = self.cliplist.currentRow()
         if self.mediaAvailable:
             if self.inCut and index == self.cliplist.count() - 1:
@@ -787,7 +789,7 @@ class VideoCutter(QWidget):
         self.cliplist.takeItem(index)
         self.showText('clip removed')
         self.renderClipIndex()
-
+    '''
     def removeItem(self) -> None:
         index = self.cliplist.currentRow()
         if self.mediaAvailable:
@@ -808,14 +810,14 @@ class VideoCutter(QWidget):
         self.cliplist.takeItem(index)
         self.showText('clip removed')
         self.renderClipIndex()
-
+    '''
     def clearList(self) -> None:
         dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all the clips?')
         dialog.accepted.connect(lambda: self.on_clearList())
         dialog.exec_()
 
     def on_clearList(self) -> None:
-        self.clipTimes.clear()
+        # self.clipTimes.clear()
         self.cliplist.clear()
         self.videos[self.currentVideoIndex].clips.clear()
 
@@ -829,7 +831,8 @@ class VideoCutter(QWidget):
         self.clipindex_clips_remove.setDisabled(True)
         self.clipindex_move_up.setDisabled(True)
         self.clipindex_move_down.setDisabled(True)
-        self.renderClipIndex()
+        self.renderVideoClipIndex()
+        # self.renderClipIndex()
 
     def projectFilters(self, savedialog: bool = False) -> str:
         if savedialog:
@@ -898,7 +901,7 @@ class VideoCutter(QWidget):
                                      'Cannot read project file {0}:\n\n{1}'.format(project_file, file.errorString()))
                 return
             qApp.setOverrideCursor(Qt.WaitCursor)
-            self.clipTimes.clear()
+            # self.clipTimes.clear()
             self.videos[self.currentVideoIndex].clips.clear()
             linenum = 1
             while not file.atEnd():
@@ -931,7 +934,7 @@ class VideoCutter(QWidget):
                                     chapter = None
                             else:
                                 chapter = None
-                            self.clipTimes.append([clip_start, clip_end, clip_image, '', chapter, 2])
+                            # self.clipTimes.append([clip_start, clip_end, clip_image, '', chapter, 2])
 
                             clip = VideoClipItem(clip_start, clip_end, clip_image, chapter, 2)
                             self.videos[self.currentVideoIndex].clips.append(clip)
@@ -952,7 +955,7 @@ class VideoCutter(QWidget):
             if project_file != os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE):
                 self.showText('project loaded')
 
-    def saveProjectNew(self, reboot: bool = False) -> None: #should replace saveProject
+    def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         if self.currentMedia is None:
             return
         project_file, _ = os.path.splitext(self.currentMedia)
@@ -996,7 +999,7 @@ class VideoCutter(QWidget):
             self.projectSaved = True
             if not reboot:
                 self.showText('project file saved')
-
+    '''
     def saveProject(self, reboot: bool = False) -> None:
         if self.currentMedia is None:
             return
@@ -1043,21 +1046,23 @@ class VideoCutter(QWidget):
             self.projectSaved = True
             if not reboot:
                 self.showText('project file saved')
-
+    '''
     def loadMedia(self, filename: str) -> None:
         if not os.path.isfile(filename):
             return
         self.currentMedia = filename
         self.initMediaControls(True)
+        print('if not semediaAvailable:')
         self.projectDirty, self.projectSaved = False, False
         self.cliplist.clear()
-        self.clipTimes.clear()
+        # self.clipTimes.clear()
         self.videos[self.currentVideoIndex].clips.clear()
         self.totalRuntime = 0
         self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
         self.seekSlider.clearRegions()
         self.taskbar.init()
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
+
         if not self.mediaAvailable:
             self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
             self.novideoWidget.hide()
@@ -1094,13 +1099,14 @@ class VideoCutter(QWidget):
         self.mpvWidget.pause()
 
     def playMediaTimeClip(self, index) -> None:
-        if not len(self.clipTimes) or not self.videos[self.currentVideoIndex].clipsLength():
+        # if not len(self.clipTimes) or not self.videos[self.currentVideoIndex].clipsLength():
+        if not self.videos[self.currentVideoIndex].clipsLength():
             return
 
         playstate = self.mpvWidget.property('pause')
         self.clipIsPlaying = True
         self.clipIsPlayingIndex = index
-        self.setPosition(self.clipTimes[index][0].msecsSinceStartOfDay())
+        # self.setPosition(self.clipTimes[index][0].msecsSinceStartOfDay())
         self.setPosition(self.videos[self.currentVideoIndex].clips[index].timeStart.msecsSinceStartOfDay())
         if playstate:
             self.setPlayButton(True)
@@ -1122,14 +1128,15 @@ class VideoCutter(QWidget):
         self.toolbar_start.setEnabled(flag)
         self.toolbar_end.setEnabled(False)
         self.toolbar_save.setEnabled(False)
-        self.streamsAction.setEnabled(flag)
-        self.streamsButton.setEnabled(flag)
-        self.mediainfoAction.setEnabled(flag)
-        self.mediainfoButton.setEnabled(flag)
+        # self.streamsAction.setEnabled(flag)
+        # self.streamsButton.setEnabled(flag)
+        # self.mediainfoAction.setEnabled(flag)
+        # self.mediainfoButton.setEnabled(flag)
         self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
         self.seekSlider.clearRegions()
-        self.blackdetectAction.setEnabled(flag)
+        # self.blackdetectAction.setEnabled(flag)
+        print('!!!!')
         if flag:
             self.seekSlider.setRestrictValue(0)
         else:
@@ -1158,7 +1165,7 @@ class VideoCutter(QWidget):
                 self.taskbar.setProgress(float(progress / self.seekSlider.maximum()), True)
             if self.clipIsPlayingIndex >= 0:
                 current_clip_end = QTime(0, 0, 0).msecsTo(self.videos[self.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
-                current_clip_end = QTime(0, 0, 0).msecsTo(self.clipTimes[self.clipIsPlayingIndex][1])
+                # current_clip_end = QTime(0, 0, 0).msecsTo(self.clipTimes[self.clipIsPlayingIndex][1])
                 if progress > current_clip_end:
                     self.playMedia()
                     self.clipIsPlaying = False
@@ -1179,7 +1186,7 @@ class VideoCutter(QWidget):
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
 
-            self.clipTimes[item_index][5] = item_state
+            # self.clipTimes[item_index][5] = item_state
             self.videos[self.currentVideoIndex].clips[item_index].visibility = item_state
             self.renderClipIndex()
         except Exception:
@@ -1192,7 +1199,7 @@ class VideoCutter(QWidget):
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
 
-            self.clipTimes[item_index][5] = item_state
+            # self.clipTimes[item_index][5] = item_state
             self.videos[self.currentVideoIndex].clips[item_index].visibility = item_state
 
             self.seekSlider.setRegionVizivility(item_index, item_state)
@@ -1205,13 +1212,13 @@ class VideoCutter(QWidget):
             modifierPressed = QApplication.keyboardModifiers()
             row = self.cliplist.currentRow()
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-                self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
+                # self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
                 self.setPosition(self.videos[self.currentVideoIndex].clips.timeStart.msecsSinceStartOfDay())
             elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
                 self.playMediaTimeClip(row)
             else:
-                if not len(self.clipTimes[row][3]):
-                    self.seekSlider.selectRegion(row)
+                # if not len(self.clipTimes[row][3]):
+                self.seekSlider.selectRegion(row)
         except:
             self.doPass()
 
@@ -1294,7 +1301,7 @@ class VideoCutter(QWidget):
     @pyqtSlot(list)
     def addScenes(self, scenes: List[list]) -> None:
         if len(scenes):
-            [self.clipTimes.append([scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', None, 2]) for scene in scenes if len(scene)]
+            # [self.clipTimes.append([scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', None, 2]) for scene in scenes if len(scene)]
             [self.videos[self.currentVideoIndex].clipAppend(VideoClipItem(scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', 2)) for scene in scenes if len(scene)]
             self.renderClipIndex()
         self.filterProgressBar.done(VCProgressDialog.Accepted)
@@ -1337,11 +1344,12 @@ class VideoCutter(QWidget):
 
     def clipStart(self) -> None:
         starttime = self.delta2QTime(self.seekSlider.value())
-        clipsNumber = len(self.clipTimes)
+        clipsNumber = len(self.videos[self.currentVideoIndex].clips)
+        # clipsNumber = len(self.clipTimes)
         defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
         clip = VideoClipItem(starttime, QTime(), self.captureImage(self.currentMedia, starttime), defaultClipName, 2)
         self.videos[self.currentVideoIndex].clips.append(clip)
-        self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', defaultClipName, 2])
+        # self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', defaultClipName, 2])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
         self.clipindex_clips_remove.setDisabled(True)
@@ -1357,9 +1365,15 @@ class VideoCutter(QWidget):
         self.cliplist.scrollToBottom()
 
     def clipEnd(self) -> None:
-        item = self.clipTimes[len(self.clipTimes) - 1]
+        # item = self.clipTimes[len(self.clipTimes) - 1]
         clipItemLast = self.videos[self.currentVideoIndex].clipsLast()
-        endtime = self.delta2QTime(self.seekSlider.value())
+        endTime = self.delta2QTime(self.seekSlider.value())
+        if endTime.__lt__(clipItemLast.startTime):
+            clipItemLast.timeEnd = clipItemLast.timeStart
+            clipItemLast.timeStart = endTime
+        else:
+            clipItemLast.timeEnd = endTime
+        '''
         if endtime.__lt__(item[0]):
             item[1] = item[0]
             item[0] = endtime
@@ -1367,15 +1381,16 @@ class VideoCutter(QWidget):
             return
         else:
             item[1] = endtime
+        '''
 
-        clipItemLast.timeEnd = endtime
+        # clipItemLast.timeEnd = endTime
         self.toolbar_start.setEnabled(True)
         self.toolbar_end.setDisabled(True)
-        
+        '''
         if len(self.clipTimes) > 1:
             self.clipindex_move_up.setEnabled(True)
             self.clipindex_move_down.setEnabled(True)
-
+        '''
         if self.videos[self.currentVideoIndex].clipsLength() > 1:
             self.clipindex_move_up.setEnabled(True)
             self.clipindex_move_down.setEnabled(True)
@@ -1385,7 +1400,7 @@ class VideoCutter(QWidget):
         self.seekSlider.setRestrictValue(0, False)
         self.blackdetectAction.setEnabled(True)
         self.inCut = False
-        self.showText('clip ends at {}'.format(endtime.toString(self.timeformat)))
+        self.showText('clip ends at {}'.format(endTime.toString(self.timeformat)))
         self.renderClipIndex()
         self.cliplist.scrollToBottom()
 
@@ -1396,16 +1411,18 @@ class VideoCutter(QWidget):
 
     # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
     @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
-    def syncVideoClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None: #should replace syncClipList
+    def syncClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None: #should replace syncClipList
         index = row - 1 if start < row else row
         clip = self.videos[self.currentVideoIndex].clips.pop(start)
         self.videos[self.currentVideoIndex].clips.insert(index, clip)
-        if not len(clip[3]):
+        if not len(clip.visibility): #????? was clip[3]
             self.seekSlider.switchRegions(start, index)
         self.showText('clip order updated')
-        self.renderVideoClipIndex()
+        self.renderClipIndex()
+        # self.renderVideoClipIndex()
 
     # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
+    '''
     @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
     def syncClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None:
         index = row - 1 if start < row else row
@@ -1415,8 +1432,8 @@ class VideoCutter(QWidget):
             self.seekSlider.switchRegions(start, index)
         self.showText('clip order updated')
         self.renderClipIndex()
-
-    def renderVideoClipIndex(self) -> None: #should replace renderClipIndex()
+    '''
+    def renderClipIndex(self) -> None: #should replace renderClipIndex()
         self.seekSlider.clearRegions()
         self.totalRuntime = 0
         externals = self.cliplist.renderVideoClips(self.videos[self.currentVideoIndex].clips)
@@ -1427,7 +1444,7 @@ class VideoCutter(QWidget):
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
-
+    '''
     def renderClipIndex(self) -> None:
         self.seekSlider.clearRegions()
         self.totalRuntime = 0
@@ -1439,7 +1456,7 @@ class VideoCutter(QWidget):
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
-
+    '''
     @staticmethod
     def delta2QTime(msecs: Union[float, int]) -> QTime:
         if isinstance(msecs, float):
@@ -1515,7 +1532,7 @@ class VideoCutter(QWidget):
                                              'at our <a href="{}">GitHub Issues page</a> so that it can be fixed.</p>'
                                              .format(vidcutter.__bugreport__))
                         return
-            self.joinMedia(filelist)
+            # self.joinMedia(filelist)
 
     '''
     def smartcutter(self, file: str, source_file: str, source_ext: str) -> None:
@@ -1548,7 +1565,7 @@ class VideoCutter(QWidget):
         if len(self.smartcut_monitor.results) == len(self.smartcut_monitor.clips) - self.smartcut_monitor.externals:
             if False not in self.smartcut_monitor.results:
                 self.joinMedia(self.smartcut_monitor.clips)
-
+    '''
     def joinMedia(self, filelist: list) -> None:
         if len(filelist) > 1:
             self.seekSlider.updateProgress()
@@ -1577,7 +1594,7 @@ class VideoCutter(QWidget):
             self.complete(False)
         else:
             self.complete(True, filelist[-1])
-
+    '''
     def complete(self, rename: bool=True, filename: str=None) -> None:
         if rename and filename is not None:
             # noinspection PyCallByClass
