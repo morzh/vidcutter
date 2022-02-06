@@ -712,15 +712,15 @@ class VideoCutter(QWidget):
             self.setPosition(self.videos[self.currentVideoIndex].clips[index].timeEnd.msecsSinceStartOfDay())
         else:
             name = self.videos[self.currentVideoIndex].clips[index].name
-            time_start = self.videos[self.currentVideoIndex].clips[index].timeStart
-            time_end = self.videos[self.currentVideoIndex].clips[index].timeEnd
+            timeStart = self.videos[self.currentVideoIndex].clips[index].timeStart
+            timeEnd = self.videos[self.currentVideoIndex].clips[index].timeEnd
             '''
             name = self.clipTimes[index][4]
             name = name if name is not None else 'Chapter {}'.format(index + 1)
-            time_start = self.clipTimes[index][0]
-            time_end = self.clipTimes[index][1]
+            timeStart = self.clipTimes[index][0]
+            timeEnd = self.clipTimes[index][1]
             '''
-            dialog = VCChapterInputDialog(self, name, time_start, time_end)
+            dialog = VCChapterInputDialog(self, name, timeStart, timeEnd)
             dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
             dialog.exec_()
 
@@ -739,7 +739,6 @@ class VideoCutter(QWidget):
     def moveItemUp(self) -> None:
         index = self.cliplist.currentRow()
         if index != -1:
-
             tempVideoItem = self.videos[self.currentVideoIndex].clips[index]
             del self.videos[self.currentVideoIndex].clips[index]
             self.videos[self.currentVideoIndex].clips.insert(index - 1, tempVideoItem)
