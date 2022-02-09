@@ -13,18 +13,6 @@ from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, Q
                              QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication)
 
 from vidcutter.libs.videoservice import VideoService
-'''
-FREE_STATE = 1
-BUILDING_SQUARE = 2
-BEGIN_SIDE_EDIT = 3
-END_SIDE_EDIT = 4
-RECTANGLE_MOVE = 5
-
-CURSOR_ON_BEGIN_SIDE = 1
-CURSOR_ON_END_SIDE = 2
-CURSOR_IS_INSIDE = 3
-CURSOR_OFF = 4
-'''
 
 class CursorStates(Enum):
     CURSOR_ON_BEGIN_SIDE = 1
@@ -245,14 +233,12 @@ class VideoSlider(QSlider):
             self._regions[self.current_rectangle_index].setLeft(rectangle_left_value)
             value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value_begin)
-            # self.parent.clipTimes[self.current_rectangle_index][0] = time
             self.parent.videos[self.parent.currentVideoIndex].clips[self.current_rectangle_index].timeStart = time
         elif self.state == RectangleEditState.END_SIDE_EDIT:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.current_rectangle_index].setRight(rectangle_right_value)
             value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value)
-            # self.parent.clipTimes[self.current_rectangle_index][1] = time
             self.parent.videos[self.parent.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = time
         elif self.state == RectangleEditState.RECTANGLE_MOVE:
             delta_value = event.x() - self.dragPosition.x()
@@ -262,8 +248,6 @@ class VideoSlider(QSlider):
             rectangle_right_value = min(self._regions[self.current_rectangle_index].right(), self.width() - 1)
             value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
             value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            # self.parent.clipTimes[self.current_rectangle_index][0] = self.parent.delta2QTime(value_begin)
-            # self.parent.clipTimes[self.current_rectangle_index][1] = self.parent.delta2QTime(value_end)
             self.parent.videos[self.parent.currentVideoIndex].clips[self.current_rectangle_index].timeStart = self.parent.delta2QTime(value_begin)
             self.parent.videos[self.parent.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = self.parent.delta2QTime(value_end)
 
@@ -468,20 +452,8 @@ class VideoSlider(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-
-            # time_start = min(self.parent.clipTimes[self.current_rectangle_index][0], self.parent.clipTimes[self.current_rectangle_index][1])
-            # time_end = max(self.parent.clipTimes[self.current_rectangle_index][0], self.parent.clipTimes[self.current_rectangle_index][1])
-            # thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.clipTimes[self.current_rectangle_index][0])
-
-            # self.parent.clipTimes[self.current_rectangle_index][2] = thumbnail
-            # self.parent.clipTimes[self.current_rectangle_index][0] = time_start
-            # self.parent.clipTimes[self.current_rectangle_index][1] = time_end
-
-            # thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videos[0].clips[self.current_rectangle_index].timeStart)
-            # self.parent.videos[0].clips[self.current_rectangle_index].timeStart = time_start
-            # self.parent.videos[0].clips[self.current_rectangle_index].timeEnd = time_end
-            # self.parent.videos[0].clips[self.current_rectangle_index].thumbnail = thumbnail
-
+            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videos[self.parent.currentVideoIndex].clips[self.current_rectangle_index].timeStart)
+            self.parent.videos[self.parent.currentVideoIndex].clips[self.current_rectangle_index].thumbnail = thumbnail
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0

@@ -188,7 +188,7 @@ class VideoItem(QStyledItemDelegate):
                     value = bool(index.data(Qt.CheckStateRole))
                     model.setData(index, not value, Qt.CheckStateRole)
                     return True
-        return QStyledItemDelegate.editorEvent(event, model, option, index)
+        return super(VideoItem, self).editorEvent(event, model, option, index)
 
     def getCheckboxRect(self, option: QStyleOptionViewItem) -> QRect:
         opt_button = QStyleOptionButton()

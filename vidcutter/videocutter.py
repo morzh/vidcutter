@@ -139,6 +139,7 @@ class VideoCutter(QWidget):
         self._initActions()
 
         self.appmenu = QMenu(self.parent)
+        self.help_menu = QMenu('Help n Logs', self.appmenu)
         self.clipindex_removemenu = QMenu(self)
 
         self._initMenus()
@@ -317,21 +318,6 @@ class VideoCutter(QWidget):
             self.parent.console.show()
 
         # noinspection PyArgumentList
-
-        # self.chaptersButton = QPushButton(self, flat=True, checkable=True, objectName='chaptersButton', statusTip='Automatically create chapters per clip', toolTip='Create chapters',
-        #                                   cursor=Qt.PointingHandCursor)
-        # self.chaptersButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
-        # self.chaptersButton.setChecked(self.createChapters)
-        # self.chaptersButton.toggled.connect(self.toggleChapters)
-
-        # noinspection PyArgumentList
-        # self.smartcutButton = QPushButton(self, flat=True, checkable=True, objectName='smartcutButton', toolTip='Toggle SmartCut', statusTip='Toggle frame accurate cutting',
-        #                                   cursor=Qt.PointingHandCursor)
-        # self.smartcutButton.setFixedSize(32, 29 if self.theme == 'dark' else 31)
-        # self.smartcutButton.setChecked(self.smartcut)
-        # self.smartcutButton.toggled.connect(self.toggleSmartCut)
-
-        # noinspection PyArgumentList
         self.muteButton = QPushButton(objectName='muteButton', icon=self.unmuteIcon, flat=True, toolTip='Mute', statusTip='Toggle audio mute', iconSize=QSize(16, 16), clicked=self.muteAudio,
                                       cursor=Qt.PointingHandCursor)
         # noinspection PyArgumentList
@@ -340,19 +326,6 @@ class VideoCutter(QWidget):
         # noinspection PyArgumentList
         self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True, toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
                                             iconSize=QSize(14, 14), clicked=self.toggleFullscreen, cursor=Qt.PointingHandCursor, enabled=False)
-        # noinspection PyArgumentList
-        # self.settingsButton = QPushButton(self, toolTip='Settings', cursor=Qt.PointingHandCursor, flat=True, statusTip='Configure application settings',
-        #                                   objectName='settingsButton', clicked=self.showSettings)
-        # self.settingsButton.setFixedSize(QSize(33, 32))
-        # noinspection PyArgumentList
-        # self.streamsButton = QPushButton(self, toolTip='Media streams', cursor=Qt.PointingHandCursor, flat=True, statusTip='Select the media streams to be included',
-        #                                  objectName='streamsButton', clicked=self.selectStreams, enabled=False)
-        # self.streamsButton.setFixedSize(QSize(33, 32))
-        # noinspection PyArgumentList
-        # self.mediainfoButton = QPushButton(self, toolTip='Media information', cursor=Qt.PointingHandCursor, flat=True, statusTip='View technical details about current media',
-        #                                    objectName='mediainfoButton', clicked=self.mediaInfo, enabled=False)
-        # self.mediainfoButton.setFixedSize(QSize(33, 32))
-        # noinspection PyArgumentList
         self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True, objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
         self.menuButton.setFixedSize(QSize(33, 32))
 
@@ -400,16 +373,6 @@ class VideoCutter(QWidget):
         self.toolbarGroup.setStyleSheet('QGroupBox { border: 0; }')
 
         self.setToolBarStyle(self.settings.value('toolbarLabels', 'beside', type=str))
-
-        # togglesLayout = QHBoxLayout()
-        # togglesLayout.setSpacing(0)
-        # togglesLayout.setContentsMargins(0, 0, 0, 0)
-        # togglesLayout.addWidget(self.consoleButton)
-        # togglesLayout.addWidget(self.osdButton)
-        # togglesLayout.addWidget(self.thumbnailsButton)
-        # togglesLayout.addWidget(self.chaptersButton)
-        # togglesLayout.addWidget(self.smartcutButton)
-        # togglesLayout.addStretch(1)
 
         settingsLayout = QHBoxLayout()
         settingsLayout.setSpacing(0)
@@ -569,7 +532,7 @@ class VideoCutter(QWidget):
         # self.changelogAction = QAction(self.changelogIcon, 'View changelog', self, triggered=self.viewChangelog, statusTip='View log of changes')
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs, statusTip='View the application\'s log file')
         self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
-        # self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
+        self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
         self.aboutAction = QAction('About {}'.format(qApp.applicationName()), self, triggered=self.aboutApp, statusTip='About {}'.format(qApp.applicationName()))
         self.keyRefAction = QAction(self.keyRefIcon, 'Keyboard shortcuts', self, triggered=self.showKeyRef, statusTip='View shortcut key bindings')
         self.settingsAction = QAction(self.settingsIcon, 'Settings', self, triggered=self.showSettings, statusTip='Configure application settings')
@@ -592,27 +555,15 @@ class VideoCutter(QWidget):
         return menu
 
     def _initMenus(self) -> None:
-        self.appmenu.addAction(self.openProjectAction)
-        self.appmenu.addAction(self.saveProjectAction)
-        self.appmenu.addSeparator()
-
-        # self.appmenu.addMenu(self._filtersMenu)
-        # self.appmenu.addSeparator()
-        self.appmenu.addAction(self.fullscreenAction)
-        # self.appmenu.addAction(self.streamsAction)
-        # self.appmenu.addAction(self.mediainfoAction)
-        self.appmenu.addAction(self.keyRefAction)
-        self.appmenu.addSeparator()
         self.appmenu.addAction(self.settingsAction)
         self.appmenu.addSeparator()
-        self.appmenu.addAction(self.viewLogsAction)
-        self.appmenu.addAction(self.toggleConsoleAction)
-        self.appmenu.addAction(self.updateCheckAction)
-        # self.appmenu.addSeparator()
-        # self.appmenu.addAction(self.changelogAction)
-        # self.appmenu.addAction(self.aboutQtAction)
-        self.appmenu.addAction(self.aboutAction)
-        self.appmenu.addSeparator()
+        self.appmenu.addMenu(self.help_menu)
+        self.help_menu.addAction(self.keyRefAction)
+        self.help_menu.addAction(self.viewLogsAction)
+        self.help_menu.addAction(self.toggleConsoleAction)
+        self.help_menu.addAction(self.aboutAction)
+        self.help_menu.addAction(self.aboutQtAction)
+        self.help_menu.addAction(self.updateCheckAction)
         self.appmenu.addAction(self.quitAction)
 
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
@@ -1111,7 +1062,6 @@ class VideoCutter(QWidget):
             self.frameCounter.clearFocus()
             self.mpvWidget.pause()
 
-
     def showText(self, text: str, duration: int = 3, override: bool = False) -> None:
         if self.mediaAvailable:
             if not self.osdButton.isChecked() and not override:
@@ -1208,7 +1158,7 @@ class VideoCutter(QWidget):
             row = self.cliplist.currentRow()
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 # self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
-                self.setPosition(self.videos[self.currentVideoIndex].clips.timeStart.msecsSinceStartOfDay())
+                self.setPosition(self.videos[self.currentVideoIndex].clips[row].timeStart.msecsSinceStartOfDay())
             elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
                 self.playMediaTimeClip(row)
             else:
@@ -1437,7 +1387,7 @@ class VideoCutter(QWidget):
         if len(self.videos[self.currentVideoIndex].clips) and not self.inCut and externals != 1:
             self.toolbar_save.setEnabled(True)
             self.saveProjectAction.setEnabled(True)
-        if self.inCut or len(self.videos[self.currentVideoIndex].clips) == 0 or not self.videos[self.currentVideoIndex].clips[0].endTime.isNull():
+        if self.inCut or len(self.videos[self.currentVideoIndex].clips) == 0 or not self.videos[self.currentVideoIndex].clips[0].timeEnd.isNull():
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
