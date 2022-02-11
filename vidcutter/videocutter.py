@@ -812,6 +812,9 @@ class VideoCutter(QWidget):
         filters += ';;{};;All files (*)'.format(';;'.join(VideoService.config.filters.get('types')))
         return filters
 
+    def openFolder(self) -> Optional[Callable]:
+        pass
+
     def openMedia(self) -> Optional[Callable]:
         cancel, callback = self.saveWarning()
         if cancel:
