@@ -48,7 +48,8 @@ from vidcutter.mediainfo import MediaInfo
 from vidcutter.mediastream import StreamSelector
 from vidcutter.settings import SettingsDialog
 from vidcutter.updater import Updater
-from vidcutter.videolist import VideoList
+from vidcutter.VideoClipsList import VideoClipsList
+from vidcutter.VideosList import VideosList
 from vidcutter.videoslider import VideoSlider
 from vidcutter.videosliderwidget import VideoSliderWidget
 from vidcutter.videostyle import VideoStyleDark, VideoStyleLight
@@ -145,7 +146,9 @@ class VideoCutter(QWidget):
         self._initMenus()
         self._initNoVideo()
 
-        self.cliplist = VideoList(self)
+        self.videosList = VideosList(self)
+
+        self.cliplist = VideoClipsList(self)
         self.cliplist.clicked.connect(self.videoListSingleClick)
         self.cliplist.doubleClicked.connect(self.videoListDoubleClick)
         self.cliplist.customContextMenuRequested.connect(self.itemMenu)
@@ -154,7 +157,7 @@ class VideoCutter(QWidget):
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
-
+        '''
         self.listHeaderButtonL = QPushButton(self)
         self.listHeaderButtonL.setObjectName('listheaderbutton-left')
         self.listHeaderButtonL.setFlat(True)
@@ -176,11 +179,13 @@ class VideoCutter(QWidget):
         listheaderLayout.addWidget(self.listHeaderButtonL)
         listheaderLayout.addStretch(1)
         listheaderLayout.addWidget(self.listHeaderButtonR)
+        
         self.listheader = QWidget(self)
         self.listheader.setObjectName('listheader')
         self.listheader.setFixedWidth(self.cliplist.width())
         self.listheader.setLayout(listheaderLayout)
-        self._initClipIndexHeader()
+        '''
+        # self._initClipIndexHeader()
 
         self.runtimeLabel = QLabel('<div align="right">00:00:00</div>', self)
         self.runtimeLabel.setObjectName('runtimeLabel')
@@ -229,25 +234,34 @@ class VideoCutter(QWidget):
         clipindexTools.setObjectName('clipindextools')
         clipindexTools.setLayout(clipindex_layout)
 
-        self.clipindexLayout = QVBoxLayout()
-        self.clipindexLayout.setSpacing(0)
-        self.clipindexLayout.setContentsMargins(0, 0, 0, 0)
-        self.clipindexLayout.addWidget(self.listheader)
-        self.clipindexLayout.addWidget(self.cliplist)
-        self.clipindexLayout.addWidget(self.runtimeLabel)
-        self.clipindexLayout.addSpacing(3)
-        self.clipindexLayout.addWidget(clipindexTools)
+        self.clipIndexLayout = QVBoxLayout()
+        self.clipIndexLayout.setSpacing(0)
+        self.clipIndexLayout.setContentsMargins(0, 0, 0, 0)
+        # self.clipIndexLayout.addWidget(self.listheader)
+        self.clipIndexLayout.addWidget(self.cliplist)
+        self.clipIndexLayout.addWidget(self.runtimeLabel)
+        self.clipIndexLayout.addSpacing(3)
+        self.clipIndexLayout.addWidget(clipindexTools)
+
+        self.vdieoIndexLayout = QVBoxLayout()
+        self.clipIndexLayout.setSpacing(0)
+        self.clipIndexLayout.setContentsMargins(0, 0, 0, 0)
+        self.vdieoIndexLayout.addWidget(self.videosList)
 
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
         if self.indexLayout == 'left':
-            self.videoLayout.addLayout(self.clipindexLayout)
+            self.videoLayout.addLayout(self.clipIndexLayout)
             self.videoLayout.addSpacing(10)
             self.videoLayout.addWidget(self.novideoWidget)
+            self.videoLayout.addSpacing(10)
+            self.videoLayout.addWidget(self.vdieoIndexLayout)
         else:
+            self.videoLayout.addWidget(self.videosList)
+            self.videoLayout.addSpacing(10)
             self.videoLayout.addWidget(self.novideoWidget)
             self.videoLayout.addSpacing(10)
-            self.videoLayout.addLayout(self.clipindexLayout)
+            self.videoLayout.addLayout(self.clipIndexLayout)
 
         self.timeCounter = VCTimeCounter(self)
         self.timeCounter.timeChanged.connect(lambda newtime: self.setPosition(newtime.msecsSinceStartOfDay()))

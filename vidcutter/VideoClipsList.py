@@ -37,9 +37,9 @@ from vidcutter.libs.graphicseffects import OpacityEffect
 from vidcutter.VideoClipItem import VideoClipItem
 
 
-class VideoList(QListWidget):
+class VideoClipsList(QListWidget):
     def __init__(self, parent=None):
-        super(VideoList, self).__init__(parent)
+        super(VideoClipsList, self).__init__(parent)
         # self.itemClicked.connect(self.on_item_clicked)
         self.parent = parent
         self.theme = self.parent.theme
@@ -67,7 +67,7 @@ class VideoList(QListWidget):
 
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
-        super(VideoList, self).mousePressEvent(event)
+        super(VideoClipsList, self).mousePressEvent(event)
 
     def renderClips(self, videoClipItems: list) -> int:
         self.clipsHasRendered = False
@@ -156,7 +156,7 @@ class VideoList(QListWidget):
                 self.setCursor(Qt.PointingHandCursor)
             else:
                 self.setCursor(Qt.ArrowCursor)
-        super(VideoList, self).mouseMoveEvent(event)
+        super(VideoClipsList, self).mouseMoveEvent(event)
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.EnabledChange:
@@ -169,11 +169,11 @@ class VideoList(QListWidget):
     def clearSelection(self) -> None:
         # self.parent.seekSlider.selectRegion(-1)
         self.parent.removeItemAction.setEnabled(False)
-        super(VideoList, self).clearSelection()
+        super(VideoClipsList, self).clearSelection()
 
 
 class VideoItem(QStyledItemDelegate):
-    def __init__(self, parent: VideoList=None):
+    def __init__(self, parent: VideoClipsList=None):
         super(VideoItem, self).__init__(parent)
         self.parent = parent
         self.theme = self.parent.theme
