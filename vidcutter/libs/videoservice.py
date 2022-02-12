@@ -248,7 +248,7 @@ class VideoService(QObject):
 
     def duration(self, source: str = None) -> QTime:
         if source is None and hasattr(self.media, 'format') and self.parent is not None:
-            return self.parent.delta2QTime(float(self.media.format.duration))
+            return self.parent.delta2QTime(float(self.media.format.video_duration))
         else:
             args = '-i "{}"'.format(source)
             result = self.cmdExec(self.backends.ffmpeg, args, True)

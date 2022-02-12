@@ -24,6 +24,7 @@
 
 import logging
 import os
+import pickle
 import re
 import sys
 import time
@@ -352,7 +353,8 @@ class VideoCutter(QWidget):
         audioLayout.addWidget(self.fullscreenButton)
 
         self.toolbar_open = VCToolBarButton('Open Media', 'Open and load a media file to begin', parent=self)
-        self.toolbar_open.clicked.connect(self.openMedia)
+        self.toolbar_open.clicked.connect(self.openFolder)
+        # self.toolbar_open.clicked.connect(self.openMedia)
         self.toolbar_play = VCToolBarButton('Play Media', 'Play currently loaded media file', parent=self)
         self.toolbar_play.setEnabled(False)
         self.toolbar_play.clicked.connect(self.playMedia)
@@ -813,7 +815,17 @@ class VideoCutter(QWidget):
         return filters
 
     def openFolder(self) -> Optional[Callable]:
-        pass
+        cancel, callback = self.saveWarning()
+        if cancel:
+            if callback is not None:
+                return callback()
+            else:
+                return
+        # QFileDialog.setFileMode(QFileDialog.Directory)
+        outputFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
+        dataFilepath = os.path.join(outputFolder, 'data.pickle')
+        self.videos = pickle.load(dataFilepath)
+        # print(outputFolder)
 
     def openMedia(self) -> Optional[Callable]:
         cancel, callback = self.saveWarning()
@@ -833,7 +845,7 @@ class VideoCutter(QWidget):
             self.lastFolder = QFileInfo(filename).absolutePath()
 
             video = VideoItem()
-            video.filepath = filename
+            video.filename = filename
             self.videos.append(video)
             self.loadMedia(filename)
 

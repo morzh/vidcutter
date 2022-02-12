@@ -6,12 +6,14 @@ class VideoItem:
     def __init__(self, *args):
         if not len(args):
             self._thumbnail = QPixmap()
+            self._duration = QTime()
             self._filepath = ''
             self.description = ''
             self.clips = []
+            self._currentCLipIndex = 0
         elif len(args) == 2:
             self.thumb = args[0]
-            self.filepath = args[1]
+            self.filename = args[1]
 
 
     def clipsLast(self):
@@ -24,17 +26,35 @@ class VideoItem:
         return len(self.clips)
 
     @property
-    def filepath(self):
+    def filename(self):
         return self._filepath
+
+    @filename.setter
+    def filename(self, fp: str):
+        self._filepath = fp
 
     @property
     def thumbnail(self):
         return self._thumbnail
 
-    @filepath.setter
-    def filepath(self, fp: str):
-        self._filepath = fp
-
     @thumbnail.setter
     def thumbnail(self, thumb: QPixmap):
         self._thumbnail = thumb
+
+    @property
+    def currentClipIndex(self):
+        return self._currentCLipIndex
+
+    @currentClipIndex.setter
+    def currentClipIndex(self, index: int):
+        if index < 0:
+            index *= -1
+        self._currentCLipIndex = index
+
+    @property
+    def duration(self, time: QTime):
+        self._duration = time
+
+    @duration.setter
+    def duration(self, time: QTime):
+        self._duration = time
