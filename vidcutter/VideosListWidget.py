@@ -11,9 +11,10 @@ from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QP
 
 from vidcutter.libs.graphicseffects import OpacityEffect
 
-class VideosList(QListWidget):
+
+class VideosListWidget(QListWidget):
     def __init__(self, parent=None):
-        super(VideosList, self).__init__(parent)
+        super(VideosListWidget, self).__init__(parent)
         # self.itemClicked.connect(self.on_item_clicked)
         self.parent = parent
         self.theme = self.parent.theme
@@ -32,9 +33,10 @@ class VideosList(QListWidget):
         self.setAlternatingRowColors(True)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setObjectName('cliplist')
+        self.setObjectName('videoslist')
         self.setStyleSheet('QListView::item { border: none; }')
-        self.opacityEffect = OpacityEffect(0.3)
+        # self.opacityEffect = OpacityEffect(0.3)
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
-        self.clipsHasRendered = False
+        self.videosHasRendered = False
+        

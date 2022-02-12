@@ -13,11 +13,19 @@ class VideoList:
         self._currentVideoIndex = 0
         self.videos = []
 
+    @staticmethod
+    def clamp(x, minimum, maximum):
+        return max(minimum, min(x, maximum))
+
     def readData(self):
         self.videos = pickle.loads(os.path.join(self._absolute_path, self._data_filename))
 
     def saveData(self):
         pickle.dump(self.videos, os.path.join(self._absolute_path, self._data_filename))
+
+    @property
+    def currentVideoIndex(self):
+        return self._currentVideoIndex
 
     def setCurrentVideoIndex(self, index: int) -> None:
         if index < 0:
@@ -49,11 +57,6 @@ class VideoList:
         self.videos[self._currentVideoIndex].clips[currentClipIndex].description = description
 
     def setCurrentVideoClipVisibility(self, visibility: int):
-        if visibility < 0:
-            visibility = 0
-        elif visibility > 2:
-            visibility = 2
-
+        visibility = VideoList.clamp(visibility, 0, 2)
         currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
         self.videos[self._currentVideoIndex].clips[currentClipIndex].visibility = visibility
-

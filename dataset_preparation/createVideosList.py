@@ -1,25 +1,34 @@
 import pickle
 import os
+import sys
 
 import numpy as np
 import matplotlib.pyplot as plt
 from moviepy.editor import * # import everythings (variables, classes, methods...) inside moviepy.editor
+from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import (QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime)
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
 
-from vidcutter.VideoItem import VideoItem
 
+from vidcutter.VideoItem import VideoItem
+from vidcutter.QPixmapPickle import QPixmapPickle
 
 videos_list_path = '/home/morzh/work/enhancersUtils/vidcutter_test_videos'
 image_size = 256
+data_filename = 'data.pickle'
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
 videos_list = []
 
+app = QApplication(sys.argv)
+
 for video_file in video_files:
     print(video_file)
-    video_clip = VideoFileClip(os.path.join(videos_list_path, video_file))
+    try:
+        video_clip = VideoFileClip(os.path.join(videos_list_path, video_file))
+    except:
+        continue
     video_duration = video_clip.duration
     thumb = video_clip.get_frame(0.5 * video_duration)
 
@@ -38,17 +47,19 @@ for video_file in video_files:
     plt.imshow(thumb_cropped)
     plt.show()
     '''
-
+    height, width, channel = thumb_cropped.shape
     bytesPerLine = 3 * width
-    qt_image = QImage(thumb.data, width, height, bytesPerLine, QImage.Format_RGB888)
+    qt_image = QImage(thumb_cropped.data.tobytes(), width, height, QImage.Format_RGB888)
     qt_image.scaledToWidth(image_size)
     qt_pixmap = QPixmap.fromImage(qt_image)
 
     videoItem = VideoItem()
     videoItem.filename = video_file
     videoItem.duration = video_duration
-    videoItem.thumbnail = qt_pixmap
+    videoItem.thumbnail = QPixmapPickle(qt_pixmap)
 
     videos_list.append(videoItem)
 
-pickle.dump(videos_list)
+data_filepath = os.path.join(videos_list_path, data_filename)
+with open(data_filepath, 'wb') as f:
+    pickle.dump(videos_list, f)
