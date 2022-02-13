@@ -15,7 +15,7 @@ from vidcutter.VideoItem import VideoItem
 from vidcutter.QPixmapPickle import QPixmapPickle
 
 videos_list_path = '/home/morzh/work/enhancersUtils/vidcutter_test_videos'
-image_size = 256
+image_size = 128
 data_filename = 'data.pickle'
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
@@ -49,7 +49,7 @@ for video_file in video_files:
     '''
     height, width, channel = thumb_cropped.shape
     bytesPerLine = 3 * width
-    qt_image = QImage(thumb_cropped.data.tobytes(), width, height, QImage.Format_RGB888)
+    qt_image = QImage(thumb_cropped.data.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
     qt_image.scaledToWidth(image_size)
     qt_pixmap = QPixmap.fromImage(qt_image)
 

@@ -7,7 +7,7 @@ from vidcutter.VideoItem import VideoItem
 
 class VideoList:
     def __init__(self, absolute_path: str, data_filename='data.pickle', videos=[]):
-        self._absolute_path: str = ''
+        self._absolute_path = absolute_path
         self._data_filename = data_filename
         self._description = ''
         self._currentVideoIndex = 0
@@ -18,7 +18,9 @@ class VideoList:
         return max(minimum, min(x, maximum))
 
     def readData(self):
-        self.videos = pickle.loads(os.path.join(self._absolute_path, self._data_filename))
+        filepath = os.path.join(self._absolute_path, self._data_filename)
+        with open(filepath, 'rb') as f:
+            self.videos = pickle.load(f)
 
     def saveData(self):
         pickle.dump(self.videos, os.path.join(self._absolute_path, self._data_filename))

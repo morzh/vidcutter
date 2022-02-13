@@ -49,7 +49,7 @@ class VideoClipsListWidget(QListWidget):
         self.setFixedWidth(190)
         self.setAttribute(Qt.WA_MacShowFocusRect, False)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setItemDelegate(VideoItem(self))
+        self.setItemDelegate(VideoClipItemStyle(self))
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.setUniformItemSizes(True)
         self.setDragEnabled(True)
@@ -95,39 +95,6 @@ class VideoClipsListWidget(QListWidget):
         self.clipsHasRendered = True
         return externalCount
 
-    '''
-    def renderClips(self, clipTimes: list) -> int:
-        self.clipsHasRendered = False
-        self.clear()
-        externalCount = 0
-        for index, clip in enumerate(clipTimes):
-            chapterName, endItem = '', ''
-            if isinstance(clip[1], QTime):
-                endItem = clip[1].toString(self.parent.timeformat)
-                self.parent.totalRuntime += clip[0].msecsTo(clip[1])
-            listitem = QListWidgetItem(self)
-            listitem.setToolTip('Drag to reorder clips')
-            if len(clip[3]):
-                listitem.setToolTip(clip[3])
-                externalCount += 1
-            if self.parent.createChapters:
-                chapterName = clip[4] if clip[4] is not None else 'Chapter {}'.format(index + 1)
-            listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
-            listitem.setTextAlignment(Qt.AlignVCenter)
-            listitem.setData(Qt.DecorationRole + 1, clip[2])
-            listitem.setData(Qt.DisplayRole + 1, clip[0].toString(self.parent.timeformat))
-            listitem.setData(Qt.UserRole + 1, endItem)
-            listitem.setData(Qt.UserRole + 2, clip[3])
-            listitem.setData(Qt.UserRole + 3, chapterName)
-            listitem.setData(Qt.CheckStateRole, clip[5])
-            listitem.setCheckState(clip[5])
-            listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
-            self.addItem(listitem)
-            if isinstance(clip[1], QTime) and not len(clip[3]):
-                self.parent.seekSlider.addRegion(clip[0].msecsSinceStartOfDay(), clip[1].msecsSinceStartOfDay(), clip[5])
-        self.clipsHasRendered = True
-        return externalCount
-    '''
     def showProgress(self, steps: int) -> None:
         for row in range(self.count()):
             item = self.item(row)
@@ -172,9 +139,9 @@ class VideoClipsListWidget(QListWidget):
         super(VideoClipsListWidget, self).clearSelection()
 
 
-class VideoItem(QStyledItemDelegate):
+class VideoClipItemStyle(QStyledItemDelegate):
     def __init__(self, parent: VideoClipsListWidget=None):
-        super(VideoItem, self).__init__(parent)
+        super(VideoClipItemStyle, self).__init__(parent)
         self.parent = parent
         self.theme = self.parent.theme
 
@@ -188,7 +155,7 @@ class VideoItem(QStyledItemDelegate):
                     value = bool(index.data(Qt.CheckStateRole))
                     model.setData(index, not value, Qt.CheckStateRole)
                     return True
-        return super(VideoItem, self).editorEvent(event, model, option, index)
+        return super(VideoClipItemStyle, self).editorEvent(event, model, option, index)
 
     def getCheckboxRect(self, option: QStyleOptionViewItem) -> QRect:
         opt_button = QStyleOptionButton()
@@ -240,9 +207,8 @@ class VideoItem(QStyledItemDelegate):
             offset = 0
             r = option.rect.adjusted(5, 0, 0, 0)
 
-        # r = option.rect.adjusted(5+offset, 5, 0, 0)
-        # painter.drawText(r, Qt.AlignRight, "Viz" + str(checkVisibility))
         thumbicon.paint(painter, r, Qt.AlignVCenter | Qt.AlignLeft)
+
         r = option.rect.adjusted(110, 10 + offset, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
         painter.drawText(r, Qt.AlignLeft, 'FILENAME' if len(externalPath) else 'START')

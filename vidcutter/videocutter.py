@@ -50,7 +50,7 @@ from vidcutter.mediastream import StreamSelector
 from vidcutter.settings import SettingsDialog
 from vidcutter.updater import Updater
 from vidcutter.VideoClipsListWidget import VideoClipsListWidget
-from vidcutter.VideosListWidget import VideosListWidget
+from vidcutter.VideoListWidget import VideoListWidget
 from vidcutter.videoslider import VideoSlider
 from vidcutter.videosliderwidget import VideoSliderWidget
 from vidcutter.videostyle import VideoStyleDark, VideoStyleLight
@@ -147,7 +147,7 @@ class VideoCutter(QWidget):
         self._initMenus()
         self._initNoVideo()
 
-        self.videosList = VideosListWidget(self)
+        self.videosList = VideoListWidget(self)
 
         self.cliplist = VideoClipsListWidget(self)
         self.cliplist.clicked.connect(self.videoListSingleClick)
