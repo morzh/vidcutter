@@ -52,8 +52,8 @@ class VideoItem:
         self._currentCLipIndex = index
 
     @property
-    def duration(self, time: QTime):
-        self._duration = time
+    def duration(self):
+        return self._duration
 
     @duration.setter
     def duration(self, time: QTime):

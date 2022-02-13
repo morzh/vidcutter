@@ -353,8 +353,8 @@ class VideoCutter(QWidget):
         audioLayout.addWidget(self.fullscreenButton)
 
         self.toolbar_open = VCToolBarButton('Open Media', 'Open and load a media file to begin', parent=self)
-        self.toolbar_open.clicked.connect(self.openFolder)
-        # self.toolbar_open.clicked.connect(self.openMedia)
+        # self.toolbar_open.clicked.connect(self.openFolder)
+        self.toolbar_open.clicked.connect(self.openMedia)
         self.toolbar_play = VCToolBarButton('Play Media', 'Play currently loaded media file', parent=self)
         self.toolbar_play.setEnabled(False)
         self.toolbar_play.clicked.connect(self.playMedia)

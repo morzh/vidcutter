@@ -13,6 +13,7 @@ from vidcutter.VideoListWidget import VideoListWidget
 
 
 class Example(QWidget):
+    timeformat = 'hh:mm:ss.zzz'
 
     def __init__(self):
         super().__init__()

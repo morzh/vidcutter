@@ -47,6 +47,7 @@ class VideoListWidget(QListWidget):
             listitem.setTextAlignment(Qt.AlignVCenter)
             listitem.setData(Qt.DecorationRole + 1, video.thumbnail)
             listitem.setData(Qt.UserRole + 1, video.filename)
+            listitem.setData(Qt.UserRole + 2, video.duration.toString(self.parent.timeformat))
             listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             self.addItem(listitem)
 
@@ -77,15 +78,28 @@ class VideoListItemStyle(QStyledItemDelegate):
         pixmap = index.data(Qt.DecorationRole + 1)
         thumbicon = QIcon(pixmap)
         filename = index.data(Qt.UserRole + 1)
+        duration = index.data(Qt.UserRole + 2)
 
         painter.setPen(QPen(pencolor, 1, Qt.SolidLine))
         r = option.rect.adjusted(0, 0, -20, -20)
         thumbicon.paint(painter, r, Qt.AlignTop | Qt.AlignLeft)
+
+        r = option.rect.adjusted(90, 10, 0, 0)
+        painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
+        painter.drawText(r, Qt.AlignLeft, 'DURATION:')
+        r = option.rect.adjusted(90, 30, 0, 0)
+        cfont = QFont('Futura LT', 8, QFont.Medium)
+        painter.setFont(cfont)
+        painter.drawText(r, Qt.AlignLeft, duration)
+
+        r = option.rect.adjusted(90, 70, 0, 0)
+        painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
+        painter.drawText(r, Qt.AlignLeft, 'FILE NAME:')
+
         if len(filename):
-            offset = 20
             r = option.rect.adjusted(5, 85, 0, 0)
             cfont = QFont('Futura LT', -1, QFont.Medium)
-            cfont.setPointSizeF(12.25 if sys.platform == 'darwin' else 10.25)
+            cfont.setPointSizeF(11 if sys.platform == 'darwin' else 10)
             painter.setFont(cfont)
             painter.drawText(r, Qt.AlignLeft, self.clipText(filename, painter, True))
 

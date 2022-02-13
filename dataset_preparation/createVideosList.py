@@ -55,7 +55,7 @@ for video_file in video_files:
 
     videoItem = VideoItem()
     videoItem.filename = video_file
-    videoItem.duration = video_duration
+    videoItem.duration = video_item_duration
     videoItem.thumbnail = QPixmapPickle(qt_pixmap)
 
     videos_list.append(videoItem)
