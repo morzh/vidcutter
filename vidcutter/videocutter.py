@@ -164,11 +164,6 @@ class VideoCutter(QWidget):
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
 
-        self.runtimeLabel = QLabel('<div align="right">00:00:00</div>', self)
-        self.runtimeLabel.setObjectName('runtimeLabel')
-        self.runtimeLabel.setToolTip('total runtime: 00:00:00')
-        self.runtimeLabel.setStatusTip('total running time: 00:00:00')
-
         self.clipindex_move_up = QPushButton(self)
         self.clipindex_move_up.setObjectName('clip_move_up')
         self.clipindex_move_up.clicked.connect(self.moveItemUp)
@@ -214,26 +209,18 @@ class VideoCutter(QWidget):
         self.clipIndexLayout = QVBoxLayout()
         self.clipIndexLayout.setSpacing(0)
         self.clipIndexLayout.setContentsMargins(0, 0, 0, 0)
-        # self.clipIndexLayout.addWidget(self.listheader)
         self.clipIndexLayout.addWidget(self.cliplist)
-        self.clipIndexLayout.addWidget(self.runtimeLabel)
         self.clipIndexLayout.addSpacing(3)
         self.clipIndexLayout.addWidget(clipindexTools)
 
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
-        if self.indexLayout == 'left':
-            self.videoLayout.addLayout(self.clipIndexLayout)
-            self.videoLayout.addSpacing(10)
-            self.videoLayout.addWidget(self.novideoWidget)
-            self.videoLayout.addSpacing(10)
-            self.videoLayout.addWidget(self.videoListWidget)
-        else:
-            self.videoLayout.addWidget(self.videoListWidget)
-            self.videoLayout.addSpacing(10)
-            self.videoLayout.addWidget(self.novideoWidget)
-            self.videoLayout.addSpacing(10)
-            self.videoLayout.addLayout(self.clipIndexLayout)
+
+        self.videoLayout.addWidget(self.videoListWidget)
+        self.videoLayout.addSpacing(10)
+        self.videoLayout.addWidget(self.novideoWidget)
+        self.videoLayout.addSpacing(10)
+        self.videoLayout.addLayout(self.clipIndexLayout)
 
         self.timeCounter = VCTimeCounter(self)
         self.timeCounter.timeChanged.connect(lambda newtime: self.setPosition(newtime.msecsSinceStartOfDay()))
@@ -364,12 +351,6 @@ class VideoCutter(QWidget):
         settingsLayout = QHBoxLayout()
         settingsLayout.setSpacing(0)
         settingsLayout.setContentsMargins(0, 0, 0, 0)
-        # settingsLayout.addWidget(self.settingsButton)
-        # settingsLayout.addSpacing(5)
-        # settingsLayout.addWidget(self.streamsButton)
-        # settingsLayout.addSpacing(5)
-        # settingsLayout.addWidget(self.mediainfoButton)
-        # settingsLayout.addWidget(self.consoleButton)
         settingsLayout.addWidget(self.osdButton)
         settingsLayout.addWidget(self.thumbnailsButton)
 
@@ -665,9 +646,6 @@ class VideoCutter(QWidget):
     def on_editChapter(self, index: int, timeStart: QTime, end: QTime, clipName: str) -> None:
         if end < timeStart:
             end = timeStart.addSecs(1)
-        # self.clipTimes[index][0] = start
-        # self.clipTimes[index][1] = end
-        # self.clipTimes[index][4] = clipName
         self.videos[self.currentVideoIndex].clips[index].timeStart = timeStart
         self.videos[self.currentVideoIndex].clips[index].timeEnd = end
         self.videos[self.currentVideoIndex].clips[index].name = clipName
@@ -680,11 +658,6 @@ class VideoCutter(QWidget):
             tempVideoItem = self.videos[self.currentVideoIndex].clips[index]
             del self.videos[self.currentVideoIndex].clips[index]
             self.videos[self.currentVideoIndex].clips.insert(index - 1, tempVideoItem)
-            '''
-            tmpItem = self.clipTimes[index]
-            del self.clipTimes[index]
-            self.clipTimes.insert(index - 1, tmpItem)
-            '''
             self.showText('clip moved up')
             self.renderClipIndex()
 
@@ -695,11 +668,6 @@ class VideoCutter(QWidget):
             tempVideoItem = self.videos[self.currentVideoIndex].clips[index]
             del self.videos[self.currentVideoIndex].clips[index]
             self.videos[self.currentVideoIndex].clips.insert(index + 1, tempVideoItem)
-            '''
-            tmpItem = self.clipTimes[index]
-            del self.clipTimes[index]
-            self.clipTimes.insert(index + 1, tmpItem)
-            '''
             self.showText('clip moved down')
             self.renderClipIndex()
 
@@ -724,28 +692,7 @@ class VideoCutter(QWidget):
         self.cliplist.takeItem(index)
         self.showText('clip removed')
         self.renderClipIndex()
-    '''
-    def removeItem(self) -> None:
-        index = self.cliplist.currentRow()
-        if self.mediaAvailable:
-            if self.inCut and index == self.cliplist.count() - 1:
-                self.inCut = False
-                self.initMediaControls()
-        elif len(self.clipTimes) == 0:
-            self.initMediaControls(False)
 
-        del self.clipTimes[index]
-
-        if len(self.clipTimes) <= 1:
-            self.clipindex_move_up.setDisabled(True)
-            self.clipindex_move_down.setDisabled(True)
-        if not len(self.clipTimes):
-            self.clipindex_clips_remove.setDisabled(True)
-
-        self.cliplist.takeItem(index)
-        self.showText('clip removed')
-        self.renderClipIndex()
-    '''
     def clearList(self) -> None:
         dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all the clips?')
         dialog.accepted.connect(lambda: self.on_clearList())
