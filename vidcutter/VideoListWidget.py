@@ -17,8 +17,8 @@ class VideoListWidget(QListWidget):
         super(VideoListWidget, self).__init__(parent)
         # self.itemClicked.connect(self.on_item_clicked)
         self.parent = parent
-        # self.theme = self.parent.theme
-        self.theme = 'light'
+        self.theme = self.parent.theme
+        # self.theme = 'dark'
         self._progressbars = []
         self.setMouseTracking(True)
         self.setDropIndicatorShown(True)
@@ -74,15 +74,15 @@ class VideoListItemStyle(QStyledItemDelegate):
                 painter.setBrush(Qt.transparent if index.row() % 2 == 0 else brushcolor)
         painter.setPen(Qt.NoPen)
         painter.drawRect(r)
-        # print()
+
         pixmap = index.data(Qt.DecorationRole + 1)
-        thumbicon = QIcon(pixmap)
+        thumbnailIcon = QIcon(pixmap)
         filename = index.data(Qt.UserRole + 1)
         duration = index.data(Qt.UserRole + 2)
 
         painter.setPen(QPen(pencolor, 1, Qt.SolidLine))
         r = option.rect.adjusted(0, 0, -20, -20)
-        thumbicon.paint(painter, r, Qt.AlignTop | Qt.AlignLeft)
+        thumbnailIcon.paint(painter, r, Qt.AlignTop | Qt.AlignLeft)
 
         r = option.rect.adjusted(90, 10, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))

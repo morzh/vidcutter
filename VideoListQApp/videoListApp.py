@@ -14,6 +14,7 @@ from vidcutter.VideoListWidget import VideoListWidget
 
 class Example(QWidget):
     timeformat = 'hh:mm:ss.zzz'
+    theme = 'light'
 
     def __init__(self):
         super().__init__()
@@ -21,6 +22,7 @@ class Example(QWidget):
         self.videoList = None
         self.listWidget = VideoListWidget(parent=self)
         self.listWidget.itemDoubleClicked.connect(self.onClicked)
+
         self.initUI()
 
     def initUI(self):

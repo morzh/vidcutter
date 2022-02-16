@@ -66,6 +66,10 @@ from vidcutter.libs.widgets import (ClipErrorsDialog, VCBlinkText, VCDoubleInput
 
 from vidcutter.VideoItem import VideoItem
 from vidcutter.VideoClipItem import VideoClipItem
+
+from vidcutter.VideoList import VideoList
+from vidcutter.VideoListWidget import VideoListWidget
+
 import vidcutter
 
 
@@ -101,6 +105,9 @@ class VideoCutter(QWidget):
         self.sliderWidget.setMouseTracking(False)
 
         self.taskbar = TaskbarProgress(self.parent)
+
+        self.videoList = None
+        self.videoListWidget = VideoListWidget(parent=self)
 
         self.videos = []
         self.currentVideoIndex = 0
@@ -147,8 +154,6 @@ class VideoCutter(QWidget):
         self._initMenus()
         self._initNoVideo()
 
-        self.videosList = VideoListWidget(self)
-
         self.cliplist = VideoClipsListWidget(self)
         self.cliplist.clicked.connect(self.videoListSingleClick)
         self.cliplist.doubleClicked.connect(self.videoListDoubleClick)
@@ -158,35 +163,6 @@ class VideoCutter(QWidget):
         self.cliplist.model().rowsRemoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
-        '''
-        self.listHeaderButtonL = QPushButton(self)
-        self.listHeaderButtonL.setObjectName('listheaderbutton-left')
-        self.listHeaderButtonL.setFlat(True)
-        self.listHeaderButtonL.clicked.connect(self.setClipIndexLayout)
-        self.listHeaderButtonL.setCursor(Qt.PointingHandCursor)
-        self.listHeaderButtonL.setFixedSize(14, 14)
-        self.listHeaderButtonL.setToolTip('Move to left')
-        self.listHeaderButtonL.setStatusTip('Move the Clip Index list to the left side of player')
-        self.listHeaderButtonR = QPushButton(self)
-        self.listHeaderButtonR.setObjectName('listheaderbutton-right')
-        self.listHeaderButtonR.setFlat(True)
-        self.listHeaderButtonR.clicked.connect(self.setClipIndexLayout)
-        self.listHeaderButtonR.setCursor(Qt.PointingHandCursor)
-        self.listHeaderButtonR.setFixedSize(14, 14)
-        self.listHeaderButtonR.setToolTip('Move to right')
-        self.listHeaderButtonR.setStatusTip('Move the Clip Index list to the right side of player')
-        listheaderLayout = QHBoxLayout()
-        listheaderLayout.setContentsMargins(6, 5, 6, 5)
-        listheaderLayout.addWidget(self.listHeaderButtonL)
-        listheaderLayout.addStretch(1)
-        listheaderLayout.addWidget(self.listHeaderButtonR)
-        
-        self.listheader = QWidget(self)
-        self.listheader.setObjectName('listheader')
-        self.listheader.setFixedWidth(self.cliplist.width())
-        self.listheader.setLayout(listheaderLayout)
-        '''
-        # self._initClipIndexHeader()
 
         self.runtimeLabel = QLabel('<div align="right">00:00:00</div>', self)
         self.runtimeLabel.setObjectName('runtimeLabel')
@@ -244,11 +220,6 @@ class VideoCutter(QWidget):
         self.clipIndexLayout.addSpacing(3)
         self.clipIndexLayout.addWidget(clipindexTools)
 
-        self.vdieoIndexLayout = QVBoxLayout()
-        self.clipIndexLayout.setSpacing(0)
-        self.clipIndexLayout.setContentsMargins(0, 0, 0, 0)
-        self.vdieoIndexLayout.addWidget(self.videosList)
-
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
         if self.indexLayout == 'left':
@@ -256,9 +227,9 @@ class VideoCutter(QWidget):
             self.videoLayout.addSpacing(10)
             self.videoLayout.addWidget(self.novideoWidget)
             self.videoLayout.addSpacing(10)
-            self.videoLayout.addWidget(self.vdieoIndexLayout)
+            self.videoLayout.addWidget(self.videoListWidget)
         else:
-            self.videoLayout.addWidget(self.videosList)
+            self.videoLayout.addWidget(self.videoListWidget)
             self.videoLayout.addSpacing(10)
             self.videoLayout.addWidget(self.novideoWidget)
             self.videoLayout.addSpacing(10)
@@ -353,8 +324,8 @@ class VideoCutter(QWidget):
         audioLayout.addWidget(self.fullscreenButton)
 
         self.toolbar_open = VCToolBarButton('Open Media', 'Open and load a media file to begin', parent=self)
-        # self.toolbar_open.clicked.connect(self.openFolder)
-        self.toolbar_open.clicked.connect(self.openMedia)
+        self.toolbar_open.clicked.connect(self.openFolder)
+        # self.toolbar_open.clicked.connect(self.openMedia)
         self.toolbar_play = VCToolBarButton('Play Media', 'Play currently loaded media file', parent=self)
         self.toolbar_play.setEnabled(False)
         self.toolbar_play.clicked.connect(self.playMedia)
@@ -823,8 +794,9 @@ class VideoCutter(QWidget):
                 return
         # QFileDialog.setFileMode(QFileDialog.Directory)
         outputFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
-        dataFilepath = os.path.join(outputFolder, 'data.pickle')
-        self.videos = pickle.load(dataFilepath)
+        self.videoList = VideoList(outputFolder, 'data.pickle')
+        self.videoList.readData()
+        self.videoListWidget.renderList(self.videoList)
         # print(outputFolder)
 
     def openMedia(self) -> Optional[Callable]:
