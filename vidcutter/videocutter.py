@@ -108,6 +108,7 @@ class VideoCutter(QWidget):
 
         self.videoList = None
         self.videoListWidget = VideoListWidget(parent=self)
+        self.videoListWidget.itemDoubleClicked.connect(self.loadMedia)
 
         self.videos = []
         self.currentVideoIndex = 0
@@ -943,17 +944,19 @@ class VideoCutter(QWidget):
             if not reboot:
                 self.showText('project file saved')
     '''
-    def loadMedia(self, filename: str) -> None:
+    def loadMedia(self, item) -> None:
+        item_index = self.videoListWidget.row(item)
+        self.videoList.setCurrentVideoIndex(item_index)
+        filename = self.videoList.currentVideoFilepath()
         if not os.path.isfile(filename):
             return
         self.currentMedia = filename
         self.initMediaControls(True)
         self.projectDirty, self.projectSaved = False, False
         self.cliplist.clear()
-        # self.clipTimes.clear()
-        self.videos[self.currentVideoIndex].clips.clear()
+        self.videoList.videos[self.currentVideoIndex].clips.clear()
         self.totalRuntime = 0
-        self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
+        # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
         self.seekSlider.clearRegions()
         self.taskbar.init()
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
@@ -966,7 +969,7 @@ class VideoCutter(QWidget):
             self.mediaAvailable = True
         try:
             self.videoService.setMedia(self.currentMedia)
-            self.videos[self.currentVideoIndex].thumbnail = self.captureImage(self.currentMedia, QTime(0, 0, 0))
+            self.videoList.videos[self.currentVideoIndex].thumbnail = self.captureImage(self.currentMedia, QTime(0, 0, 0))
             self.seekSlider.setFocus()
             self.mpvWidget.play(self.currentMedia)
         except InvalidMediaException:
@@ -1338,7 +1341,7 @@ class VideoCutter(QWidget):
         if self.inCut or len(self.videos[self.currentVideoIndex].clips) == 0 or not self.videos[self.currentVideoIndex].clips[0].timeEnd.isNull():
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
-        self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
+        # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
     '''
     def renderClipIndex(self) -> None:
         self.seekSlider.clearRegions()
