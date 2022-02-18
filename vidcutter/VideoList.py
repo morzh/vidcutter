@@ -37,31 +37,31 @@ class VideoList:
             index *= -1
         self._currentVideoIndex = index
 
-    def setCurrentClipIndex(self, index):
+    def setCurrentVideoClipIndex(self, index):
         if len(self.videos):
             self.videos[self._currentVideoIndex].currentClipIndex = index
 
     def setCurrentVideoClipStartTime(self, time: QTime):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
+        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
         self.videos[self._currentVideoIndex].clips[currentClipIndex].timeStart = time
 
     def setCurrentVideoClipEndTime(self, time: QTime):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
+        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
         self.videos[self._currentVideoIndex].clips[currentClipIndex].timeEnd = time
 
     def setCurrentVideoClipThumbnail(self, thumbnail: QPixmap):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
+        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
         self.videos[self._currentVideoIndex].clips[currentClipIndex].thumbnail = thumbnail
 
     def setCurrentVideoClipName(self, name: str):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].namw = name
+        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
+        self.videos[self._currentVideoIndex].clips[currentClipIndex].name = name
 
     def setCurrentVideoClipDescription(self, description: str):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
+        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
         self.videos[self._currentVideoIndex].clips[currentClipIndex].description = description
 
     def setCurrentVideoClipVisibility(self, visibility: int):
         visibility = VideoList.clamp(visibility, 0, 2)
-        currentClipIndex = self.videos[self._currentVideoIndex].currentCLipIndex
+        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
         self.videos[self._currentVideoIndex].clips[currentClipIndex].visibility = visibility

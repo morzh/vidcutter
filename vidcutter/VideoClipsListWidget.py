@@ -34,7 +34,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QP
 # import PyQt5.QtCore.
 
 from vidcutter.libs.graphicseffects import OpacityEffect
-from vidcutter.VideoClipItem import VideoClipItem
+from vidcutter.VideoItemClip import VideoItemClip
 
 
 class VideoClipsListWidget(QListWidget):
@@ -131,7 +131,7 @@ class VideoClipsListWidget(QListWidget):
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         self.setFixedWidth(210 if self.verticalScrollBar().isVisible() else 190)
-        self.parent.listheader.setFixedWidth(self.width())
+        # self.parent.listheader.setFixedWidth(self.width())
 
     def clearSelection(self) -> None:
         # self.parent.seekSlider.selectRegion(-1)

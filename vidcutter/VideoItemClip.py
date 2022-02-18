@@ -2,7 +2,7 @@ from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
                           Qt, QTextStream, QTime, QTimer, QUrl)
 
-class VideoClipItem:
+class VideoItemClip:
     def __init__(self, *args):
         if not len(args):
             self._timeStart = QTime()
@@ -75,5 +75,6 @@ class VideoClipItem:
         self._description = description
 
     def print(self):
-        print('start time', self._timeStart, ' time end:',  self._timeEnd, ' name:',  self._name, ' visibility:',  self._visibility, ' description:',  self._description)
+        print('start time', self._timeStart, ' time end:',  self._timeEnd, ' name:',  self._name,
+              ' visibility:',  self._visibility, ' description:',  self._description)
 

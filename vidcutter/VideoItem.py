@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime, QTimer, QUrl)
-from vidcutter.VideoClipItem import VideoClipItem
+from vidcutter.VideoItemClip import VideoItemClip
 
 class VideoItem:
     def __init__(self, *args):
