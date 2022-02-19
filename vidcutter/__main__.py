@@ -315,6 +315,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> Optional[Callable]:
         event.accept()
+        print('closeEvent')
         try:
             if not self.isEnabled():
                 exitwarn = VCMessageBox('Warning', 'Media is currently being processed',
@@ -327,30 +328,28 @@ class MainWindow(QMainWindow):
                     event.ignore()
                     return
             noexit, callback = self.cutter.saveWarning()
+            print('noexit, callback = self.cutter.saveWarning()')
+            print(noexit)
             if noexit:
                 event.ignore()
                 if callback is not None:
                     return callback()
                 else:
                     return
+            print('first try')
         except AttributeError:
             logging.exception('warning dialogs on app exit exception', exc_info=True)
         self.console.deleteLater()
+        print('self.console.deleteLater()')
         if hasattr(self, 'cutter'):
             self.save_settings()
-            '''
             try:
-                if hasattr(self.cutter.videoService, 'smartcut_jobs'):
-                    [
-                        self.cutter.videoService.cleanup(job.files.values())
-                        for job in self.cutter.videoService.smartcut_jobs
-                    ]
                 if hasattr(self.cutter, 'mpvWidget'):
                     self.cutter.mpvWidget.shutdown()
             except AttributeError:
                 pass
-            '''
         try:
+            print('try qApp.exit(0)')
             qApp.exit(0)
         except mpv.MPVError:
             pass
