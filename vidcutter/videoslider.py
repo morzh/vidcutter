@@ -101,7 +101,6 @@ class VideoSlider(QSlider):
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()
-        # print(self.widgetWidth, self.frameCounterMaximum)
 
     def initStyle(self) -> None:
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
@@ -148,7 +147,7 @@ class VideoSlider(QSlider):
             handleHeight=handleHeight,
             timelineBackground=timeline))
 
-    def setRestrictValue(self, value: int, force: bool = False) -> None:
+    def setRestrictValue(self, value: int = 0, force: bool = False) -> None:
         self.restrictValue = value
         if value > 0 or force:
             self._cutStarted = True
@@ -432,6 +431,7 @@ class VideoSlider(QSlider):
 
     @pyqtSlot(int)
     def on_valueChanged(self, value: int) -> None:
+        # print('on_valueChanged', value)
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
 

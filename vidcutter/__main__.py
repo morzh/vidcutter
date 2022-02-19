@@ -338,6 +338,7 @@ class MainWindow(QMainWindow):
         self.console.deleteLater()
         if hasattr(self, 'cutter'):
             self.save_settings()
+            '''
             try:
                 if hasattr(self.cutter.videoService, 'smartcut_jobs'):
                     [
@@ -348,6 +349,7 @@ class MainWindow(QMainWindow):
                     self.cutter.mpvWidget.shutdown()
             except AttributeError:
                 pass
+            '''
         try:
             qApp.exit(0)
         except mpv.MPVError:

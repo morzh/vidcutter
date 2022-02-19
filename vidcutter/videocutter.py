@@ -69,8 +69,7 @@ from vidcutter.VideoItemClip import VideoItemClip
 
 from vidcutter.VideoList import VideoList
 from vidcutter.VideoListWidget import VideoListWidget
-
-import vidcutter
+from vidcutter.QPixmapPickle import QPixmapPickle
 
 
 class VideoCutter(QWidget):
@@ -862,47 +861,15 @@ class VideoCutter(QWidget):
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         if self.currentMedia is None:
             return
-        project_file, _ = os.path.splitext(self.currentMedia)
-        if reboot:
-            project_save = os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE)
-            ptype = 'VidCutter Project (*.vcp)'
-        else:
-            project_save, ptype = QFileDialog.getSaveFileName(
-                parent=self.parent,
-                caption='Save project',
-                directory='{}.vcp'.format(project_file),
-                filter=self.projectFilters(True),
-                initialFilter='VidCutter Project (*.vcp)',
-                options=self.getFileDialogOptions())
-        if project_save is not None and len(project_save.strip()):
-            file = QFile(project_save)
-            if not file.open(QFile.WriteOnly | QFile.Text):
-                QMessageBox.critical(self.parent, 'Cannot save project',
-                                     'Cannot save project file at {0}:\n\n{1}'.format(project_save, file.errorString()))
-                return
-            qApp.setOverrideCursor(Qt.WaitCursor)
-            if ptype == 'VidCutter Project (*.vcp)':
-                # noinspection PyUnresolvedReferences
-                QTextStream(file) << '{}\n'.format(self.currentMedia)
-            for clip in self.videoList.videos[self.videoList.currentVideoIndex].clips:
-                start_time = timedelta(hours=clip.startTime.hour(), minutes=clip.startTime.minute(), seconds=clip.startTime.second(), milliseconds=clip.startTime.msec())
-                stop_time = timedelta(hours=clip.endTime.hour(), minutes=clip.endTime.minute(), seconds=clip.endTime.second(), milliseconds=clip.endTime.msec())
-                if ptype == 'VidCutter Project (*.vcp)':
-                    if self.createChapters:
-                        chapter = '"{}"'.format(clip.name) if clip.name is not None else '""'
-                    else:
-                        chapter = ''
-                    # noinspection PyUnresolvedReferences
-                    QTextStream(file) << '{0}\t{1}\t{2}\t{3}\n'.format(self.delta2String(start_time),
-                                                                       self.delta2String(stop_time), 0, chapter)
-                else:
-                    # noinspection PyUnresolvedReferences
-                    QTextStream(file) << '{0}\t{1}\t{2}\n'.format(self.delta2String(start_time),
-                                                                  self.delta2String(stop_time), 0)
+        try:
+            self.videoList.saveData()
             qApp.restoreOverrideCursor()
             self.projectSaved = True
-            if not reboot:
-                self.showText('project file saved')
+        except Exception:
+            print('can not save project')
+
+        if not reboot:
+            self.showText('project file saved')
     '''
     def saveProject(self, reboot: bool = False) -> None:
         if self.currentMedia is None:
@@ -1360,8 +1327,9 @@ class VideoCutter(QWidget):
         else:
             return '%f' % (td.days * 86400 + td.seconds + td.microseconds / 1000000.)
 
-    def captureImage(self, source: str, frametime: QTime, external: bool = False) -> QPixmap:
-        return VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat), external=external)
+    def captureImage(self, source: str, frametime: QTime, external: bool = False) -> QPixmapPickle:
+        thumbnail = VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat), external=external)
+        return QPixmapPickle(thumbnail)
     '''
     def saveMedia(self) -> None:
         clips = len(self.clipTimes)

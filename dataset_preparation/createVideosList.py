@@ -3,18 +3,19 @@ import os
 import sys
 
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from moviepy.editor import * # import everythings (variables, classes, methods...) inside moviepy.editor
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtCore import (QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime)
+from PyQt5.QtCore import QTime
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
 
 
 from vidcutter.VideoItem import VideoItem
+from vidcutter.VideoItemClip import VideoItemClip
 from vidcutter.QPixmapPickle import QPixmapPickle
 
-videos_list_path = '/home/morzh/work/enhancersUtils/vidcutter_test_videos'
+videos_list_path = '/home/morzh/work/vidcutter_test_videos'
 image_size = 128
 data_filename = 'data.pickle'
 
@@ -26,9 +27,11 @@ app = QApplication(sys.argv)
 for video_file in video_files:
     print(video_file)
     try:
-        video_clip = VideoFileClip(os.path.join(videos_list_path, video_file))
+        video_clip = VideoItem()
     except:
         continue
+
+    video_clip.filename = video_file
     video_duration = video_clip.duration
     thumb = video_clip.get_frame(0.5 * video_duration)
 

@@ -1,6 +1,6 @@
 import pickle
 import os
-from PyQt5.QtCore import (QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime)
+from PyQt5.QtCore import QTime
 from PyQt5.QtGui import QPixmap
 from vidcutter.VideoItem import VideoItem
 
@@ -23,7 +23,10 @@ class VideoList:
             self.videos = pickle.load(f)
 
     def saveData(self):
-        pickle.dump(self.videos, os.path.join(self._absolute_path, self._data_filename))
+        data_filepath = os.path.join(self._absolute_path, self._data_filename)
+        # print('project files saved to', data_filepath)
+        with open(data_filepath, 'wb') as f:
+            pickle.dump(self.videos, f)
 
     @property
     def currentVideoIndex(self):
