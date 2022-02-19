@@ -870,6 +870,7 @@ class VideoCutter(QWidget):
 
         if not reboot:
             self.showText('project file saved')
+
     '''
     def saveProject(self, reboot: bool = False) -> None:
         if self.currentMedia is None:
@@ -1547,7 +1548,7 @@ class VideoCutter(QWidget):
             savewarn.exec_()
             res = savewarn.clickedButton()
             if res == savebutton:
-                return True, self.saveProject
+                return False, self.saveProject
             elif res == cancelbutton:
                 return True, None
         return False, None
