@@ -327,7 +327,7 @@ class VideoCutter(QWidget):
         self.toolbar_save = VCToolBarButton('Save Media', 'Save clips to a new media file', parent=self)
         self.toolbar_save.setObjectName('savebutton')
         self.toolbar_save.setEnabled(False)
-        self.toolbar_save.clicked.connect(self.saveMedia)
+        self.toolbar_save.clicked.connect(self.saveProject)
 
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
@@ -1322,10 +1322,10 @@ class VideoCutter(QWidget):
         self.seekSlider.clearRegions()
         self.totalRuntime = 0
         externals = self.cliplist.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
-        if len(self.videoList.videos[self.videoList.currentVideoIndex].clips) and not self.inCut and externals != 1:
+        if len(self.videoList.videos[self.videoList.currentVideoIndex].clips) and not self.inCut:
             self.toolbar_save.setEnabled(True)
             self.saveProjectAction.setEnabled(True)
-        if self.inCut or len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0 or not self.videoList.videos[self.videoList.currentVideoIndex].clips[0].timeEnd.isNull():
+        if self.inCut or len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0 or  self.videoList.videos[self.videoList.currentVideoIndex].clips[0].timeEnd.isNull():
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
@@ -1362,7 +1362,7 @@ class VideoCutter(QWidget):
 
     def captureImage(self, source: str, frametime: QTime, external: bool = False) -> QPixmap:
         return VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat), external=external)
-
+    '''
     def saveMedia(self) -> None:
         clips = len(self.clipTimes)
         source_file, source_ext = os.path.splitext(self.currentMedia if self.currentMedia is not None else self.clipTimes[0][3])
@@ -1419,7 +1419,6 @@ class VideoCutter(QWidget):
                         return
             # self.joinMedia(filelist)
 
-    '''
     def smartcutter(self, file: str, source_file: str, source_ext: str) -> None:
         self.smartcut_monitor = Munch(clips=[], results=[], externals=0)
         for index, clip in enumerate(self.clipTimes):

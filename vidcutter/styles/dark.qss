@@ -146,6 +146,22 @@ QListView::item:selected#settingsmenu {
 }
 
 /* -------------------------------------------------------------------------- */
+QListView#videolist {
+    border-radius: 0;
+    border: none;
+    border-left: 1px solid #4D5355;
+    border-right: 1px solid #4D5355;
+    show-decoration-selected: 1;
+    background-color: #0C0F10;
+}
+
+QListView::item#videolist {
+    padding: 0;
+    color: #EAEAEA;
+}
+
+
+/* -------------------------------------------------------------------------- */
 
 QLabel#runtimeLabel {
     font-size: 10.5pt;

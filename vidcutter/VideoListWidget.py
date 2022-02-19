@@ -18,7 +18,6 @@ class VideoListWidget(QListWidget):
         # self.itemClicked.connect(self.on_item_clicked)
         self.parent = parent
         self.theme = self.parent.theme
-        # self.theme = 'dark'
         self._progressbars = []
         self.setMouseTracking(True)
         self.setDropIndicatorShown(True)
@@ -34,8 +33,11 @@ class VideoListWidget(QListWidget):
         self.setAlternatingRowColors(True)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setObjectName('videolist')
+        self.setObjectName('cliplist')
         self.setStyleSheet('QListView::item { border: none; }')
+        self.opacityEffect = OpacityEffect(0.3)
+        self.opacityEffect.setEnabled(False)
+        self.setGraphicsEffect(self.opacityEffect)
         self.videosHasRendered = False
 
     def renderList(self, videoList) -> None:

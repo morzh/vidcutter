@@ -232,14 +232,18 @@ class VideoSlider(QSlider):
             rectangle_left_value = max(event.x(), 0)
             self._regions[self.current_rectangle_index].setLeft(rectangle_left_value)
             value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
-            time = self.parent.delta2QTime(value_begin)
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart = time
+            timeStart = self.parent.delta2QTime(value_begin)
+            self.parent.videoList.setCurrentVideoClipIndex(self.current_rectangle_index)
+            self.parent.videoList.setCurrentVideoClipStartTime(timeStart)
+            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart = time
         elif self.state == RectangleEditState.END_SIDE_EDIT:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.current_rectangle_index].setRight(rectangle_right_value)
             value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value)
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = time
+            self.parent.videoList.setCurrentVideoClipIndex(self.current_rectangle_index)
+            self.parent.videoList.setCurrentVideoClipEndTime(time)
+            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = time
         elif self.state == RectangleEditState.RECTANGLE_MOVE:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
@@ -248,8 +252,11 @@ class VideoSlider(QSlider):
             rectangle_right_value = min(self._regions[self.current_rectangle_index].right(), self.width() - 1)
             value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
             value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart = self.parent.delta2QTime(value_begin)
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = self.parent.delta2QTime(value_end)
+            self.parent.videoList.setCurrentVideoClipIndex(self.current_rectangle_index)
+            self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
+            self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
+            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart = self.parent.delta2QTime(value_begin)
+            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = self.parent.delta2QTime(value_end)
 
     def cursorOnSide(self, e_pos) -> int:
         if len(self._regions) > 0:
@@ -355,9 +362,12 @@ class VideoSlider(QSlider):
         self.thumbsThread = QThread(self)
         self.thumbsWorker = ThumbWorker(self.parent.settings, self.parent.currentMedia, frametimes, thumbsize)
         self.thumbsWorker.moveToThread(self.thumbsThread)
+
         self.thumbsThread.started.connect(self.parent.sliderWidget.setLoader)
         self.thumbsThread.started.connect(self.thumbsWorker.generate)
+
         self.thumbsThread.finished.connect(self.thumbsThread.deleteLater, Qt.DirectConnection)
+
         self.thumbsWorker.completed.connect(self.buildTimeline)
         self.thumbsWorker.completed.connect(self.thumbsWorker.deleteLater, Qt.DirectConnection)
         self.thumbsWorker.completed.connect(self.thumbsThread.quit, Qt.DirectConnection)
