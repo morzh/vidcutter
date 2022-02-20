@@ -69,10 +69,9 @@ class VideoClipsListWidget(QListWidget):
         self._mouse_button = event.button()
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
-    def renderClips(self, videoClipItems: list) -> int:
+    def renderClips(self, videoClipItems: list) -> None:
         self.clipsHasRendered = False
         self.clear()
-        externalCount = 0
         for index, videoClip in enumerate(videoClipItems):
             listitem = QListWidgetItem(self)
             listitem.setToolTip('Drag to reorder clips')
@@ -93,7 +92,6 @@ class VideoClipsListWidget(QListWidget):
             self.addItem(listitem)
             self.parent.seekSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
         self.clipsHasRendered = True
-        return externalCount
 
     def showProgress(self, steps: int) -> None:
         for row in range(self.count()):

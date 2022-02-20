@@ -431,7 +431,7 @@ class VideoSlider(QSlider):
 
     @pyqtSlot(int)
     def on_valueChanged(self, value: int) -> None:
-        # print('on_valueChanged', value)
+        # print('on_valueChanged')
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
 
@@ -467,7 +467,7 @@ class VideoSlider(QSlider):
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0
-            self.update()
+            # self.update()
 
         elif event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
@@ -501,7 +501,7 @@ class VideoSlider(QSlider):
                 self.free_cursor_on_side = 0
                 self.unsetCursor()
 
-            self.update()
+        self.update()
 
         return super(VideoSlider, self).eventFilter(obj, event)
 

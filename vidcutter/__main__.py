@@ -315,7 +315,6 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> Optional[Callable]:
         event.accept()
-        print('closeEvent')
         try:
             if not self.isEnabled():
                 exitwarn = VCMessageBox('Warning', 'Media is currently being processed',
@@ -334,9 +333,9 @@ class MainWindow(QMainWindow):
                     return callback()
                 else:
                     return
-            if callback is not None:
-                callback()
-            print('first try')
+            else:
+                if callback is not None:
+                    callback()
         except AttributeError:
             logging.exception('warning dialogs on app exit exception', exc_info=True)
         self.console.deleteLater()
