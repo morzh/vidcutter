@@ -105,7 +105,7 @@ class VideoCutter(QWidget):
 
         self.taskbar = TaskbarProgress(self.parent)
 
-        self.videoList = None
+        self.videoList = VideoList()
         self.videoListWidget = VideoListWidget(parent=self)
         self.videoListWidget.itemDoubleClicked.connect(self.loadMedia)
 
@@ -748,7 +748,7 @@ class VideoCutter(QWidget):
                 return
         # QFileDialog.setFileMode(QFileDialog.Directory)
         outputFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
-        self.videoList = VideoList(outputFolder, 'data.pickle')
+        self.videoList.absolutePath = outputFolder
         self.videoList.readData()
         self.videoListWidget.renderList(self.videoList)
         # print(outputFolder)

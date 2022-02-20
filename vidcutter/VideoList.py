@@ -6,9 +6,9 @@ from vidcutter.VideoItem import VideoItem
 
 
 class VideoList:
-    def __init__(self, absolute_path: str, data_filename='data.pickle', videos=[]):
-        self._absolute_path = absolute_path
-        self._data_filename = data_filename
+    def __init__(self):
+        self._absolutePath = ''
+        self._data_filename = 'data.pickle'
         self._description = ''
         self._currentVideoIndex = 0
         self.videos = []
@@ -18,22 +18,30 @@ class VideoList:
         return max(minimum, min(x, maximum))
 
     def readData(self):
-        filepath = os.path.join(self._absolute_path, self._data_filename)
+        filepath = os.path.join(self._absolutePath, self._data_filename)
         with open(filepath, 'rb') as f:
             self.videos = pickle.load(f)
 
     def saveData(self):
-        data_filepath = os.path.join(self._absolute_path, self._data_filename)
+        data_filepath = os.path.join(self._absolutePath, self._data_filename)
         # print('project files saved to', data_filepath)
         with open(data_filepath, 'wb') as f:
             pickle.dump(self.videos, f)
+
+    @property
+    def absolutePath(self) -> str:
+        return self._absolutePath
+
+    @absolutePath.setter
+    def absolutePath(self, path: str) -> None:
+        self._absolutePath = path
 
     @property
     def currentVideoIndex(self):
         return self._currentVideoIndex
 
     def currentVideoFilepath(self):
-        return os.path.join(self._absolute_path, self.videos[self._currentVideoIndex].filename)
+        return os.path.join(self._absolutePath, self.videos[self._currentVideoIndex].filename)
 
     def setCurrentVideoIndex(self, index: int) -> None:
         if index < 0:
