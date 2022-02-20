@@ -746,13 +746,13 @@ class VideoCutter(QWidget):
                 return callback()
             else:
                 return
-        QFileDialog.setFileMode(QFileDialog.Directory)
+        # QFileDialog.setFileMode(QFileDialog.Directory)
         outputFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
         self.videoList = VideoList(outputFolder, 'data.pickle')
         self.videoList.readData()
         self.videoListWidget.renderList(self.videoList)
-        print(outputFolder)
-
+        # print(outputFolder)
+    '''
     def openMedia(self) -> Optional[Callable]:
         cancel, callback = self.saveWarning()
         if cancel:
@@ -774,6 +774,7 @@ class VideoCutter(QWidget):
             video.filename = filename
             self.videos.append(video)
             self.loadMedia(filename)
+    '''
 
     # noinspection PyUnusedLocal
     def openProject(self, checked: bool = False, project_file: str = None) -> Optional[Callable]:
@@ -927,10 +928,7 @@ class VideoCutter(QWidget):
         self.currentMedia = filename
         self.initMediaControls(True)
         self.projectDirty, self.projectSaved = False, False
-        self.cliplist.clear()
         self.totalRuntime = 0
-        # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
-        self.seekSlider.clearRegions()
         self.taskbar.init()
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
 
@@ -940,14 +938,11 @@ class VideoCutter(QWidget):
             self.novideoWidget.deleteLater()
             self.videoplayerWidget.show()
             self.mediaAvailable = True
-
         try:
             self.videoService.setMedia(self.currentMedia)
+            self.seekSlider.setFocus()
             self.mpvWidget.play(self.currentMedia)
-            self.seekSlider.restrictValue = 0
             self.renderClipIndex()
-
-            print('endddd')
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
@@ -1287,14 +1282,30 @@ class VideoCutter(QWidget):
         # self.renderVideoClipIndex()
 
 
-    def renderClipIndex(self) -> None:
+    def renderClipIndex(self) -> None: #should replace renderClipIndex()
         self.seekSlider.clearRegions()
-        self.cliplist.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
+        self.totalRuntime = 0
+        externals = self.cliplist.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
         if len(self.videoList.videos[self.videoList.currentVideoIndex].clips) and not self.inCut:
             self.toolbar_save.setEnabled(True)
-        if self.inCut or len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0: #or self.videoList.videos[self.videoList.currentVideoIndex].clips[0].timeEnd.isNull():
+            self.saveProjectAction.setEnabled(True)
+        if self.inCut or len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0 or  self.videoList.videos[self.videoList.currentVideoIndex].clips[0].timeEnd.isNull():
             self.toolbar_save.setEnabled(False)
-
+            self.saveProjectAction.setEnabled(False)
+        # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
+    '''
+    def renderClipIndex(self) -> None:
+        self.seekSlider.clearRegions()
+        self.totalRuntime = 0
+        externals = self.cliplist.renderClips(self.clipTimes)
+        if len(self.clipTimes) and not self.inCut and externals != 1:
+            self.toolbar_save.setEnabled(True)
+            self.saveProjectAction.setEnabled(True)
+        if self.inCut or len(self.clipTimes) == 0 or not isinstance(self.clipTimes[0][1], QTime):
+            self.toolbar_save.setEnabled(False)
+            self.saveProjectAction.setEnabled(False)
+        self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
+    '''
     @staticmethod
     def delta2QTime(msecs: Union[float, int]) -> QTime:
         if isinstance(msecs, float):
@@ -1394,7 +1405,6 @@ class VideoCutter(QWidget):
                                            end=VideoCutter.qtime2delta(clip[1]),
                                            allstreams=True)
     '''
-    '''
     @pyqtSlot(bool, str)
     def smartmonitor(self, success: bool = None, outputfile: str = None) -> None:
         if success is not None:
@@ -1404,7 +1414,6 @@ class VideoCutter(QWidget):
         if len(self.smartcut_monitor.results) == len(self.smartcut_monitor.clips) - self.smartcut_monitor.externals:
             if False not in self.smartcut_monitor.results:
                 self.joinMedia(self.smartcut_monitor.clips)
-    '''
     '''
     def joinMedia(self, filelist: list) -> None:
         if len(filelist) > 1:
@@ -1435,7 +1444,7 @@ class VideoCutter(QWidget):
         else:
             self.complete(True, filelist[-1])
     '''
-    def complete(self, rename: bool=True, filename: str=None) -> None: # !!!!!!!! where it was used????
+    def complete(self, rename: bool=True, filename: str=None) -> None:
         if rename and filename is not None:
             # noinspection PyCallByClass
             QFile.remove(self.finalFilename)

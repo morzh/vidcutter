@@ -333,9 +333,8 @@ class MainWindow(QMainWindow):
                     return callback()
                 else:
                     return
-            else:
-                if callback is not None:
-                    callback()
+            if callback is not None:
+                callback()
         except AttributeError:
             logging.exception('warning dialogs on app exit exception', exc_info=True)
         self.console.deleteLater()
