@@ -754,6 +754,7 @@ class VideoCutter(QWidget):
         self.videoList.absolutePath = outputFolder
         self.videoList.readData()
         self.videoListWidget.renderList(self.videoList)
+        self.seekSlider.setUpdatesEnabled(True)
         # print(outputFolder)
     '''
     def MMedia(self) -> Optional[Callable]:
@@ -945,9 +946,9 @@ class VideoCutter(QWidget):
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
             self.seekSlider.setEnabled(True)
-            self.seekSlider.setFocus()
-            self.seekSlider.setUpdatesEnabled(True)
             self.renderClipIndex()
+            self.seekSlider.setFocus()
+            self.cliplist.repaint()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
