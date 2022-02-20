@@ -193,7 +193,7 @@ class VideoSlider(QSlider):
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
         if not len(self._progressbars) and (not self.parent.thumbnailsButton.isChecked() or self.thumbnailsOn):
-            if len(self._regions) == len(self._regionsVisibility):
+            if len(self._regions) == len(self._regionsVisibility): # should always be true
                 for rect, rectViz in zip(self._regions, self._regionsVisibility):
                     if rectViz == 0:
                         continue
