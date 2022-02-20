@@ -945,10 +945,13 @@ class VideoCutter(QWidget):
         try:
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
+            duration_time = self.videoService.duration(self.currentMedia)
+
+            range_max = int(self.qtime2delta(duration_time)*1000) - 2*self.seekSlider.offset
             self.seekSlider.setEnabled(True)
+            self.seekSlider.setRange(0, range_max)
             self.renderClipIndex()
             self.seekSlider.setFocus()
-            self.cliplist.repaint()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
