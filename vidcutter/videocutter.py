@@ -96,9 +96,12 @@ class VideoCutter(QWidget):
         self.updater = Updater(self.parent)
 
         self.seekSlider = VideoSlider(self)
-        # self.seekSlider.setTracking(False)
-        # self.seekSlider.setMouseTracking(False)
-        # self.seekSlider.sliderMoved.connect(self.setPosition)
+        self.seekSlider.setEnabled(False)
+        self.seekSlider.setTracking(False)
+        self.seekSlider.setUpdatesEnabled(False)
+        self.seekSlider.setMouseTracking(False)
+        self.seekSlider.sliderMoved.connect(self.setPosition)
+
         self.sliderWidget = VideoSliderWidget(self, self.seekSlider)
         self.sliderWidget.setLoader(True)
         self.sliderWidget.setMouseTracking(False)
@@ -753,7 +756,7 @@ class VideoCutter(QWidget):
         self.videoListWidget.renderList(self.videoList)
         # print(outputFolder)
     '''
-    def openMedia(self) -> Optional[Callable]:
+    def MMedia(self) -> Optional[Callable]:
         cancel, callback = self.saveWarning()
         if cancel:
             if callback is not None:
@@ -940,8 +943,10 @@ class VideoCutter(QWidget):
             self.mediaAvailable = True
         try:
             self.videoService.setMedia(self.currentMedia)
-            self.seekSlider.setFocus()
             self.mpvWidget.play(self.currentMedia)
+            self.seekSlider.setEnabled(True)
+            self.seekSlider.setFocus()
+            self.seekSlider.setUpdatesEnabled(True)
             self.renderClipIndex()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
