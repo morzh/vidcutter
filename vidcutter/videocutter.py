@@ -945,12 +945,25 @@ class VideoCutter(QWidget):
         try:
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
-            duration_time = self.videoService.duration(self.currentMedia)
-            # !!!!!!
-            range_max = int(self.qtime2delta(duration_time)*1000) + self.seekSlider.offset
+            # duration_time = self.videoService.duration(self.currentMedia)
+            # duration_delta = self.qtime2delta(duration_time)
             self.seekSlider.setEnabled(True)
-            self.seekSlider.setRange(self.seekSlider.offset, range_max)
-            self.renderClipIndex()
+            # self.update()
+            # self.mpvWidget.update()
+            # self.mpvWidget.eventHandler()
+            # self.sliderWidget.update()
+
+            # frames = self.mpvWidget.property('estimated-frame-count')
+            # print(duration_time, duration_delta, frames)
+            # event = self.mpvWidget.mpv.wait_event(.01)
+            # event_prop = event.data
+            # self.on_durationChanged(duration_delta, frames)
+            # self.seekSlider.update()
+            # print(self.seekSlider.minimum(), self.seekSlider.maximum())
+            # offset = float(self.seekSlider.offset) / float(self.seekSlider.width()) * duration_delta
+            # print(self.seekSlider.offset, self.seekSlider.width(), duration_delta, offset)
+            # self.seekSlider.setRange(0, int((duration_delta + 2*offset)*1e3))
+            # self.renderClipIndex()
             self.seekSlider.setFocus()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -1031,9 +1044,7 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
-        # print(progress)
         progress *= 1000
-        # modifierPressed = QApplication.keyboardModifiers()
         if self.seekSlider.restrictValue < progress or progress == 0:
             self.seekSlider.setValue(int(progress))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
@@ -1042,7 +1053,6 @@ class VideoCutter(QWidget):
                 self.taskbar.setProgress(float(progress / self.seekSlider.maximum()), True)
             if self.clipIsPlayingIndex >= 0:
                 current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
-                # current_clip_end = QTime(0, 0, 0).msecsTo(self.clipTimes[self.clipIsPlayingIndex][1])
                 if progress > current_clip_end:
                     self.playMedia()
                     self.clipIsPlaying = False
@@ -1051,10 +1061,12 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
+        print('on_durationChanged', duration)
         duration *= 1000
         self.seekSlider.setRange(0, int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
+        self.renderClipIndex()
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
