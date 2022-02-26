@@ -97,10 +97,10 @@ class VideoCutter(QWidget):
 
         self.seekSlider = VideoSlider(self)
         self.seekSlider.setEnabled(False)
-        self.seekSlider.setTracking(False)
-        self.seekSlider.setUpdatesEnabled(False)
-        self.seekSlider.setMouseTracking(False)
+        self.seekSlider.setTracking(True)
+        self.seekSlider.setMouseTracking(True)
         self.seekSlider.sliderMoved.connect(self.setPosition)
+        # self.seekSlider.setUpdatesEnabled(False)
 
         self.sliderWidget = VideoSliderWidget(self, self.seekSlider)
         self.sliderWidget.setLoader(True)
@@ -945,25 +945,7 @@ class VideoCutter(QWidget):
         try:
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
-            # duration_time = self.videoService.duration(self.currentMedia)
-            # duration_delta = self.qtime2delta(duration_time)
             self.seekSlider.setEnabled(True)
-            # self.update()
-            # self.mpvWidget.update()
-            # self.mpvWidget.eventHandler()
-            # self.sliderWidget.update()
-
-            # frames = self.mpvWidget.property('estimated-frame-count')
-            # print(duration_time, duration_delta, frames)
-            # event = self.mpvWidget.mpv.wait_event(.01)
-            # event_prop = event.data
-            # self.on_durationChanged(duration_delta, frames)
-            # self.seekSlider.update()
-            # print(self.seekSlider.minimum(), self.seekSlider.maximum())
-            # offset = float(self.seekSlider.offset) / float(self.seekSlider.width()) * duration_delta
-            # print(self.seekSlider.offset, self.seekSlider.width(), duration_delta, offset)
-            # self.seekSlider.setRange(0, int((duration_delta + 2*offset)*1e3))
-            # self.renderClipIndex()
             self.seekSlider.setFocus()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -1061,7 +1043,6 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
-        print('on_durationChanged', duration)
         duration *= 1000
         self.seekSlider.setRange(0, int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
