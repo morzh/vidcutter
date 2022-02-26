@@ -74,7 +74,6 @@ from vidcutter.QPixmapPickle import QPixmapPickle
 
 class VideoCutter(QWidget):
     errorOccurred = pyqtSignal(str)
-
     timeformat = 'hh:mm:ss.zzz'
     runtimeformat = 'hh:mm:ss'
 
@@ -1048,6 +1047,7 @@ class VideoCutter(QWidget):
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
         self.renderClipIndex()
+        self.updateClipIndexButtonsState()
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
@@ -1238,29 +1238,15 @@ class VideoCutter(QWidget):
         # item = self.clipTimes[len(self.clipTimes) - 1]
         clipItemLast = self.videoList.videos[self.videoList.currentVideoIndex].clipsLast()
         endTime = self.delta2QTime(self.seekSlider.value())
-        # if endTime.__lt__(clipItemLast.startTime):
-        #     clipItemLast.timeEnd = clipItemLast.timeStart
-        #     clipItemLast.timeStart = endTime
-        # else:
         clipItemLast.timeEnd = endTime
         clipItemLast.visibility = 2
 
-        # clipItemLast.timeEnd = endTime
         self.toolbar_start.setEnabled(True)
         self.toolbar_end.setDisabled(True)
-        '''
-        if len(self.clipTimes) > 1:
-            self.clipindex_move_up.setEnabled(True)
-            self.clipindex_move_down.setEnabled(True)
-        '''
-        if self.videoList.videos[self.videoList.currentVideoIndex].clipsLength() > 1:
-            self.clipindex_move_up.setEnabled(True)
-            self.clipindex_move_down.setEnabled(True)
 
-        self.clipindex_clips_remove.setEnabled(True)
+        self.updateClipIndexButtonsState()
         self.timeCounter.setMinimum()
         self.seekSlider.setRestrictValue(0, False)
-        # self.blackdetectAction.setEnabled(True)
         self.inCut = False
         self.showText('clip ends at {}'.format(endTime.toString(self.timeformat)))
         self.renderClipIndex()
@@ -1283,11 +1269,24 @@ class VideoCutter(QWidget):
         self.renderClipIndex()
         # self.renderVideoClipIndex()
 
+    def updateClipIndexButtonsState(self):
+        if self.videoList.videos[self.videoList.currentVideoIndex].clipsLength() > 0:
+            self.clipindex_clips_remove.setEnabled(True)
+        else:
+            self.clipindex_clips_remove.setEnabled(False)
+
+        if self.videoList.videos[self.videoList.currentVideoIndex].clipsLength() > 1:
+            self.clipindex_move_up.setEnabled(True)
+            self.clipindex_move_down.setEnabled(True)
+        else:
+            self.clipindex_move_up.setEnabled(False)
+            self.clipindex_move_down.setEnabled(False)
+
 
     def renderClipIndex(self) -> None: #should replace renderClipIndex()
         self.seekSlider.clearRegions()
         self.totalRuntime = 0
-        externals = self.cliplist.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
+        self.cliplist.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
         if len(self.videoList.videos[self.videoList.currentVideoIndex].clips) and not self.inCut:
             self.toolbar_save.setEnabled(True)
             self.saveProjectAction.setEnabled(True)

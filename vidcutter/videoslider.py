@@ -190,6 +190,7 @@ class VideoSlider(QSlider):
                 if x + 30 > self.width():
                     break
                 x += 15
+
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
         if not len(self._progressbars) and (not self.parent.thumbnailsButton.isChecked() or self.thumbnailsOn):
@@ -214,13 +215,19 @@ class VideoSlider(QSlider):
         if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
             begin = self._regions[self.current_rectangle_index].topLeft()
             end = self._regions[self.current_rectangle_index].bottomLeft()
+            # brushcolor = QColor(237, 242, 255, 150)
+            # painter.setBrush(brushcolor)
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_ON_END_SIDE:
             begin = self._regions[self.current_rectangle_index].topRight()
             end = self._regions[self.current_rectangle_index].bottomRight()
+            brushcolor = QColor(237, 242, 255, 150)
+            # painter.setBrush(brushcolor)
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_IS_INSIDE:
-            painter.drawRect(self._regions[self.current_rectangle_index])
+            brushcolor = QColor(237, 242, 255, 150)
+            painter.setBrush(brushcolor)
+            painter.drawRect(self._regions[self.current_rectangle_index]) #rect is drawing above rect
 
     def setRegionVizivility(self, index, state):
         if len(self._regionsVisibility) > 0:
@@ -501,7 +508,6 @@ class VideoSlider(QSlider):
                 self.state = RectangleEditState.FREE_STATE
                 self.free_cursor_on_side = 0
                 self.unsetCursor()
-
             self.repaint()
 
         return super(VideoSlider, self).eventFilter(obj, event)
