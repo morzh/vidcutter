@@ -19,15 +19,12 @@ class CursorStates(Enum):
     CURSOR_ON_END_SIDE = 2
     CURSOR_IS_INSIDE = 3
     CURSOR_OFF = 4
-
-
 class RectangleEditState(Enum):
     FREE_STATE = 1
     BUILDING_SQUARE = 2
     BEGIN_SIDE_EDIT = 3
     END_SIDE_EDIT = 4
     RECTANGLE_MOVE = 5
-
 
 class VideoSlider(QSlider):
     def __init__(self, parent=None):
@@ -242,7 +239,6 @@ class VideoSlider(QSlider):
             timeStart = self.parent.delta2QTime(value_begin)
             self.parent.videoList.setCurrentVideoClipIndex(self.current_rectangle_index)
             self.parent.videoList.setCurrentVideoClipStartTime(timeStart)
-            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart = timeStart
         elif self.state == RectangleEditState.END_SIDE_EDIT:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.current_rectangle_index].setRight(rectangle_right_value)
@@ -250,7 +246,6 @@ class VideoSlider(QSlider):
             time = self.parent.delta2QTime(value)
             self.parent.videoList.setCurrentVideoClipIndex(self.current_rectangle_index)
             self.parent.videoList.setCurrentVideoClipEndTime(time)
-            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = time
         elif self.state == RectangleEditState.RECTANGLE_MOVE:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
@@ -262,8 +257,6 @@ class VideoSlider(QSlider):
             self.parent.videoList.setCurrentVideoClipIndex(self.current_rectangle_index)
             self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
             self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
-            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart = self.parent.delta2QTime(value_begin)
-            # self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeEnd = self.parent.delta2QTime(value_end)
 
     def cursorOnSide(self, e_pos) -> int:
         if len(self._regions) > 0:
@@ -439,7 +432,6 @@ class VideoSlider(QSlider):
 
     @pyqtSlot(int)
     def on_valueChanged(self, value: int) -> None:
-        # print('on_valueChanged')
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
 
