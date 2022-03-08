@@ -106,6 +106,8 @@ QToolBar#appcontrols QToolButton#saveButton {
     color: #642C68;
 }
 
+
+
 /* -------------------------------------------------------------------------- */
 
 QListView#cliplist {
@@ -829,6 +831,24 @@ VCToolBarButton QPushButton:hover#toolbar-save {
 
 VCToolBarButton QPushButton:pressed#toolbar-save {
     border-image: url(:/images/light/toolbar-save-pressed.png);
+}
+
+/* -------------------------------------------------------------------------- */
+
+VCToolBarButton QPushButton#toolbar-send {
+    border-image: url(:/images/light/toolbar-send.png);
+}
+
+VCToolBarButton QPushButton:disabled#toolbar-send {
+    border-image: url(:/images/light/toolbar-send-disabled.png);
+}
+
+VCToolBarButton QPushButton:hover#toolbar-send {
+    border-image: url(:/images/light/toolbar-send-hover.png);
+}
+
+VCToolBarButton QPushButton:pressed#toolbar-save {
+    border-image: url(:/images/light/toolbar-send-pressed.png);
 }
 
 /* -------------------------------------------------------------------------- */

@@ -852,6 +852,24 @@ VCToolBarButton QPushButton:pressed#toolbar-save {
 
 /* -------------------------------------------------------------------------- */
 
+VCToolBarButton QPushButton#toolbar-send {
+    border-image: url(:/images/dark/toolbar-send.png);
+}
+
+VCToolBarButton QPushButton:disabled#toolbar-send {
+    border-image: url(:/images/dark/toolbar-send-disabled.png);
+}
+
+VCToolBarButton QPushButton:hover#toolbar-send {
+    border-image: url(:/images/dark/toolbar-send-hover.png);
+}
+
+VCToolBarButton QPushButton:pressed#toolbar-send {
+    border-image: url(:/images/dark/toolbar-send-pressed.png);
+}
+
+/* -------------------------------------------------------------------------- */
+
 VCProgressDialog {
     background-color: #1B2326;
     border: 1px solid #000;

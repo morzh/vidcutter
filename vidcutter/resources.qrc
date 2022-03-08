@@ -137,6 +137,10 @@
         <file>images/dark/toolbar-play-disabled.png</file>
         <file>images/dark/toolbar-play-hover.png</file>
         <file>images/dark/toolbar-play-pressed.png</file>
+        <file>images/dark/toolbar-send.png</file>
+        <file>images/dark/toolbar-send-disabled.png</file>
+        <file>images/dark/toolbar-send-hover.png</file>
+        <file>images/dark/toolbar-send-pressed.png</file>
         <file>images/dark/toolbar-save.png</file>
         <file>images/dark/toolbar-save-disabled.png</file>
         <file>images/dark/toolbar-save-hover.png</file>
@@ -237,6 +241,10 @@
         <file>images/light/toolbar-start-disabled.png</file>
         <file>images/light/toolbar-start-hover.png</file>
         <file>images/light/toolbar-start-pressed.png</file>
+        <file>images/light/toolbar-send.png</file>
+        <file>images/light/toolbar-send-disabled.png</file>
+        <file>images/light/toolbar-send-hover.png</file>
+        <file>images/light/toolbar-send-pressed.png</file>
         <file>images/light/unmuted.png</file>
         <file>styles/light.qss</file>
         <file>styles/dark.qss</file>

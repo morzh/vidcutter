@@ -98,8 +98,8 @@ class VideoCutter(QWidget):
         self.seekSlider.setEnabled(False)
         self.seekSlider.setTracking(True)
         self.seekSlider.setMouseTracking(True)
+        self.seekSlider.setUpdatesEnabled(False)
         self.seekSlider.sliderMoved.connect(self.setPosition)
-        # self.seekSlider.setUpdatesEnabled(False)
 
         self.sliderWidget = VideoSliderWidget(self, self.seekSlider)
         self.sliderWidget.setLoader(True)
@@ -279,13 +279,6 @@ class VideoCutter(QWidget):
         self.osdButton.setChecked(self.enableOSD)
         self.osdButton.toggled.connect(self.toggleOSD)
 
-        # noinspection PyArgumentList
-        '''
-        self.consoleButton = QPushButton(self, flat=True, checkable=True, objectName='consoleButton', statusTip='Toggle console window', toolTip='Toggle console', cursor=Qt.PointingHandCursor)
-        self.consoleButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
-        self.consoleButton.setChecked(self.showConsole)
-        self.consoleButton.toggled.connect(self.toggleConsole)
-        '''
         # self.showConsole = True
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
@@ -318,17 +311,21 @@ class VideoCutter(QWidget):
         self.toolbar_play = VCToolBarButton('Play Media', 'Play currently loaded media file', parent=self)
         self.toolbar_play.setEnabled(False)
         self.toolbar_play.clicked.connect(self.playMedia)
-        self.toolbar_start = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position',
-                                             parent=self)
+
+        self.toolbar_start = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
         self.toolbar_start.setEnabled(False)
         self.toolbar_start.clicked.connect(self.clipStart)
+
         self.toolbar_end = VCToolBarButton('End Clip', 'End a new clip at the current timeline position', parent=self)
         self.toolbar_end.setEnabled(False)
         self.toolbar_end.clicked.connect(self.clipEnd)
+
         self.toolbar_save = VCToolBarButton('Save Media', 'Save clips to a new media file', parent=self)
-        self.toolbar_save.setObjectName('savebutton')
         self.toolbar_save.setEnabled(False)
         self.toolbar_save.clicked.connect(self.saveProject)
+
+        self.toolbar_send = VCToolBarButton('Send Data', 'Send labeled data ', parent=self)
+        self.toolbar_send.setEnabled(False)
 
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
@@ -343,6 +340,7 @@ class VideoCutter(QWidget):
         toolbarLayout.addStretch(1)
         toolbarLayout.addWidget(self.toolbar_save)
         toolbarLayout.addStretch(1)
+        toolbarLayout.addWidget(self.toolbar_send)
 
         self.toolbarGroup = QGroupBox()
         self.toolbarGroup.setLayout(toolbarLayout)
@@ -495,11 +493,9 @@ class VideoCutter(QWidget):
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips from list', enabled=False)
         self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
 
-        # self.streamsAction = QAction(self.streamsIcon, 'Media streams', self, triggered=self.selectStreams, statusTip='Select the media streams to be included', enabled=False)
-        # self.mediainfoAction = QAction(self.mediaInfoIcon, 'Media information', self, triggered=self.mediaInfo, statusTip='View technical details about current media', enabled=False)
         self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
-        # self.changelogAction = QAction(self.changelogIcon, 'View changelog', self, triggered=self.viewChangelog, statusTip='View log of changes')
+
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs, statusTip='View the application\'s log file')
         self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
         self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
@@ -874,54 +870,6 @@ class VideoCutter(QWidget):
         if not reboot:
             self.showText('project file saved')
 
-    '''
-    def saveProject(self, reboot: bool = False) -> None:
-        if self.currentMedia is None:
-            return
-        project_file, _ = os.path.splitext(self.currentMedia)
-        if reboot:
-            project_save = os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE)
-            ptype = 'VidCutter Project (*.vcp)'
-        else:
-            project_save, ptype = QFileDialog.getSaveFileName(
-                parent=self.parent,
-                caption='Save project',
-                directory='{}.vcp'.format(project_file),
-                filter=self.projectFilters(True),
-                initialFilter='VidCutter Project (*.vcp)',
-                options=self.getFileDialogOptions())
-        if project_save is not None and len(project_save.strip()):
-            file = QFile(project_save)
-            if not file.open(QFile.WriteOnly | QFile.Text):
-                QMessageBox.critical(self.parent, 'Cannot save project',
-                                     'Cannot save project file at {0}:\n\n{1}'.format(project_save, file.errorString()))
-                return
-            qApp.setOverrideCursor(Qt.WaitCursor)
-            if ptype == 'VidCutter Project (*.vcp)':
-                # noinspection PyUnresolvedReferences
-                QTextStream(file) << '{}\n'.format(self.currentMedia)
-            for clip in self.clipTimes:
-                start_time = timedelta(hours=clip[0].hour(), minutes=clip[0].minute(), seconds=clip[0].second(),
-                                       milliseconds=clip[0].msec())
-                stop_time = timedelta(hours=clip[1].hour(), minutes=clip[1].minute(), seconds=clip[1].second(),
-                                      milliseconds=clip[1].msec())
-                if ptype == 'VidCutter Project (*.vcp)':
-                    if self.createChapters:
-                        chapter = '"{}"'.format(clip[4]) if clip[4] is not None else '""'
-                    else:
-                        chapter = ''
-                    # noinspection PyUnresolvedReferences
-                    QTextStream(file) << '{0}\t{1}\t{2}\t{3}\n'.format(self.delta2String(start_time),
-                                                                       self.delta2String(stop_time), 0, chapter)
-                else:
-                    # noinspection PyUnresolvedReferences
-                    QTextStream(file) << '{0}\t{1}\t{2}\n'.format(self.delta2String(start_time),
-                                                                  self.delta2String(stop_time), 0)
-            qApp.restoreOverrideCursor()
-            self.projectSaved = True
-            if not reboot:
-                self.showText('project file saved')
-    '''
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
@@ -1000,14 +948,10 @@ class VideoCutter(QWidget):
         self.toolbar_start.setEnabled(flag)
         self.toolbar_end.setEnabled(False)
         self.toolbar_save.setEnabled(False)
-        # self.streamsAction.setEnabled(flag)
-        # self.streamsButton.setEnabled(flag)
-        # self.mediainfoAction.setEnabled(flag)
-        # self.mediainfoButton.setEnabled(flag)
+        self.toolbar_send.setEnabled(False)
         self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
         self.seekSlider.clearRegions()
-        # self.blackdetectAction.setEnabled(flag)
         if flag:
             self.seekSlider.setRestrictValue(0)
         else:
