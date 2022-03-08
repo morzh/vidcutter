@@ -1,10 +1,6 @@
 #!/usr/bin/python
 
 import sys
-import os
-import pickle
-
-sys.path.append('/home/morzh/work/vidcutter')
 
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime, QTimer, QUrl)
 from PyQt5.QtWidgets import (QListWidget, QWidget, QMessageBox, QApplication, QVBoxLayout, QPushButton, QFileDialog)
