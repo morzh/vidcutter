@@ -37,7 +37,7 @@ from PyQt5.QtGui import (QCloseEvent, QContextMenuEvent, QDragEnterEvent, QDropE
                          QResizeEvent, QSurfaceFormat, qt_set_sequence_auto_mnemonic)
 from PyQt5.QtWidgets import qApp, QMainWindow, QMessageBox, QSizePolicy
 
-from vidcutter.videoconsole import ConsoleHandler, ConsoleWidget, VideoLogger
+from vidcutter.VideoConsole import ConsoleHandler, ConsoleWidget, VideoLogger
 from vidcutter.videocutter import VideoCutter
 
 from vidcutter.libs.singleapplication import SingleApplication
@@ -296,7 +296,7 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event: QResizeEvent) -> None:
         try:
             if self.isEnabled() and self.cutter.mediaAvailable and self.cutter.thumbnailsButton.isChecked():
-                if self.cutter.seekSlider.thumbnailsOn:
+                if self.cutter.videoSlider.thumbnailsOn:
                     self.cutter.sliderWidget.setLoader(True)
                     self.cutter.sliderWidget.hideThumbs()
                 if self.resizeTimer:
@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
 
     def timerEvent(self, event: QTimerEvent) -> None:
         try:
-            self.cutter.seekSlider.reloadThumbs()
+            self.cutter.videoSlider.reloadThumbs()
             self.killTimer(self.resizeTimer)
             self.resizeTimer = 0
         except AttributeError:

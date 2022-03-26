@@ -24,7 +24,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGridLayout, QLabel, QSizePolicy, QStackedLayout, QStackedWidget, QWidget
 
-from vidcutter.videoslider import VideoSlider
+from vidcutter.VideoSlider import VideoSlider
 from vidcutter.libs.graphicseffects import OpacityEffect
 
 
