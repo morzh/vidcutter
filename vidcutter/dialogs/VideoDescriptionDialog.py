@@ -35,13 +35,11 @@ class VideoDescriptionDialog(QDialog):
         self.issuesTable.setColumnCount(1)
         self.issuesTable.verticalHeader().setVisible(False)
         self.issuesTable.horizontalHeader().setVisible(False)
-        self.addIssuesItems()
+        self.addIssuestableItems()
 
         self.descriptionLayout.addWidget(self.textField)
         self.descriptionLayout.addWidget(self.issuesTable)
 
-        # self.acceptButton = QDialogButtonBox
-        # self.buttonsLayout.addWidget()
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
         self.layout.addLayout(self.descriptionLayout)
@@ -50,7 +48,7 @@ class VideoDescriptionDialog(QDialog):
         self.setLayout(self.layout)
         self.setWindowTitle(title)
 
-    def addIssuesItems(self):
+    def addIssuestableItems(self):
         for idx in range(5):
             chkBoxItem = QTableWidgetItem()
             chkBoxItem.setText('string')
