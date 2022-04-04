@@ -27,7 +27,7 @@ import os
 import re
 import sys
 import time
-import copy
+import pickle
 from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
@@ -88,6 +88,9 @@ class VideoCutter(QWidget):
         self.projectDirty, self.projectSaved, self.debugonstart = False, False, False
         self.smartcut_monitor, self.notify = None, None
         self.fonts = []
+        self._absolutePathFolder = ''
+        self._data_filename = 'data.pickle'
+        self._data_temporary_filename = 'data.pickle.tmp'
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -105,7 +108,7 @@ class VideoCutter(QWidget):
 
         self.taskbar = TaskbarProgress(self.parent)
 
-        self.videoList = VideoList()
+        self.videoList = None
         self.videoListWidget = VideoListWidget(parent=self)
         self.videoListWidget.itemDoubleClicked.connect(self.loadMedia)
         self.videoListWidget.itemClicked.connect(self.editVideoDescription)
@@ -492,7 +495,7 @@ class VideoCutter(QWidget):
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips from list', enabled=False)
         self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
 
-        self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
+        # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
 
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs, statusTip='View the application\'s log file')
@@ -744,36 +747,15 @@ class VideoCutter(QWidget):
             else:
                 return
         # QFileDialog.setFileMode(QFileDialog.Directory)
-        outputFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
-        self.videoList.absolutePath = outputFolder
-        self.videoList.readData()
+        self._absolutePathFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
+        filepath = os.path.join(self._absolutePathFolder, self._data_filename)
+        with open(filepath, 'rb') as f:
+            self.videoList = pickle.load(f)
+
         self.videoListWidget.renderList(self.videoList)
         self.videoSlider.setUpdatesEnabled(True)
-        # print(outputFolder)
-    '''
-    def MMedia(self) -> Optional[Callable]:
-        cancel, callback = self.saveWarning()
-        if cancel:
-            if callback is not None:
-                return callback()
-            else:
-                return
-        filename, _ = QFileDialog.getOpenFileName(
-            parent=self.parent,
-            caption='Open media file',
-            filter=self.mediaFilters(),
-            initialFilter=self.mediaFilters(True),
-            directory=(self.lastFolder if os.path.exists(self.lastFolder) else QDir.homePath()),
-            options=self.getFileDialogOptions())
-        if filename is not None and len(filename.strip()):
-            self.lastFolder = QFileInfo(filename).absolutePath()
 
-            video = VideoItem()
-            video.filename = filename
-            self.videos.append(video)
-            self.loadMedia(filename)
     '''
-
     # noinspection PyUnusedLocal
     def openProject(self, checked: bool = False, project_file: str = None) -> Optional[Callable]:
         cancel, callback = self.saveWarning()
@@ -855,18 +837,24 @@ class VideoCutter(QWidget):
             qApp.restoreOverrideCursor()
             if project_file != os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE):
                 self.showText('project loaded')
+    '''
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         if self.currentMedia is None:
             return
+
+        self.parent.setEnabled(False)
+        data_filepath_temporary = os.path.join(self._absolutePathFolder, self._data_temporary_filename)
+        data_filepath = os.path.join(self._absolutePathFolder, self._data_filename)
         try:
-            self.parent.setEnabled(False)
-            self.videoList.saveData()
-            qApp.restoreOverrideCursor()
-            self.projectSaved = True
-            self.parent.setEnabled(True)
-        except Exception:
-            print('can not save project')
+            with open(data_filepath_temporary, 'wb') as f:
+                pickle.dump(self.videoList, f)
+            os.rename(data_filepath_temporary, data_filepath)
+        except OSError:
+            self.showText('project save failed')
+        qApp.restoreOverrideCursor()
+        self.projectSaved = True
+        self.parent.setEnabled(True)
 
         if not reboot:
             self.showText('project file saved')

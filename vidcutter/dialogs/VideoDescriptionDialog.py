@@ -27,7 +27,8 @@ class VideoDescriptionDialog(QDialog):
                             'exercise is not performed',
                             'strong occlusions',
                             'too many people in video',
-                            'camera shake']
+                            'camera shake',
+                            'video is too long']
 
         title = 'Edit Video Description'
         self.layout = QVBoxLayout()
