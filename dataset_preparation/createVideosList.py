@@ -1,39 +1,56 @@
 import pickle
-import os
-import sys
-
 import numpy as np
 # import matplotlib.pyplot as plt
-from moviepy.editor import * # import everythings (variables, classes, methods...) inside moviepy.editor
-from PyQt5.QtWidgets import QApplication, QWidget
+from moviepy.editor import *
 from PyQt5.QtCore import QTime
-from PyQt5.QtGui import QImage
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QImage, QPixmap
 
-
+from vidcutter.VideoList import VideoList
 from vidcutter.VideoItem import VideoItem
-from vidcutter.VideoItemClip import VideoItemClip
 from vidcutter.QPixmapPickle import QPixmapPickle
+
+import os, sys
+ci_build_and_not_headless = False
+try:
+    from cv2.version import ci_build, headless
+    ci_and_not_headless = ci_build and not headless
+except:
+    pass
+if sys.platform.startswith("linux") and ci_and_not_headless:
+    os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
+if sys.platform.startswith("linux") and ci_and_not_headless:
+    os.environ.pop("QT_QPA_FONTDIR")
+
 
 videos_list_path = '/home/morzh/work/vidcutter_test_videos'
 image_size = 128
 data_filename = 'data.pickle'
 
-video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
-videos_list = []
+issues_list = ['video of a bad quality',
+               'video is too dark',
+               'exercise is not performed',
+               'strong occlusions',
+               'too many people in video',
+               'camera shake',
+               'video is too long']
 
+video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
+videos = []
+
+video_list = VideoList(issues_list)
 app = QApplication(sys.argv)
 
 for video_file in video_files:
     print(video_file)
     try:
-        video_clip = VideoItem()
+        video_file_clip = VideoFileClip(os.path.join(videos_list_path, video_file))
     except:
         continue
 
-    video_clip.filename = video_file
-    video_duration = video_clip.duration
-    thumb = video_clip.get_frame(0.5 * video_duration)
+    video_file_clip.filename = video_file
+    video_duration = video_file_clip.duration
+    thumb = video_file_clip.get_frame(0.5 * video_duration)
 
     video_item_duration = QTime(0, 0)
     video_item_duration = video_item_duration.addSecs(int(video_duration))
@@ -61,8 +78,9 @@ for video_file in video_files:
     videoItem.duration = video_item_duration
     videoItem.thumbnail = QPixmapPickle(qt_pixmap)
 
-    videos_list.append(videoItem)
+    videos.append(videoItem)
 
+video_list.videos = videos
 data_filepath = os.path.join(videos_list_path, data_filename)
 with open(data_filepath, 'wb') as f:
-    pickle.dump(videos_list, f)
+    pickle.dump(video_list, f)

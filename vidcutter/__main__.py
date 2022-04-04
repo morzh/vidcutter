@@ -377,7 +377,6 @@ def main():
     win = MainWindow()
     win.stylename = app.style().objectName().lower()
     app.setActivationWindow(win)
-    app.messageReceived.connect(win.file_opener)
     app.aboutToQuit.connect(MainWindow.cleanup)
 
     exit_code = app.exec_()

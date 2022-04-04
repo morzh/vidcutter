@@ -75,8 +75,8 @@ class VideoList:
             index *= -1
         self._currentVideoIndex = index
 
-    def currentVideoFilepath(self):
-        return os.path.join(self._absolutePath, self.videos[self._currentVideoIndex].filename)
+    def currentVideoFilepath(self, folderPath: str):
+        return os.path.join(folderPath, self.videos[self._currentVideoIndex].filename)
 
     def setCurrentVideoClipIndex(self, index):
         if len(self.videos):

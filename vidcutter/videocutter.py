@@ -88,9 +88,9 @@ class VideoCutter(QWidget):
         self.projectDirty, self.projectSaved, self.debugonstart = False, False, False
         self.smartcut_monitor, self.notify = None, None
         self.fonts = []
-        self._absolutePathFolder = ''
-        self._data_filename = 'data.pickle'
-        self._data_temporary_filename = 'data.pickle.tmp'
+        self._dataFolder = ''
+        self._dataFilename = 'data.pickle'
+        self._dataFilenameTemp = 'data.pickle.tmp'
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -107,6 +107,7 @@ class VideoCutter(QWidget):
         self.sliderWidget.setMouseTracking(False)
 
         self.taskbar = TaskbarProgress(self.parent)
+
 
         self.videoList = None
         self.videoListWidget = VideoListWidget(parent=self)
@@ -143,18 +144,12 @@ class VideoCutter(QWidget):
         self.videoService.error.connect(self.completeOnError)
         self.videoService.addScenes.connect(self.addScenes)
 
-        self.project_files = {
-            'edl': re.compile(r'(\d+(?:\.?\d+)?)\t(\d+(?:\.?\d+)?)\t([01])'),
-            'vcp': re.compile(r'(\d+(?:\.?\d+)?)\t(\d+(?:\.?\d+)?)\t([01])\t(".*")$')
-        }
-
         self._initIcons()
         self._initActions()
 
         self.appmenu = QMenu(self.parent)
         self.help_menu = QMenu('Help n Logs', self.appmenu)
         self.clipindex_removemenu = QMenu(self)
-
         self._initMenus()
         self._initNoVideo()
 
@@ -281,7 +276,6 @@ class VideoCutter(QWidget):
         self.osdButton.setChecked(self.enableOSD)
         self.osdButton.toggled.connect(self.toggleOSD)
 
-        # self.showConsole = True
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
             os.environ['DEBUG'] = '1'
@@ -326,8 +320,6 @@ class VideoCutter(QWidget):
         self.toolbar_save.setEnabled(False)
         self.toolbar_save.clicked.connect(self.saveProject)
 
-        # self.toolbar_send = VCToolBarButton('Send Data', 'Send labeled data ', parent=self)
-        # self.toolbar_send.setEnabled(False)
 
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
@@ -747,8 +739,8 @@ class VideoCutter(QWidget):
             else:
                 return
         # QFileDialog.setFileMode(QFileDialog.Directory)
-        self._absolutePathFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
-        filepath = os.path.join(self._absolutePathFolder, self._data_filename)
+        self._dataFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
+        filepath = os.path.join(self._dataFolder, self._dataFilename)
         with open(filepath, 'rb') as f:
             self.videoList = pickle.load(f)
 
@@ -844,8 +836,8 @@ class VideoCutter(QWidget):
             return
 
         self.parent.setEnabled(False)
-        data_filepath_temporary = os.path.join(self._absolutePathFolder, self._data_temporary_filename)
-        data_filepath = os.path.join(self._absolutePathFolder, self._data_filename)
+        data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
+        data_filepath = os.path.join(self._dataFolder, self._dataFilename)
         try:
             with open(data_filepath_temporary, 'wb') as f:
                 pickle.dump(self.videoList, f)
@@ -870,12 +862,13 @@ class VideoCutter(QWidget):
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
         # self.videoList.currentVideoIndex = item_index
-        filename = self.videoList.currentVideoFilepath()
-        if not os.path.isfile(filename):
+        filepath = self.videoList.currentVideoFilepath(self._dataFolder)
+
+        if not os.path.isfile(filepath):
             return
-        self.currentMedia = filename
-        self.initMediaControls(True)
+        self.currentMedia = filepath
         self.projectDirty, self.projectSaved = False, False
+        self.initMediaControls(True)
         self.totalRuntime = 0
         self.taskbar.init()
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
@@ -944,7 +937,7 @@ class VideoCutter(QWidget):
         self.toolbar_play.setEnabled(flag)
         self.toolbar_start.setEnabled(flag)
         self.toolbar_end.setEnabled(False)
-        self.toolbar_save.setEnabled(False)
+        self.toolbar_save.setEnabled(flag)
         # self.toolbar_send.setEnabled(False)
         self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
@@ -956,7 +949,6 @@ class VideoCutter(QWidget):
             self.videoSlider.setRange(0, 0)
             self.timeCounter.reset()
             self.frameCounter.reset()
-        self.openProjectAction.setEnabled(flag)
         self.saveProjectAction.setEnabled(False)
 
     @pyqtSlot(int)
