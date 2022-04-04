@@ -27,6 +27,7 @@ import os
 import re
 import sys
 import time
+import copy
 from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
@@ -46,7 +47,7 @@ from vidcutter.dialogs.about import About
 from vidcutter.dialogs.changelog import Changelog
 from vidcutter.dialogs.mediainfo import MediaInfo
 from vidcutter.mediastream import StreamSelector
-from vidcutter.settings import SettingsDialog
+from vidcutter.dialogs.settings import SettingsDialog
 from vidcutter.dialogs.updater import Updater
 from vidcutter.VideoClipsListWidget import VideoClipsListWidget
 from vidcutter.VideoSlider import VideoSlider
@@ -322,8 +323,8 @@ class VideoCutter(QWidget):
         self.toolbar_save.setEnabled(False)
         self.toolbar_save.clicked.connect(self.saveProject)
 
-        self.toolbar_send = VCToolBarButton('Send Data', 'Send labeled data ', parent=self)
-        self.toolbar_send.setEnabled(False)
+        # self.toolbar_send = VCToolBarButton('Send Data', 'Send labeled data ', parent=self)
+        # self.toolbar_send.setEnabled(False)
 
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
@@ -337,8 +338,8 @@ class VideoCutter(QWidget):
         toolbarLayout.addWidget(self.toolbar_end)
         toolbarLayout.addStretch(1)
         toolbarLayout.addWidget(self.toolbar_save)
-        toolbarLayout.addStretch(1)
-        toolbarLayout.addWidget(self.toolbar_send)
+        # toolbarLayout.addStretch(1)
+        # toolbarLayout.addWidget(self.toolbar_send)
 
         self.toolbarGroup = QGroupBox()
         self.toolbarGroup.setLayout(toolbarLayout)
@@ -859,9 +860,11 @@ class VideoCutter(QWidget):
         if self.currentMedia is None:
             return
         try:
+            self.parent.setEnabled(False)
             self.videoList.saveData()
             qApp.restoreOverrideCursor()
             self.projectSaved = True
+            self.parent.setEnabled(True)
         except Exception:
             print('can not save project')
 
@@ -878,6 +881,7 @@ class VideoCutter(QWidget):
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
+        # self.videoList.currentVideoIndex = item_index
         filename = self.videoList.currentVideoFilepath()
         if not os.path.isfile(filename):
             return
@@ -953,7 +957,7 @@ class VideoCutter(QWidget):
         self.toolbar_start.setEnabled(flag)
         self.toolbar_end.setEnabled(False)
         self.toolbar_save.setEnabled(False)
-        self.toolbar_send.setEnabled(False)
+        # self.toolbar_send.setEnabled(False)
         self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
         self.videoSlider.clearRegions()
@@ -1277,84 +1281,7 @@ class VideoCutter(QWidget):
     def captureImage(self, source: str, frametime: QTime, external: bool = False) -> QPixmapPickle:
         thumbnail = VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat), external=external)
         return QPixmapPickle(thumbnail)
-    '''
-    def saveMedia(self) -> None:
-        clips = len(self.clipTimes)
-        source_file, source_ext = os.path.splitext(self.currentMedia if self.currentMedia is not None else self.clipTimes[0][3])
-        suggestedFilename = '{0}_EDIT{1}'.format(source_file, source_ext)
-        filefilter = 'Video files (*{0})'.format(source_ext)
-        if clips > 0:
-            self.finalFilename, _ = QFileDialog.getSaveFileName(
-                parent=self.parent,
-                caption='Save media file',
-                directory=suggestedFilename,
-                filter=filefilter,
-                options=self.getFileDialogOptions())
-            if self.finalFilename is None or not len(self.finalFilename.strip()):
-                return
-            file, ext = os.path.splitext(self.finalFilename)
-            if len(ext) == 0 and len(source_ext):
-                self.finalFilename += source_ext
-            self.lastFolder = QFileInfo(self.finalFilename).absolutePath()
-            self.toolbar_save.setDisabled(True)
-            if not os.path.isdir(self.workFolder):
-                os.mkdir(self.workFolder)
-            if self.smartcut:
-                self.seekSlider.showProgress(6 if clips > 1 else 5)
-                self.parent.lock_gui(True)
-                self.videoService.smartinit(clips)
-                # self.smartcutter(file, source_file, source_ext)
-                return
-            steps = 3 if clips > 1 else 2
-            self.seekSlider.showProgress(steps)
-            self.parent.lock_gui(True)
-            filename, filelist = '', []
-            for index, clip in enumerate(self.clipTimes):
-                self.seekSlider.updateProgress(index)
-                if len(clip[3]):
-                    filelist.append(clip[3])
-                else:
-                    duration = self.delta2QTime(clip[0].msecsTo(clip[1])).toString(self.timeformat)
-                    filename = '{0}_{1}{2}'.format(file, '{0:0>2}'.format(index), source_ext)
-                    if not self.keepClips:
-                        filename = os.path.join(self.workFolder, os.path.basename(filename))
-                    filename = QDir.toNativeSeparators(filename)
-                    filelist.append(filename)
-                    if not self.videoService.cut(source='{0}{1}'.format(source_file, source_ext),
-                                                 output=filename,
-                                                 frametime=clip[0].toString(self.timeformat),
-                                                 duration=duration,
-                                                 allstreams=True):
-                        self.completeOnError('<p>Failed to cut media file, assuming media is invalid or corrupt. '
-                                             'Attempts are made to work around problematic media files, even '
-                                             'when keyframes are incorrectly set or missing.</p><p>If you feel this '
-                                             'is a bug in the software then please take the time to report it '
-                                             'at our <a href="{}">GitHub Issues page</a> so that it can be fixed.</p>'
-                                             .format(vidcutter.__bugreport__))
-                        return
-            # self.joinMedia(filelist)
 
-    def smartcutter(self, file: str, source_file: str, source_ext: str) -> None:
-        self.smartcut_monitor = Munch(clips=[], results=[], externals=0)
-        for index, clip in enumerate(self.clipTimes):
-            if len(clip[3]):
-                self.smartcut_monitor.clips.append(clip[3])
-                self.smartcut_monitor.externals += 1
-                if index == len(self.clipTimes):
-                    self.smartmonitor()
-            else:
-                filename = '{0}_{1}{2}'.format(file, '{0:0>2}'.format(index), source_ext)
-                if not self.keepClips:
-                    filename = os.path.join(self.workFolder, os.path.basename(filename))
-                filename = QDir.toNativeSeparators(filename)
-                self.smartcut_monitor.clips.append(filename)
-                self.videoService.smartcut(index=index,
-                                           source='{0}{1}'.format(source_file, source_ext),
-                                           output=filename,
-                                           start=VideoCutter.qtime2delta(clip[0]),
-                                           end=VideoCutter.qtime2delta(clip[1]),
-                                           allstreams=True)
-    '''
     @pyqtSlot(bool, str)
     def smartmonitor(self, success: bool = None, outputfile: str = None) -> None:
         if success is not None:
@@ -1364,36 +1291,7 @@ class VideoCutter(QWidget):
         if len(self.smartcut_monitor.results) == len(self.smartcut_monitor.clips) - self.smartcut_monitor.externals:
             if False not in self.smartcut_monitor.results:
                 self.joinMedia(self.smartcut_monitor.clips)
-    '''
-    def joinMedia(self, filelist: list) -> None:
-        if len(filelist) > 1:
-            self.seekSlider.updateProgress()
-            rc = False
-            chapters = None
-            if self.createChapters:
-                chapters = []
-                [
-                    chapters.append(clip[4] if clip[4] is not None else 'Chapter {}'.format(index + 1))
-                    for index, clip in enumerate(self.clipTimes)
-                ]
-            if self.videoService.isMPEGcodec(filelist[0]):
-                self.logger.info('source file is MPEG based so join via MPEG-TS')
-                rc = self.videoService.mpegtsJoin(filelist, self.finalFilename, chapters)
-            if not rc or QFile(self.finalFilename).size() < 1000:
-                self.logger.info('MPEG-TS based join failed, will retry using standard concat')
-                rc = self.videoService.join(filelist, self.finalFilename, True, chapters)
-            if not rc or QFile(self.finalFilename).size() < 1000:
-                self.logger.info('join resulted in 0 length file, trying again without all stream mapping')
-                self.videoService.join(filelist, self.finalFilename, False, chapters)
-            if not self.keepClips:
-                for f in filelist:
-                    clip = self.clipTimes[filelist.index(f)]
-                    if not len(clip[3]) and os.path.isfile(f):
-                        QFile.remove(f)
-            self.complete(False)
-        else:
-            self.complete(True, filelist[-1])
-    '''
+
     def complete(self, rename: bool=True, filename: str=None) -> None:
         if rename and filename is not None:
             # noinspection PyCallByClass

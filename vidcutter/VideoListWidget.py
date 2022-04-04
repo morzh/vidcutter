@@ -67,12 +67,12 @@ class VideoListItemStyle(QStyledItemDelegate):
         pencolor = Qt.white if self.theme == 'dark' else Qt.black
         if self.parent.isEnabled():
             if option.state & QStyle.State_Selected:
-                painter.setBrush(QColor(150, 190, 78, 150))
+                painter.setBrush(QColor(150, 190, 78, 210))
             elif option.state & QStyle.State_MouseOver:
-                painter.setBrush(QColor(227, 212, 232))
+                painter.setBrush(QColor(227, 212, 232, 150))
                 pencolor = Qt.black
             else:
-                brushcolor = QColor(79, 85, 87, 175) if self.theme == 'dark' else QColor('#EFF0F1')
+                brushcolor = QColor(49, 45, 47, 175) if self.theme == 'dark' else QColor('#EFF0F1')
                 painter.setBrush(Qt.transparent if index.row() % 2 == 0 else brushcolor)
         painter.setPen(Qt.NoPen)
         painter.drawRect(r)

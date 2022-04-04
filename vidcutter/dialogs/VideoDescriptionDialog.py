@@ -22,6 +22,13 @@ class VideoDescriptionDialog(QDialog):
         self.setWindowFlags(Qt.Window | Qt.Dialog | Qt.WindowCloseButtonHint)
         self.setWindowModality(Qt.ApplicationModal)
 
+        self.issues_list = ['video of a bad quality',
+                            'video is too dark',
+                            'exercise is not performed',
+                            'strong occlusions',
+                            'too many people in video',
+                            'camera shake']
+
         title = 'Edit Video Description'
         self.layout = QVBoxLayout()
         self.buttonsLayout = QHBoxLayout()
@@ -31,14 +38,15 @@ class VideoDescriptionDialog(QDialog):
         self.textField = QTextEdit()
 
         self.issuesTable = QTableWidget()
-        self.issuesTable.setRowCount(5)
+        self.issuesTable.setRowCount(len(self.issues_list))
+        self.issuesTable.adjustSize()
         self.issuesTable.setColumnCount(1)
         self.issuesTable.verticalHeader().setVisible(False)
         self.issuesTable.horizontalHeader().setVisible(False)
         self.addIssuestableItems()
 
-        self.descriptionLayout.addWidget(self.textField)
         self.descriptionLayout.addWidget(self.issuesTable)
+        self.descriptionLayout.addWidget(self.textField)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
@@ -49,9 +57,10 @@ class VideoDescriptionDialog(QDialog):
         self.setWindowTitle(title)
 
     def addIssuestableItems(self):
-        for idx in range(5):
+        self.issuesTable.horizontalHeader().setStretchLastSection(True)
+        for idx in range(len(self.issues_list)):
             chkBoxItem = QTableWidgetItem()
-            chkBoxItem.setText('string')
+            chkBoxItem.setText(self.issues_list[idx])
             chkBoxItem.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             chkBoxItem.setCheckState(Qt.Unchecked)
             self.issuesTable.setItem(idx, 0, chkBoxItem)

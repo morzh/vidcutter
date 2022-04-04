@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime, QTimer, QUrl)
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
 
 class VideoItem:
@@ -9,12 +9,13 @@ class VideoItem:
             self._duration = QTime()
             self._filename = ''
             self.description = ''
+            self.youtube_id = ''
+            self.issues = []
             self.clips = []
             self._currentCLipIndex = 0
         elif len(args) == 2:
             self.thumb = args[0]
             self.filename = args[1]
-
 
     def clipsLast(self):
         if len(self.clips):
