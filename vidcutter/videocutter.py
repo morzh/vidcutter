@@ -625,12 +625,7 @@ class VideoCutter(QWidget):
             name = self.videoList.videos[self.videoList.currentVideoIndex].clips[index].name
             timeStart = self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeStart
             timeEnd = self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeEnd
-            '''
-            name = self.clipTimes[index][4]
-            name = name if name is not None else 'Chapter {}'.format(index + 1)
-            timeStart = self.clipTimes[index][0]
-            timeEnd = self.clipTimes[index][1]
-            '''
+
             dialog = VCChapterInputDialog(self, name, timeStart, timeEnd)
             dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
             dialog.exec_()
@@ -732,7 +727,6 @@ class VideoCutter(QWidget):
                 return callback()
             else:
                 return
-        # QFileDialog.setFileMode(QFileDialog.Directory)
         self._dataFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
         filepath = os.path.join(self._dataFolder, self._dataFilename)
         with open(filepath, 'rb') as f:
@@ -740,90 +734,6 @@ class VideoCutter(QWidget):
 
         self.videoListWidget.renderList(self.videoList)
         self.videoSlider.setUpdatesEnabled(True)
-
-    '''
-    # noinspection PyUnusedLocal
-    def openProject(self, checked: bool = False, project_file: str = None) -> Optional[Callable]:
-        cancel, callback = self.saveWarning()
-        if cancel:
-            if callback is not None:
-                return callback()
-            else:
-                return
-        initialFilter = 'Project files (*.edl *.vcp)' if self.mediaAvailable else 'VidCutter Project (*.vcp)'
-        if project_file is None:
-            project_file, _ = QFileDialog.getOpenFileName(
-                parent=self.parent,
-                caption='Open project file',
-                filter=self.projectFilters(),
-                initialFilter=initialFilter,
-                directory=(self.lastFolder if os.path.exists(self.lastFolder) else QDir.homePath()),
-                options=self.getFileDialogOptions())
-        if project_file is not None and len(project_file.strip()):
-            if project_file != os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE):
-                self.lastFolder = QFileInfo(project_file).absolutePath()
-            file = QFile(project_file)
-            info = QFileInfo(file)
-            project_type = info.suffix()
-            if not file.open(QFile.ReadOnly | QFile.Text):
-                QMessageBox.critical(self.parent, 'Open project file',
-                                     'Cannot read project file {0}:\n\n{1}'.format(project_file, file.errorString()))
-                return
-            qApp.setOverrideCursor(Qt.WaitCursor)
-            # self.clipTimes.clear()
-            self.videoList.videos[self.videoList.currentVideoIndex].clips.clear()
-            linenum = 1
-            while not file.atEnd():
-                # noinspection PyUnresolvedReferences
-                line = file.readLine().trimmed()
-                if line.length() > 0:
-                    try:
-                        line = line.data().decode()
-                    except UnicodeDecodeError:
-                        qApp.restoreOverrideCursor()
-                        self.logger.error('Invalid project file was selected', exc_info=True)
-                        sys.stderr.write('Invalid project file was selected')
-                        QMessageBox.critical(self.parent, 'Invalid project file',
-                                             'Could not make sense of the selected project file. Try viewing it in a '
-                                             'text editor to ensure it is valid and not corrupted.')
-                        return
-                    if project_type == 'vcp' and linenum == 1:
-                        self.loadMedia(line)
-                        time.sleep(1)
-                    else:
-                        mo = self.project_files[project_type].match(line)
-                        if mo:
-                            start, stop, _, chapter = mo.groups()
-                            clip_start = self.delta2QTime(float(start))
-                            clip_end = self.delta2QTime(float(stop))
-                            clip_image = self.captureImage(self.currentMedia, clip_start)
-                            if project_type == 'vcp' and self.createChapters and len(chapter):
-                                chapter = chapter[1:len(chapter) - 1]
-                                if not len(chapter):
-                                    chapter = None
-                            else:
-                                chapter = None
-                            # self.clipTimes.append([clip_start, clip_end, clip_image, '', chapter, 2])
-
-                            clip = VideoItemClip(clip_start, clip_end, clip_image, chapter, 2)
-                            self.videoList.videos[self.videoList.currentVideoIndex].clips.append(clip)
-                        else:
-                            qApp.restoreOverrideCursor()
-                            QMessageBox.critical(self.parent, 'Invalid project file',
-                                                 'Invalid entry at line {0}:\n\n{1}'.format(linenum, line))
-                            return
-                linenum += 1
-            self.toolbar_start.setEnabled(True)
-            self.toolbar_end.setDisabled(True)
-            self.videoSlider.setRestrictValue(0, False)
-            self.blackdetectAction.setEnabled(True)
-            self.inCut = False
-            self.newproject = True
-            QTimer.singleShot(2000, self.videoListSingleClick)
-            qApp.restoreOverrideCursor()
-            if project_file != os.path.join(QDir.tempPath(), self.parent.TEMP_PROJECT_FILE):
-                self.showText('project loaded')
-    '''
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         # if self.currentMedia is None:
@@ -944,7 +854,6 @@ class VideoCutter(QWidget):
         self.toolbar_start.setEnabled(flag)
         self.toolbar_end.setEnabled(False)
         self.toolbar_save.setEnabled(flag)
-        # self.toolbar_send.setEnabled(False)
         self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
         self.videoSlider.clearRegions()
@@ -1077,29 +986,6 @@ class VideoCutter(QWidget):
             self.parent.console.hide()
         self.saveSetting('showConsole', self.showConsole)
 
-    '''
-    @pyqtSlot(bool)
-    def toggleChapters(self, checked: bool) -> None:
-        self.createChapters = checked
-        self.saveSetting('chapters', self.createChapters)
-        self.chaptersButton.setChecked(self.createChapters)
-        self.showText('chapters {}'.format('enabled' if checked else 'disabled'))
-        if checked:
-            exist = False
-            for clip in self.clipTimes:
-                if clip[4] is not None:
-                    exist = True
-                    break
-            if exist:
-                chapterswarn = VCMessageBox('Restore chapter names', 'Chapter names found in memory',
-                                            'Would you like to restore previously set chapter names?',
-                                            buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
-                if chapterswarn.exec_() == QMessageBox.No:
-                    for clip in self.clipTimes:
-                        clip[4] = None
-        self.renderClipIndex()
-    '''
-
     @pyqtSlot(bool)
     def toggleSmartCut(self, checked: bool) -> None:
         self.smartcut = checked
@@ -1110,7 +996,6 @@ class VideoCutter(QWidget):
     @pyqtSlot(list)
     def addScenes(self, scenes: List[list]) -> None:
         if len(scenes):
-            # [self.clipTimes.append([scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', None, 2]) for scene in scenes if len(scene)]
             [self.videoList.videos[self.videoList.currentVideoIndex].clipAppend(VideoItemClip(scene[0], scene[1], self.captureImage(self.currentMedia, scene[0]), '', 2)) for scene in scenes if len(scene)]
             self.renderClipIndex()
         self.filterProgressBar.done(VCProgressDialog.Accepted)
@@ -1154,11 +1039,9 @@ class VideoCutter(QWidget):
     def clipStart(self) -> None:
         starttime = self.delta2QTime(self.videoSlider.value())
         clipsNumber = len(self.videoList.videos[self.videoList.currentVideoIndex].clips)
-        # clipsNumber = len(self.clipTimes)
         defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
         clip = VideoItemClip(starttime, QTime(), self.captureImage(self.currentMedia, starttime), defaultClipName, 0)
         self.videoList.videos[self.videoList.currentVideoIndex].clips.append(clip)
-        # self.clipTimes.append([starttime, '', self.captureImage(self.currentMedia, starttime), '', defaultClipName, 2])
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
         self.clipindex_clips_remove.setDisabled(True)
@@ -1167,7 +1050,6 @@ class VideoCutter(QWidget):
         self.clipindex_move_up.setDisabled(True)
         self.clipindex_move_down.setDisabled(True)
         self.videoSlider.setRestrictValue(self.videoSlider.value(), True)
-        # self.blackdetectAction.setDisabled(True)
         self.inCut = True
         self.showText('clip started at {}'.format(starttime.toString(self.timeformat)))
         self.renderClipIndex()
@@ -1233,19 +1115,7 @@ class VideoCutter(QWidget):
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
-    '''
-    def renderClipIndex(self) -> None:
-        self.seekSlider.clearRegions()
-        self.totalRuntime = 0
-        externals = self.cliplist.renderClips(self.clipTimes)
-        if len(self.clipTimes) and not self.inCut and externals != 1:
-            self.toolbar_save.setEnabled(True)
-            self.saveProjectAction.setEnabled(True)
-        if self.inCut or len(self.clipTimes) == 0 or not isinstance(self.clipTimes[0][1], QTime):
-            self.toolbar_save.setEnabled(False)
-            self.saveProjectAction.setEnabled(False)
-        self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
-    '''
+
     @staticmethod
     def delta2QTime(msecs: Union[float, int]) -> QTime:
         if isinstance(msecs, float):
