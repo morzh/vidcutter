@@ -859,7 +859,6 @@ class VideoCutter(QWidget):
             dialog.exec_()
 
     def on_editVideoDescription(self, index, issuesList, description):
-        print('issuesList', issuesList)
         self.videoList.videos[index].issues = issuesList
         self.videoList.videos[index].description = description
 

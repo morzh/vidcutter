@@ -39,6 +39,7 @@ class VideoDescriptionDialog(QDialog):
         self.issuesTable.setColumnCount(1)
         self.issuesTable.verticalHeader().setVisible(False)
         self.issuesTable.horizontalHeader().setVisible(False)
+        self.issuesTable.cellChanged.connect(self.on_issuesTableChanged)
         self.addIssuestableItems(checkedIssues)
 
         self.descriptionLayout.addWidget(self.issuesTable)
@@ -66,9 +67,9 @@ class VideoDescriptionDialog(QDialog):
                 chkBoxItem.setCheckState(Qt.Unchecked)
             self.issuesTable.setItem(idx, 0, chkBoxItem)
 
-    def accept(self) -> None:
+    def on_issuesTableChanged(self):
+        self.checkedIssuesList.clear()
         for rowIndex in range(self.issuesTable.rowCount()):
             if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
                 self.checkedIssuesList.append(rowIndex)
-        print(self.checkedIssuesList)
-        self.close()
+
