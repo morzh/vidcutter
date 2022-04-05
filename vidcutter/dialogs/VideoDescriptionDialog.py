@@ -13,7 +13,7 @@ import vidcutter
 
 
 class VideoDescriptionDialog(QDialog):
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, issuesList, checkedIssues, description):
         super(VideoDescriptionDialog, self).__init__(parent)
         self.parent = parent
         self.logger = logging.getLogger(__name__)
@@ -21,14 +21,7 @@ class VideoDescriptionDialog(QDialog):
         self.setContentsMargins(0, 0, 0, 0)
         self.setWindowFlags(Qt.Window | Qt.Dialog | Qt.WindowCloseButtonHint)
         self.setWindowModality(Qt.ApplicationModal)
-
-        self.issues_list = ['video of a bad quality',
-                            'video is too dark',
-                            'exercise is not performed',
-                            'strong occlusions',
-                            'too many people in video',
-                            'camera shake',
-                            'video is too long']
+        self.issuesList = issuesList
 
         title = 'Edit Video Description'
         self.layout = QVBoxLayout()
@@ -37,31 +30,37 @@ class VideoDescriptionDialog(QDialog):
         self.descriptionLayout.setSpacing(3)
 
         self.textField = QTextEdit()
+        self.textField.setText(description)
 
         self.issuesTable = QTableWidget()
-        self.issuesTable.setRowCount(len(self.issues_list))
+        self.issuesTable.setRowCount(len(self.issuesList))
         self.issuesTable.adjustSize()
         self.issuesTable.setColumnCount(1)
         self.issuesTable.verticalHeader().setVisible(False)
         self.issuesTable.horizontalHeader().setVisible(False)
-        self.addIssuestableItems()
+        self.addIssuestableItems(checkedIssues)
 
         self.descriptionLayout.addWidget(self.issuesTable)
         self.descriptionLayout.addWidget(self.textField)
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttons.accepted.connect(self.accept)
+        self.buttons.rejected.connect(self.reject)
 
         self.layout.addLayout(self.descriptionLayout)
-        self.layout.addWidget(self.buttonBox)
+        self.layout.addWidget(self.buttons)
 
         self.setLayout(self.layout)
         self.setWindowTitle(title)
 
-    def addIssuestableItems(self):
+    def addIssuestableItems(self, checked_issues):
         self.issuesTable.horizontalHeader().setStretchLastSection(True)
-        for idx in range(len(self.issues_list)):
+        for idx in range(len(self.issuesList)):
             chkBoxItem = QTableWidgetItem()
-            chkBoxItem.setText(self.issues_list[idx])
+            chkBoxItem.setText(self.issuesList[idx])
             chkBoxItem.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-            chkBoxItem.setCheckState(Qt.Unchecked)
+            if idx in checked_issues:
+                chkBoxItem.setCheckState(Qt.Checked)
+            else:
+                chkBoxItem.setCheckState(Qt.Unchecked)
             self.issuesTable.setItem(idx, 0, chkBoxItem)

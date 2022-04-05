@@ -643,12 +643,6 @@ class VideoCutter(QWidget):
         self.videoList.setCurrentVideoClipEndTime(timeEnd)
         self.videoList.setCurrentVideoClipName(clipName)
         self.videoList.setCurrentVideoClipThumbnail(self.captureImage(self.currentMedia, timeStart))
-        '''
-        self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeStart = timeStart
-        self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeEnd = end
-        self.videoList.videos[self.videoList.currentVideoIndex].clips[index].name = clipName
-        self.videoList.videos[self.videoList.currentVideoIndex].clips[index].thumbnail = self.captureImage(self.currentMedia, timeStart)
-        '''
         self.renderClipIndex()
 
     def moveItemUp(self) -> None:
@@ -834,7 +828,7 @@ class VideoCutter(QWidget):
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         if self.currentMedia is None:
             return
-
+        self.showText('saving...')
         self.parent.setEnabled(False)
         data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
         data_filepath = os.path.join(self._dataFolder, self._dataFilename)
@@ -855,8 +849,19 @@ class VideoCutter(QWidget):
         index = self.videoListWidget.currentRow()
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-            dialog = VideoDescriptionDialog(self)
+            self.videoList.setCurrentVideoIndex(index)
+            issueClasses = self.videoList.videoIssuesClasses
+            checkedIssues = self.videoList.videos[index].issues
+            description = self.videoList.videos[index].description
+            print(issueClasses)
+            print(checkedIssues)
+            print(description)
+            dialog = VideoDescriptionDialog(self, issueClasses, checkedIssues, description)
             dialog.exec_()
+
+    def on_editVideoDescription(self):
+        pass
+
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)

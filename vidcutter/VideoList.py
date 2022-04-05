@@ -35,6 +35,10 @@ class VideoList:
         pass
     '''
     @property
+    def videoIssuesClasses(self):
+        return self._videoIssuesClasses
+
+    @property
     def description(self) -> str:
         return self._description
 
