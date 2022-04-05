@@ -484,7 +484,7 @@ class VideoCutter(QWidget):
         self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list', triggered=self.moveItemUp, enabled=False)
         self.moveItemDownAction = QAction(self.downIcon, 'Move clip down', self, triggered=self.moveItemDown, statusTip='Move clip position down in list', enabled=False)
         self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem, statusTip='Remove selected clip from list', enabled=False)
-        self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips from list', enabled=False)
+        self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
         self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
 
         # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
@@ -687,7 +687,7 @@ class VideoCutter(QWidget):
         self.renderClipIndex()
 
     def clearList(self) -> None:
-        dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all the clips?')
+        dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all clips of the current video?')
         dialog.accepted.connect(lambda: self.on_clearList())
         dialog.exec_()
 
