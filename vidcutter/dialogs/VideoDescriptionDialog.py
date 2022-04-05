@@ -21,6 +21,7 @@ class VideoDescriptionDialog(QDialog):
         self.setContentsMargins(0, 0, 0, 0)
         self.setWindowFlags(Qt.Window | Qt.Dialog | Qt.WindowCloseButtonHint)
         self.setWindowModality(Qt.ApplicationModal)
+
         self.issuesList = issuesList
         self.checkedIssuesList = []
 
@@ -34,11 +35,11 @@ class VideoDescriptionDialog(QDialog):
         self.textField.setText(description)
 
         self.issuesTable = QTableWidget()
-        self.issuesTable.setRowCount(len(self.issuesList))
-        self.issuesTable.adjustSize()
+        self.issuesTable.setRowCount(len(issuesList))
         self.issuesTable.setColumnCount(1)
         self.issuesTable.verticalHeader().setVisible(False)
         self.issuesTable.horizontalHeader().setVisible(False)
+        self.issuesTable.adjustSize()
         self.issuesTable.cellChanged.connect(self.on_issuesTableChanged)
         self.addIssuestableItems(checkedIssues)
 
@@ -51,6 +52,9 @@ class VideoDescriptionDialog(QDialog):
 
         self.layout.addLayout(self.descriptionLayout)
         self.layout.addWidget(self.buttons)
+
+        self.setMaximumSize(QSize(600, 500))
+        self.setMinimumSize(QSize(400, 500))
 
         self.setLayout(self.layout)
         self.setWindowTitle(title)
@@ -72,4 +76,13 @@ class VideoDescriptionDialog(QDialog):
         for rowIndex in range(self.issuesTable.rowCount()):
             if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
                 self.checkedIssuesList.append(rowIndex)
+
+    def getQTableWidgetSize(self):
+        w = self.issuesTable.verticalHeader().width() + 4  # +4 seems to be needed
+        for i in range(self.issuesTable.columnCount()):
+            w += self.issuesTable.columnWidth(i)  # seems to include gridline (on my machine)
+        h = self.issuesTable.horizontalHeader().height() + 4
+        for i in range(self.issuesTable.rowCount()):
+            h += self.issuesTable.rowHeight(i)
+        return QSize(w, h)
 

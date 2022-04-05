@@ -826,8 +826,8 @@ class VideoCutter(QWidget):
     '''
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
-        if self.currentMedia is None:
-            return
+        # if self.currentMedia is None:
+        #     return
         self.showText('saving...')
         self.parent.setEnabled(False)
         data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
@@ -852,7 +852,6 @@ class VideoCutter(QWidget):
             self.videoList.setCurrentVideoIndex(index)
             issueClasses = self.videoList.videoIssuesClasses
             checkedIssues = self.videoList.videos[index].issues
-            print(checkedIssues)
             description = self.videoList.videos[index].description
             dialog = VideoDescriptionDialog(self, issueClasses, checkedIssues, description)
             dialog.accepted.connect(lambda: self.on_editVideoDescription(index, dialog.checkedIssuesList, dialog.textField.toPlainText()))
@@ -861,6 +860,9 @@ class VideoCutter(QWidget):
     def on_editVideoDescription(self, index, issuesList, description):
         self.videoList.videos[index].issues = issuesList
         self.videoList.videos[index].description = description
+        self.projectSaved = False
+        self.saveProjectAction.setEnabled(True)
+        self.toolbar_save.setEnabled(True)
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
