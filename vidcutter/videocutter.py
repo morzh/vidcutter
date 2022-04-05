@@ -852,24 +852,16 @@ class VideoCutter(QWidget):
             self.videoList.setCurrentVideoIndex(index)
             issueClasses = self.videoList.videoIssuesClasses
             checkedIssues = self.videoList.videos[index].issues
+            print(checkedIssues)
             description = self.videoList.videos[index].description
             dialog = VideoDescriptionDialog(self, issueClasses, checkedIssues, description)
-            dialog.accepted.connect(lambda: self.on_editVideoDescription(index, dialog.issuesTable, dialog.textField.toPlainText()))
+            dialog.accepted.connect(lambda: self.on_editVideoDescription(index, dialog.checkedIssuesList, dialog.textField.toPlainText()))
             dialog.exec_()
 
-    def on_editVideoDescription(self, index, issuesTable, description):
-        issuesList = []
-        print(issuesTable.rowCount())
-
-        for rowIndex in range(issuesTable.rowCount()):
-            print(rowIndex)
-            # print(issuesTable.item(rowIndex, column=0).text())
-            if issuesTable.item(rowIndex, column=0).checkState():
-                issuesList.append(rowIndex)
-
+    def on_editVideoDescription(self, index, issuesList, description):
+        print('issuesList', issuesList)
         self.videoList.videos[index].issues = issuesList
         self.videoList.videos[index].description = description
-
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)

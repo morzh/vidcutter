@@ -22,6 +22,7 @@ class VideoDescriptionDialog(QDialog):
         self.setWindowFlags(Qt.Window | Qt.Dialog | Qt.WindowCloseButtonHint)
         self.setWindowModality(Qt.ApplicationModal)
         self.issuesList = issuesList
+        self.checkedIssuesList = []
 
         title = 'Edit Video Description'
         self.layout = QVBoxLayout()
@@ -64,3 +65,10 @@ class VideoDescriptionDialog(QDialog):
             else:
                 chkBoxItem.setCheckState(Qt.Unchecked)
             self.issuesTable.setItem(idx, 0, chkBoxItem)
+
+    def accept(self) -> None:
+        for rowIndex in range(self.issuesTable.rowCount()):
+            if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
+                self.checkedIssuesList.append(rowIndex)
+        print(self.checkedIssuesList)
+        self.close()
