@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 # import matplotlib.pyplot as plt
+import moviepy
 from moviepy.editor import *
 from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QApplication
@@ -43,14 +44,20 @@ app = QApplication(sys.argv)
 
 for video_file in video_files:
     print(video_file)
+    video_filepath = os.path.join(videos_list_path, video_file)
     try:
-        video_file_clip = VideoFileClip(os.path.join(videos_list_path, video_file))
+        video_file_clip = VideoFileClip(video_filepath)
     except:
         continue
 
     video_file_clip.filename = video_file
     video_duration = video_file_clip.duration
     thumb = video_file_clip.get_frame(0.5 * video_duration)
+
+    video_preview_filepath = video_filepath + '.preview.mp4'
+    if not os.path.exists(video_preview_filepath):
+        clip_resized = moviepy.video.fx.all.resize(video_file_clip, height=128)
+        clip_resized.write_videofile(video_preview_filepath)
 
     video_item_duration = QTime(0, 0)
     video_item_duration = video_item_duration.addSecs(int(video_duration))

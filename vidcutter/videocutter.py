@@ -85,6 +85,7 @@ class VideoCutter(QWidget):
         self.settings = self.parent.settings
         self.filter_settings = Config.filter_settings()
         self.currentMedia, self.mediaAvailable, self.mpvError = None, False, False
+        self.currentMediaPreview = None
         self.projectDirty, self.projectSaved, self.debugonstart = False, False, False
         self.smartcut_monitor, self.notify = None, None
         self.fonts = []
@@ -783,6 +784,7 @@ class VideoCutter(QWidget):
         if not os.path.isfile(filepath):
             return
         self.currentMedia = filepath
+        self.currentMediaPreview = filepath + '.preview.mp4'
         self.projectDirty, self.projectSaved = False, False
         self.initMediaControls(True)
         self.totalRuntime = 0

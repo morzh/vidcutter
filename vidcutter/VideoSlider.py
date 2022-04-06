@@ -360,7 +360,7 @@ class VideoSlider(QSlider):
                 self.completed.emit(frames)
 
         self.thumbsThread = QThread(self)
-        self.thumbsWorker = ThumbWorker(self.parent.settings, self.parent.currentMedia, frametimes, thumbsize)
+        self.thumbsWorker = ThumbWorker(self.parent.settings, self.parent.currentMediaPreview, frametimes, thumbsize)
         self.thumbsWorker.moveToThread(self.thumbsThread)
 
         self.thumbsThread.started.connect(self.parent.sliderWidget.setLoader)
