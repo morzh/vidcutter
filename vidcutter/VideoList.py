@@ -6,12 +6,18 @@ from vidcutter.VideoItem import VideoItem
 
 
 class VideoList:
-    def __init__(self):
+    def __init__(self, *args):
         self._absolutePath = ''
         self._data_filename = 'data.pickle'
+        self._data_temporary_filename = 'data.pickle.tmp'
         self._description = ''
         self._currentVideoIndex = 0
         self.videos = []
+        self.data_saved = False
+        if len(args) == 1 and isinstance(args[0], list):
+            self._video_issues = args[0]
+        else:
+            self._video_issues = []
 
     @staticmethod
     def clamp(x, minimum, maximum):
@@ -23,10 +29,35 @@ class VideoList:
             self.videos = pickle.load(f)
 
     def saveData(self):
+        data_filepath_temporary = os.path.join(self._absolutePath, self._data_temporary_filename)
         data_filepath = os.path.join(self._absolutePath, self._data_filename)
-        # print('project files saved to', data_filepath)
-        with open(data_filepath, 'wb') as f:
-            pickle.dump(self.videos, f)
+        try:
+            with open(data_filepath_temporary, 'wb') as f:
+                pickle.dump(self.videos, f)
+            os.rename(data_filepath_temporary, data_filepath)
+        except OSError:
+            print('project save failed')
+
+    def saveDataQtThread(self):
+        pass
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    @description.setter
+    def description(self, description: str) -> None:
+        if isinstance(description, str):
+            self._description = description
+
+    @property
+    def videoIssues(self) -> list:
+        return self._video_issues
+
+    @videoIssues.setter
+    def videoIssues(self, issues: list) -> None:
+        if isinstance(issues, list):
+            self._video_issues = issues
 
     @property
     def absolutePath(self) -> str:
@@ -40,13 +71,19 @@ class VideoList:
     def currentVideoIndex(self):
         return self._currentVideoIndex
 
-    def currentVideoFilepath(self):
-        return os.path.join(self._absolutePath, self.videos[self._currentVideoIndex].filename)
+    @currentVideoIndex.setter
+    def currentVideoIndex(self, index: int) -> None:
+        if index < 0:
+            index *= -1
+        self._currentVideoIndex = index
 
     def setCurrentVideoIndex(self, index: int) -> None:
         if index < 0:
             index *= -1
         self._currentVideoIndex = index
+
+    def currentVideoFilepath(self):
+        return os.path.join(self._absolutePath, self.videos[self._currentVideoIndex].filename)
 
     def setCurrentVideoClipIndex(self, index):
         if len(self.videos):

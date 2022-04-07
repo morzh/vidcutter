@@ -1,6 +1,6 @@
-from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
-                          Qt, QTextStream, QTime, QTimer, QUrl)
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QTime
+
 
 class VideoItemClip:
     def __init__(self, *args):

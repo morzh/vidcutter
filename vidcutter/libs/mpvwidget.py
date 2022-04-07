@@ -300,4 +300,4 @@ class mpvWidget(QOpenGLWidget):
             self.parent.toggleFullscreen()
 
     def wheelEvent(self, event: QWheelEvent) -> None:
-        self.parent.seekSlider.wheelEvent(event)
+        self.parent.videoSlider.wheelEvent(event)
