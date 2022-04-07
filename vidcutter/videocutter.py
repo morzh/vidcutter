@@ -146,6 +146,7 @@ class VideoCutter(QWidget):
             'vcp': re.compile(r'(\d+(?:\.?\d+)?)\t(\d+(?:\.?\d+)?)\t([01])\t(".*")$')
         }
 
+
         self._initIcons()
         self._initActions()
 
@@ -535,7 +536,7 @@ class VideoCutter(QWidget):
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
 
-        if sys.platform in {'win32', 'darwin'}:
+        if sys.platform in {'win64', 'darwin'}:
             self.appmenu.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_contextmenu.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_removemenu.setStyle(QStyleFactory.create('Fusion'))
