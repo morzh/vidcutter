@@ -394,12 +394,12 @@ class VCChapterInputDialog(QDialog):
 
         self.start = QTimeEdit(self)
         self.start.setTime(time_start)
-        self.start.setDisplayFormat('hh:mm:ss')
+        self.start.setDisplayFormat('hh:mm:ss.zzz')
         self.start_label = QLabel('Start Time')
 
         self.end = QTimeEdit(self)
         self.end.setTime(time_end)
-        self.end.setDisplayFormat('hh:mm:ss')
+        self.end.setDisplayFormat('hh:mm:ss.zzz')
         self.end_label = QLabel('End Time')
 
         layout = QVBoxLayout()

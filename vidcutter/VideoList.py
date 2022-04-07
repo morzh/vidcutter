@@ -6,23 +6,16 @@ from vidcutter.VideoItem import VideoItem
 
 
 class VideoList:
-    def __init__(self, *args):
-        self._absolutePath = ''
-        self._data_filename = 'data.pickle'
-        self._data_temporary_filename = 'data.pickle.tmp'
+    def __init__(self, videoIssues: list):
         self._description = ''
         self._currentVideoIndex = 0
         self.videos = []
-        self.data_saved = False
-        if len(args) == 1 and isinstance(args[0], list):
-            self._video_issues = args[0]
-        else:
-            self._video_issues = []
+        self._videoIssuesClasses = videoIssues
 
     @staticmethod
     def clamp(x, minimum, maximum):
         return max(minimum, min(x, maximum))
-
+    '''
     def readData(self):
         filepath = os.path.join(self._absolutePath, self._data_filename)
         with open(filepath, 'rb') as f:
@@ -40,6 +33,10 @@ class VideoList:
 
     def saveDataQtThread(self):
         pass
+    '''
+    @property
+    def videoIssuesClasses(self):
+        return self._videoIssuesClasses
 
     @property
     def description(self) -> str:
@@ -82,8 +79,8 @@ class VideoList:
             index *= -1
         self._currentVideoIndex = index
 
-    def currentVideoFilepath(self):
-        return os.path.join(self._absolutePath, self.videos[self._currentVideoIndex].filename)
+    def currentVideoFilepath(self, folderPath: str):
+        return os.path.join(folderPath, self.videos[self._currentVideoIndex].filename)
 
     def setCurrentVideoClipIndex(self, index):
         if len(self.videos):

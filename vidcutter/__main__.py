@@ -80,17 +80,17 @@ class MainWindow(QMainWindow):
             self.win_taskbar_button.progress().setVisible(True)
             self.win_taskbar_button.progress().setValue(0)
         self.console.setGeometry(int(self.x() - (self.width() / 2)), self.y() + int(self.height() / 3), 750, 300)
-        if not self.video and os.path.isfile(os.path.join(QDir.tempPath(), MainWindow.TEMP_PROJECT_FILE)):
-            self.video = os.path.join(QDir.tempPath(), MainWindow.TEMP_PROJECT_FILE)
-        if self.video:
-            self.file_opener(self.video)
+        # if not self.video and os.path.isfile(os.path.join(QDir.tempPath(), MainWindow.TEMP_PROJECT_FILE)):
+        #     self.video = os.path.join(QDir.tempPath(), MainWindow.TEMP_PROJECT_FILE)
+        # if self.video:
+        #     self.file_opener(self.video)
 
     def init_scale(self) -> None:
         screen_size = qApp.desktop().availableGeometry(-1)
         self.scale = 'LOW' if screen_size.width() <= 1024 else 'NORMAL'
         self.setMinimumSize(self.get_size(self.scale))
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
+    '''
     @pyqtSlot(str)
     def file_opener(self, filename: str) -> None:
         try:
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
             logging.exception('Error loading file')
             qApp.restoreOverrideCursor()
             self.restart()
-
+    '''
     @staticmethod
     def get_size(mode: str='NORMAL') -> QSize:
         modes = {
@@ -377,7 +377,6 @@ def main():
     win = MainWindow()
     win.stylename = app.style().objectName().lower()
     app.setActivationWindow(win)
-    app.messageReceived.connect(win.file_opener)
     app.aboutToQuit.connect(MainWindow.cleanup)
 
     exit_code = app.exec_()

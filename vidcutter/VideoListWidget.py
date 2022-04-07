@@ -56,7 +56,6 @@ class VideoListWidget(QListWidget):
         self.videosHasRendered = True
 
 class VideoListItemStyle(QStyledItemDelegate):
-
     def __init__(self, parent: VideoListWidget=None):
         super(VideoListItemStyle, self).__init__(parent)
         self.parent = parent
