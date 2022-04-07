@@ -38,12 +38,15 @@ issues_list = ['video of a bad quality',
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
 videos = []
+preview_postfix = 'preview.mp4'
 
 video_list = VideoList(issues_list)
 app = QApplication(sys.argv)
 
 for video_file in video_files:
     print(video_file)
+    if preview_postfix in video_file:
+        continue
     video_filepath = os.path.join(videos_list_path, video_file)
     try:
         video_file_clip = VideoFileClip(video_filepath)
@@ -54,8 +57,8 @@ for video_file in video_files:
     video_duration = video_file_clip.duration
     thumb = video_file_clip.get_frame(0.5 * video_duration)
 
-    video_preview_filepath = video_filepath + '.preview.mp4'
-    if not os.path.exists(video_preview_filepath):
+    video_preview_filepath = video_filepath + preview_postfix
+    if not os.path.isfile(video_preview_filepath):
         clip_resized = moviepy.video.fx.all.resize(video_file_clip, height=128)
         clip_resized.write_videofile(video_preview_filepath)
 

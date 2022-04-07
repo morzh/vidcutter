@@ -4,6 +4,7 @@
 
 import logging
 import math
+import os.path
 import sys
 from enum import Enum
 
@@ -161,6 +162,7 @@ class VideoSlider(QSlider):
         font = painter.font()
         font.setPixelSize(11)
         painter.setFont(font)
+
         if self.tickPosition() != QSlider.NoTicks:
             x = 8
             for i in range(self.minimum(), self.width(), 8):
@@ -360,7 +362,13 @@ class VideoSlider(QSlider):
                 self.completed.emit(frames)
 
         self.thumbsThread = QThread(self)
-        self.thumbsWorker = ThumbWorker(self.parent.settings, self.parent.currentMediaPreview, frametimes, thumbsize)
+
+        if os.path.isfile(self.parent.currentMediaPreview):
+            currentMedia = self.parent.currentMediaPreview
+        else:
+            currentMedia = self.parent.currentMedia
+
+        self.thumbsWorker = ThumbWorker(self.parent.settings, currentMedia, frametimes, thumbsize)
         self.thumbsWorker.moveToThread(self.thumbsThread)
 
         self.thumbsThread.started.connect(self.parent.sliderWidget.setLoader)

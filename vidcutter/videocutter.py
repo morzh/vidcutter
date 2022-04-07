@@ -92,6 +92,7 @@ class VideoCutter(QWidget):
         self._dataFolder = ''
         self._dataFilename = 'data.pickle'
         self._dataFilenameTemp = 'data.pickle.tmp'
+        self.previewPostfix = '.preview.mp4'
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -784,7 +785,7 @@ class VideoCutter(QWidget):
         if not os.path.isfile(filepath):
             return
         self.currentMedia = filepath
-        self.currentMediaPreview = filepath + '.preview.mp4'
+        self.currentMediaPreview = filepath + self.previewPostfix
         self.projectDirty, self.projectSaved = False, False
         self.initMediaControls(True)
         self.totalRuntime = 0
