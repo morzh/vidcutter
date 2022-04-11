@@ -8,7 +8,7 @@ from vidcutter.VideoList import VideoList
 from vidcutter.VideoListWidget import VideoListWidget
 
 
-class Example(QWidget):
+class VideosList(QWidget):
     timeformat = 'hh:mm:ss.zzz'
     theme = 'light'
 
@@ -46,7 +46,7 @@ class Example(QWidget):
 
 def main():
     app = QApplication(sys.argv)
-    ex = Example()
+    ex = VideosList()
     sys.exit(app.exec_())
 
 

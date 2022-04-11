@@ -24,7 +24,7 @@ if sys.platform.startswith("linux") and ci_and_not_headless:
     os.environ.pop("QT_QPA_FONTDIR")
 
 
-videos_list_path = '/home/morzh/work/vidcutter_test_videos'
+videos_list_path = '/home/morzh/work/enhancersData/test_set_squats_001'
 image_size = 128
 data_filename = 'data.pickle'
 
@@ -38,7 +38,7 @@ issues_list = ['video of a bad quality',
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
 videos = []
-preview_postfix = 'preview.mp4'
+preview_postfix = '.preview.mp4'
 
 video_list = VideoList(issues_list)
 app = QApplication(sys.argv)
