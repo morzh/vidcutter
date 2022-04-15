@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+import json
 # import matplotlib.pyplot as plt
 import moviepy
 from moviepy.editor import *
@@ -24,7 +25,7 @@ if sys.platform.startswith("linux") and ci_and_not_headless:
     os.environ.pop("QT_QPA_FONTDIR")
 
 
-videos_list_path = '/home/morzh/work/enhancersData/test_set_squats_001'
+videos_list_path = '/home/morzh/work/enhancersData/squats_set_003'
 image_size = 128
 data_filename = 'data.pickle'
 
@@ -52,6 +53,16 @@ for video_file in video_files:
         video_file_clip = VideoFileClip(video_filepath)
     except:
         continue
+
+    try:
+        ext = video_file.split('.')[-1]
+        json_filepath = os.path.join(videos_list_path, video_file.replace(ext, 'info.json'))
+        json_file = open(json_filepath, "r")
+        video_data = json.loads(json_file.read())
+        youtube_id = video_data['id']
+    except:
+        youtube_id = ''
+
 
     video_file_clip.filename = video_file
     video_duration = video_file_clip.duration
@@ -87,10 +98,11 @@ for video_file in video_files:
     videoItem.filename = video_file
     videoItem.duration = video_item_duration
     videoItem.thumbnail = QPixmapPickle(qt_pixmap)
+    videoItem.youtube_id = youtube_id
 
     videos.append(videoItem)
 
 video_list.videos = videos
 data_filepath = os.path.join(videos_list_path, data_filename)
-with open(data_filepath, 'wb') as f:
-    pickle.dump(video_list, f)
+with open(data_filepath, 'wb') as json_file:
+    pickle.dump(video_list, json_file)

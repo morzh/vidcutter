@@ -3,8 +3,8 @@ import os
 import sys
 
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QApplication, QListWidgetItem
+from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtWidgets import QDialog, QApplication, QListWidgetItem, QScrollArea
 
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
                           Qt, QTime, QTimer, QUrl)
@@ -27,13 +27,25 @@ class scalableTimeline(QWidget):
         self.scrollBar.setOrientation(Qt.Horizontal)
         self.slider = QSlider()
         self.slider.setOrientation(Qt.Horizontal)
-        self.slider.setFixedSize(1000, 10)
+        self.slider.setFixedSize(1800, 10)
+
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidget(self.slider)
+        self.scrollArea.setAlignment(Qt.AlignVCenter)
+        vbox.addWidget(self.scrollArea)
+
+        # self.slider.setSizePolicy(QSizePolicy.Frame, QSizePolicy.Fixed)
+        '''
+        
         vbox2.addWidget(self.slider)
+        vbox2.setGeometry(QRect(0, 0, 1800, 100))
         self.scrollBar.setLayout(vbox2)
+        self.scrollBar.setFixedSize(600, 30)
         vbox.addWidget(self.scrollBar)
         self.setLayout(vbox)
-
-        self.setGeometry(200, 200, 800, 150)
+        '''
+        self.setLayout(vbox)
+        self.setGeometry(200, 200, 800, 20)
         self.setWindowTitle('QListWidget')
         self.show()
 
