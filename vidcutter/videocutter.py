@@ -742,6 +742,7 @@ class VideoCutter(QWidget):
         self.cliplist.clear()
         self.videoSlider.clearRegions()
         self.videoSlider.setEnabled(False)
+        self.videoSlider.setSliderPosition(0)
         self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
 
