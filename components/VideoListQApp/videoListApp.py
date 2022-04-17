@@ -8,7 +8,7 @@ from vidcutter.VideoList import VideoList
 from vidcutter.VideoListWidget import VideoListWidget
 
 
-class Example(QWidget):
+class VideosList(QWidget):
     timeformat = 'hh:mm:ss.zzz'
     theme = 'light'
 
@@ -37,7 +37,6 @@ class Example(QWidget):
     def openFolder(self):
         outputFolder = QFileDialog.getExistingDirectory(caption='Select Folder', directory=QDir.currentPath())
         self.videoList = VideoList(outputFolder, 'data.pickle')
-        self.videoList.readData()
         self.listWidget.renderList(self.videoList)
 
     def onClicked(self, item):
@@ -46,7 +45,7 @@ class Example(QWidget):
 
 def main():
     app = QApplication(sys.argv)
-    ex = Example()
+    ex = VideosList()
     sys.exit(app.exec_())
 
 

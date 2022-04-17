@@ -1,17 +1,20 @@
+import json
+import os
 import pickle
-import numpy as np
+import sys
+
 # import matplotlib.pyplot as plt
 import moviepy
-from moviepy.editor import *
+import numpy as np
 from PyQt5.QtCore import QTime
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication
+from moviepy.editor import *
 
-from vidcutter.VideoList import VideoList
-from vidcutter.VideoItem import VideoItem
 from vidcutter.QPixmapPickle import QPixmapPickle
+from vidcutter.VideoItem import VideoItem
+from vidcutter.VideoList import VideoList
 
-import os, sys
 ci_build_and_not_headless = False
 try:
     from cv2.version import ci_build, headless
@@ -24,7 +27,7 @@ if sys.platform.startswith("linux") and ci_and_not_headless:
     os.environ.pop("QT_QPA_FONTDIR")
 
 
-videos_list_path = '/home/morzh/work/vidcutter_test_videos'
+videos_list_path = '/home/morzh/work/enhancersData/squats_set_003'
 image_size = 128
 data_filename = 'data.pickle'
 
@@ -38,7 +41,7 @@ issues_list = ['video of a bad quality',
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
 videos = []
-preview_postfix = 'preview.mp4'
+preview_postfix = '.preview.mp4'
 
 video_list = VideoList(issues_list)
 app = QApplication(sys.argv)
@@ -52,6 +55,16 @@ for video_file in video_files:
         video_file_clip = VideoFileClip(video_filepath)
     except:
         continue
+
+    try:
+        ext = video_file.split('.')[-1]
+        json_filepath = os.path.join(videos_list_path, video_file.replace(ext, 'info.json'))
+        json_file = open(json_filepath, "r")
+        video_data = json.loads(json_file.read())
+        youtube_id = video_data['id']
+    except:
+        youtube_id = ''
+
 
     video_file_clip.filename = video_file
     video_duration = video_file_clip.duration
@@ -87,10 +100,11 @@ for video_file in video_files:
     videoItem.filename = video_file
     videoItem.duration = video_item_duration
     videoItem.thumbnail = QPixmapPickle(qt_pixmap)
+    videoItem.youtube_id = youtube_id
 
     videos.append(videoItem)
 
 video_list.videos = videos
 data_filepath = os.path.join(videos_list_path, data_filename)
-with open(data_filepath, 'wb') as f:
-    pickle.dump(video_list, f)
+with open(data_filepath, 'wb') as json_file:
+    pickle.dump(video_list, json_file)

@@ -75,6 +75,6 @@ class VideoItemClip:
         self._description = description
 
     def print(self):
-        print('start time', self._timeStart, ' time end:',  self._timeEnd, ' name:',  self._name,
-              ' visibility:',  self._visibility, ' description:',  self._description)
+        print('\t',  'name:',  self._name, 'start time', self._timeStart, ' time end:',
+              self._timeEnd, ' visibility:',  self._visibility, ' description:',  self._description)
 

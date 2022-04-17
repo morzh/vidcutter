@@ -28,6 +28,7 @@ import re
 import sys
 import time
 import pickle
+import shutil
 from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
@@ -748,7 +749,7 @@ class VideoCutter(QWidget):
         try:
             with open(data_filepath_temporary, 'wb') as f:
                 pickle.dump(self.videoList, f)
-            os.rename(data_filepath_temporary, data_filepath)
+            shutil.copy(data_filepath_temporary, data_filepath)
         except OSError:
             self.showText('project save failed')
         qApp.restoreOverrideCursor()
