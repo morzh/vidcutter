@@ -745,7 +745,9 @@ class VideoCutter(QWidget):
         self.videoSlider.setSliderPosition(0)
         self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
-        self.mpvWidget.setEnabled(False)
+
+        self._initNoVideo()
+        self.initMediaControls(True)
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         # if self.currentMedia is None:
