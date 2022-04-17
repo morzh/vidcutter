@@ -15,6 +15,7 @@ import vidcutter
 class VideoDescriptionDialog(QDialog):
     def __init__(self, parent: QWidget, issuesList, checkedIssues, description):
         super(VideoDescriptionDialog, self).__init__(parent)
+        self.issuesTableIsComplete = False
         self.parent = parent
         self.logger = logging.getLogger(__name__)
         self.theme = self.parent.theme
@@ -70,10 +71,15 @@ class VideoDescriptionDialog(QDialog):
             else:
                 chkBoxItem.setCheckState(Qt.Unchecked)
             self.issuesTable.setItem(idx, 0, chkBoxItem)
+        self.issuesTableIsComplete = True
 
     def on_issuesTableChanged(self):
+        if not self.issuesTableIsComplete:
+            return
         self.checkedIssuesList.clear()
+        print(self.issuesTable.rowCount())
         for rowIndex in range(self.issuesTable.rowCount()):
+            print(self.issuesTable.item(rowIndex, 0))
             if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
                 self.checkedIssuesList.append(rowIndex)
 

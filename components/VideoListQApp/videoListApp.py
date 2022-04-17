@@ -37,7 +37,6 @@ class VideosList(QWidget):
     def openFolder(self):
         outputFolder = QFileDialog.getExistingDirectory(caption='Select Folder', directory=QDir.currentPath())
         self.videoList = VideoList(outputFolder, 'data.pickle')
-        self.videoList.readData()
         self.listWidget.renderList(self.videoList)
 
     def onClicked(self, item):

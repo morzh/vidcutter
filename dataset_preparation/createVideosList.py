@@ -1,18 +1,20 @@
-import pickle
-import numpy as np
 import json
+import os
+import pickle
+import sys
+
 # import matplotlib.pyplot as plt
 import moviepy
-from moviepy.editor import *
+import numpy as np
 from PyQt5.QtCore import QTime
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication
+from moviepy.editor import *
 
-from vidcutter.VideoList import VideoList
-from vidcutter.VideoItem import VideoItem
 from vidcutter.QPixmapPickle import QPixmapPickle
+from vidcutter.VideoItem import VideoItem
+from vidcutter.VideoList import VideoList
 
-import os, sys
 ci_build_and_not_headless = False
 try:
     from cv2.version import ci_build, headless

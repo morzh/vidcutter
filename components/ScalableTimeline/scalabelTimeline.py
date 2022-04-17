@@ -21,8 +21,8 @@ class scalableTimeline(QWidget):
         self.initUI()
 
     def initUI(self):
-        vbox = QVBoxLayout(self)
-        vbox2 = QVBoxLayout(self)
+        scrollAreaLayout = QVBoxLayout(self)
+
         self.scrollBar = QScrollBar()
         self.scrollBar.setOrientation(Qt.Horizontal)
         self.slider = QSlider()
@@ -32,22 +32,23 @@ class scalableTimeline(QWidget):
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.slider)
         self.scrollArea.setAlignment(Qt.AlignVCenter)
-        vbox.addWidget(self.scrollArea)
+        scrollAreaLayout.addWidget(self.scrollArea)
 
-        # self.slider.setSizePolicy(QSizePolicy.Frame, QSizePolicy.Fixed)
-        '''
-        
-        vbox2.addWidget(self.slider)
-        vbox2.setGeometry(QRect(0, 0, 1800, 100))
-        self.scrollBar.setLayout(vbox2)
-        self.scrollBar.setFixedSize(600, 30)
-        vbox.addWidget(self.scrollBar)
-        self.setLayout(vbox)
-        '''
-        self.setLayout(vbox)
+        buttonLayout = QHBoxLayout(self)
+        buttton_plus = QPushButton()
+        buttton_plus.setText('+')
+        buttton_minus = QPushButton()
+        buttton_minus.setText('-')
+        buttonLayout.addWidget(buttton_plus)
+        buttonLayout.addWidget(buttton_minus)
+
+        scrollAreaLayout.addLayout(buttonLayout)
+
+        self.setLayout(scrollAreaLayout)
         self.setGeometry(200, 200, 800, 20)
-        self.setWindowTitle('QListWidget')
+        self.setWindowTitle('Slider Scroll Text')
         self.show()
+
 
 class SliderInsideScroll(QScrollBar):
     pass
