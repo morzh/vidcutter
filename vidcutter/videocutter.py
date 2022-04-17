@@ -190,7 +190,7 @@ class VideoCutter(QWidget):
         self.clipindex_clips_remove.setCursor(Qt.PointingHandCursor)
         self.clipindex_clips_remove.setEnabled(False)
 
-        if sys.platform in {'win32', 'darwin'}:
+        if sys.platform in {'win', 'darwin'}:
             self.clipindex_move_up.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_move_down.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_clips_remove.setStyle(QStyleFactory.create('Fusion'))
@@ -385,6 +385,7 @@ class VideoCutter(QWidget):
         self.setLayout(layout)
         self.videoSlider.initStyle()
 
+
     @pyqtSlot()
     def showAppMenu(self) -> None:
         pos = self.menuButton.mapToGlobal(self.menuButton.rect().topLeft())
@@ -531,7 +532,7 @@ class VideoCutter(QWidget):
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
 
-        if sys.platform in {'win32', 'darwin'}:
+        if sys.platform in {'win', 'darwin'}:
             self.appmenu.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_contextmenu.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_removemenu.setStyle(QStyleFactory.create('Fusion'))
