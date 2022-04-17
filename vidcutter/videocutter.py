@@ -305,10 +305,10 @@ class VideoCutter(QWidget):
         audioLayout.addSpacing(5)
         audioLayout.addWidget(self.fullscreenButton)
 
-        self.toolbar_open = VCToolBarButton('Open Media', 'Open and load a media file to begin', parent=self)
+        self.toolbar_open = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
         self.toolbar_open.clicked.connect(self.openFolder)
         # self.toolbar_open.clicked.connect(self.openMedia)
-        self.toolbar_play = VCToolBarButton('Play Media', 'Play currently loaded media file', parent=self)
+        self.toolbar_play = VCToolBarButton('Play', 'Play currently loaded media file', parent=self)
         self.toolbar_play.setEnabled(False)
         self.toolbar_play.clicked.connect(self.playMedia)
 
@@ -320,7 +320,7 @@ class VideoCutter(QWidget):
         self.toolbar_end.setEnabled(False)
         self.toolbar_end.clicked.connect(self.clipEnd)
 
-        self.toolbar_save = VCToolBarButton('Save Media', 'Save clips to a new media file', parent=self)
+        self.toolbar_save = VCToolBarButton('Save', 'Save clips to a new media file', parent=self)
         self.toolbar_save.setEnabled(False)
         self.toolbar_save.clicked.connect(self.saveProject)
 
@@ -739,6 +739,11 @@ class VideoCutter(QWidget):
 
         self.videoListWidget.renderList(self.videoList)
         self.videoSlider.setUpdatesEnabled(True)
+        self.cliplist.clear()
+        self.videoSlider.clearRegions()
+        self.videoSlider.setEnabled(False)
+        self.sliderWidget.hideThumbs()
+        self.sliderWidget.setEnabled(False)
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         # if self.currentMedia is None:
@@ -808,6 +813,7 @@ class VideoCutter(QWidget):
             self.mpvWidget.play(self.currentMedia)
             self.videoSlider.setEnabled(True)
             self.videoSlider.setFocus()
+            self.sliderWidget.setEnabled(True)
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
