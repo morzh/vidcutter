@@ -33,6 +33,7 @@ from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+import filelock as filelock
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
                           Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
@@ -746,10 +747,12 @@ class VideoCutter(QWidget):
         self.parent.setEnabled(False)
         data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
         data_filepath = os.path.join(self._dataFolder, self._dataFilename)
+        lock = filelock.FileLock(data_filepath_temporary)
         try:
-            with open(data_filepath_temporary, 'wb') as f:
-                pickle.dump(self.videoList, f)
-            shutil.copy(data_filepath_temporary, data_filepath)
+            with lock.acquire(timeout=10):
+                with open(data_filepath_temporary, 'wb') as f:
+                    pickle.dump(self.videoList, f)
+                shutil.copy(data_filepath_temporary, data_filepath)
         except OSError:
             self.showText('project save failed')
         qApp.restoreOverrideCursor()
