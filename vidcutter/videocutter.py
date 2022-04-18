@@ -95,6 +95,7 @@ class VideoCutter(QWidget):
         self._dataFilename = 'data.pickle'
         self._dataFilenameTemp = 'data.pickle.tmp'
         self.previewPostfix = '.preview.mp4'
+        self.folderOpened = False
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -726,6 +727,7 @@ class VideoCutter(QWidget):
         return filters
 
     def openFolder(self) -> Optional[Callable]:
+        self.folderOpened = False
         cancel, callback = self.saveWarning()
         if cancel:
             if callback is not None:
@@ -740,14 +742,62 @@ class VideoCutter(QWidget):
         self.videoListWidget.renderList(self.videoList)
         self.videoSlider.setUpdatesEnabled(True)
         self.cliplist.clear()
+
         self.videoSlider.clearRegions()
         self.videoSlider.setEnabled(False)
         self.videoSlider.setSliderPosition(0)
+
         self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
 
-        self._initNoVideo()
+        self.frameCounter.hide()
+        self.timeCounter.hide()
+        self.videoplayerWidget.hide()
+        self.novideoWidget.show()
+        self.videoLayout.replaceWidget(self.videoplayerWidget, self.novideoWidget)
+        # self.folderOpened = False
+
+    def loadMedia(self, item) -> None:
+        if not self.folderOpened:
+            self.frameCounter.show()
+            self.timeCounter.show()
+            self.videoplayerWidget.show()
+            self.novideoWidget.hide()
+            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
+            self.mpvWidget.setEnabled(True)
+            self.folderOpened = True
+
+        item_index = self.videoListWidget.row(item)
+        self.videoList.setCurrentVideoIndex(item_index)
+
+        filepath = self.videoList.currentVideoFilepath(self._dataFolder)
+        if not os.path.isfile(filepath):
+            return
+        self.currentMedia = filepath
+        self.currentMediaPreview = filepath + self.previewPostfix
+        self.projectDirty, self.projectSaved = False, False
         self.initMediaControls(True)
+        self.totalRuntime = 0
+        self.taskbar.init()
+        self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
+
+        try:
+            self.videoService.setMedia(self.currentMedia)
+            self.mpvWidget.play(self.currentMedia)
+            self.videoSlider.setEnabled(True)
+            self.videoSlider.setFocus()
+            self.sliderWidget.setEnabled(True)
+            self.mediaAvailable = True
+        except InvalidMediaException:
+            qApp.restoreOverrideCursor()
+            self.initMediaControls(False)
+            self.logger.error('Could not load media file', exc_info=True)
+            QMessageBox.critical(self.parent, 'Could not load media file',
+                                 '<h3>Invalid media file selected</h3><p>All attempts to make sense of the file have '
+                                 'failed. Try viewing it in another media player and if it plays as expected please '
+                                 'report it as a bug. Use the link in the About VidCutter menu option for details '
+                                 'and make sure to include your operating system, video card, the invalid media file '
+                                 'and the version of VidCutter you are currently using.</p>')
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         # if self.currentMedia is None:
@@ -789,46 +839,6 @@ class VideoCutter(QWidget):
         self.projectSaved = False
         self.saveProjectAction.setEnabled(True)
         self.toolbar_save.setEnabled(True)
-
-    def loadMedia(self, item) -> None:
-        item_index = self.videoListWidget.row(item)
-        self.videoList.setCurrentVideoIndex(item_index)
-        # self.videoList.currentVideoIndex = item_index
-        filepath = self.videoList.currentVideoFilepath(self._dataFolder)
-
-        if not os.path.isfile(filepath):
-            return
-        self.currentMedia = filepath
-        self.currentMediaPreview = filepath + self.previewPostfix
-        self.projectDirty, self.projectSaved = False, False
-        self.initMediaControls(True)
-        self.totalRuntime = 0
-        self.taskbar.init()
-        self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
-
-        if not self.mediaAvailable:
-            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
-            self.novideoWidget.hide()
-            self.novideoWidget.deleteLater()
-            self.videoplayerWidget.show()
-            self.mediaAvailable = True
-        try:
-            self.mpvWidget.setEnabled(True)
-            self.videoService.setMedia(self.currentMedia)
-            self.mpvWidget.play(self.currentMedia)
-            self.videoSlider.setEnabled(True)
-            self.videoSlider.setFocus()
-            self.sliderWidget.setEnabled(True)
-        except InvalidMediaException:
-            qApp.restoreOverrideCursor()
-            self.initMediaControls(False)
-            self.logger.error('Could not load media file', exc_info=True)
-            QMessageBox.critical(self.parent, 'Could not load media file',
-                                 '<h3>Invalid media file selected</h3><p>All attempts to make sense of the file have '
-                                 'failed. Try viewing it in another media player and if it plays as expected please '
-                                 'report it as a bug. Use the link in the About VidCutter menu option for details '
-                                 'and make sure to include your operating system, video card, the invalid media file '
-                                 'and the version of VidCutter you are currently using.</p>')
 
 
     def setPlayButton(self, playing: bool=False) -> None:
