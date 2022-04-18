@@ -12,6 +12,15 @@ class VideoList:
         self.videos = []
         self._videoIssuesClasses = videoIssues
 
+    def print(self):
+        print('description:', self._description)
+        print('video issues classes:', self._videoIssuesClasses)
+        print('videos:')
+        print('-' * 50)
+        for video in self.videos:
+            video.print()
+            print('-' * 50)
+
     @staticmethod
     def clamp(x, minimum, maximum):
         return max(minimum, min(x, maximum))

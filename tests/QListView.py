@@ -26,8 +26,6 @@ class DemoListWidget(QDialog):
       _item.setData(Qt.UserRole, 'world')
 
 
-
-
 def main():
    app = QApplication(sys.argv)
    dialog = DemoListWidget()

@@ -1,3 +1,4 @@
+# from operator import itemgetter
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
@@ -16,6 +17,18 @@ class VideoItem:
         elif len(args) == 2:
             self.thumb = args[0]
             self.filename = args[1]
+
+    def print(self):
+        print('filename:', self._filename)
+        print('description:', self.description)
+        print('youtube id:', self.youtube_id)
+        # print('issues classes:', itemgetter(*self.issues)(a))
+        print('issues classes:', self.issues)
+        print('clips:')
+        # print('-' * 30)
+        for clip in self.clips:
+            clip.print()
+            # print('-' * 30)
 
     def clipsLast(self):
         if len(self.clips):
