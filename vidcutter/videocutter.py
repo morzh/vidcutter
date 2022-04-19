@@ -809,18 +809,16 @@ class VideoCutter(QWidget):
         data_filepath = os.path.join(self._dataFolder, self._dataFilename)
         lock = filelock.FileLock(data_filepath_temporary)
         try:
-            with lock.acquire(timeout=100):
-                with open(data_filepath_temporary, 'wb') as f:
-                    pickle.dump(self.videoList, f)
-                shutil.copy(data_filepath_temporary, data_filepath)
+            with open(data_filepath_temporary, 'wb') as f:
+                pickle.dump(self.videoList, f)
+            shutil.copy(data_filepath_temporary, data_filepath)
+            if not reboot:
+                self.showText('project file saved')
+            self.projectSaved = True
         except OSError:
             self.showText('project save failed')
-        qApp.restoreOverrideCursor()
-        self.projectSaved = True
         self.parent.setEnabled(True)
-
-        if not reboot:
-            self.showText('project file saved')
+        qApp.restoreOverrideCursor()
 
     def editVideoDescription(self):
         index = self.videoListWidget.currentRow()
