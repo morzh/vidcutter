@@ -755,18 +755,9 @@ class VideoCutter(QWidget):
         self.videoplayerWidget.hide()
         self.novideoWidget.show()
         self.videoLayout.replaceWidget(self.videoplayerWidget, self.novideoWidget)
-        # self.folderOpened = False
+        self.mpvWidget.setEnabled(False)
 
     def loadMedia(self, item) -> None:
-        if not self.folderOpened:
-            self.frameCounter.show()
-            self.timeCounter.show()
-            self.videoplayerWidget.show()
-            self.novideoWidget.hide()
-            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
-            self.mpvWidget.setEnabled(True)
-            self.folderOpened = True
-
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
 
@@ -782,6 +773,7 @@ class VideoCutter(QWidget):
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
 
         try:
+            self.mpvWidget.setEnabled(True)
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
             self.videoSlider.setEnabled(True)
@@ -799,6 +791,15 @@ class VideoCutter(QWidget):
                                  'and make sure to include your operating system, video card, the invalid media file '
                                  'and the version of VidCutter you are currently using.</p>')
 
+        if not self.folderOpened:
+            self.frameCounter.show()
+            self.timeCounter.show()
+            self.videoplayerWidget.show()
+            self.novideoWidget.hide()
+            self.mpvWidget.setEnabled(True)
+            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
+            self.folderOpened = True
+
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         # if self.currentMedia is None:
         #     return
@@ -808,7 +809,7 @@ class VideoCutter(QWidget):
         data_filepath = os.path.join(self._dataFolder, self._dataFilename)
         lock = filelock.FileLock(data_filepath_temporary)
         try:
-            with lock.acquire(timeout=10):
+            with lock.acquire(timeout=100):
                 with open(data_filepath_temporary, 'wb') as f:
                     pickle.dump(self.videoList, f)
                 shutil.copy(data_filepath_temporary, data_filepath)
