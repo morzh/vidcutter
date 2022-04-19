@@ -473,7 +473,7 @@ class VideoSlider(QSlider):
             if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
                 return False
 
-            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart)
+            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart())
             self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].thumbnail = thumbnail
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
