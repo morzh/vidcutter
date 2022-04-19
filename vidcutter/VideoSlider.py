@@ -470,6 +470,9 @@ class VideoSlider(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
+            if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
+                return False
+
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart)
             self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].thumbnail = thumbnail
             self.parent.renderClipIndex()

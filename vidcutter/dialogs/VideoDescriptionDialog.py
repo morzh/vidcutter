@@ -77,7 +77,6 @@ class VideoDescriptionDialog(QDialog):
         if not self.issuesTableIsComplete:
             return
         self.checkedIssuesList.clear()
-        print(self.issuesTable.rowCount())
         for rowIndex in range(self.issuesTable.rowCount()):
             print(self.issuesTable.item(rowIndex, 0))
             if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
