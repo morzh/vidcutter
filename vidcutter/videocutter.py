@@ -307,7 +307,6 @@ class VideoCutter(QWidget):
 
         self.toolbar_open = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
         self.toolbar_open.clicked.connect(self.openFolder)
-        # self.toolbar_open.clicked.connect(self.openMedia)
         self.toolbar_play = VCToolBarButton('Play', 'Play currently loaded media file', parent=self)
         self.toolbar_play.setEnabled(False)
         self.toolbar_play.clicked.connect(self.playMedia)
@@ -798,9 +797,7 @@ class VideoCutter(QWidget):
                                  'and make sure to include your operating system, video card, the invalid media file '
                                  'and the version of VidCutter you are currently using.</p>')
 
-
-
-    def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
+    def saveProject(self, reboot: bool = False) -> None:
         if self.currentMedia is None:
             return
         self.showText('saving...')

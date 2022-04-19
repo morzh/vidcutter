@@ -21,8 +21,8 @@ class VideoList:
             video.print()
             print('-' * 50)
 
-    def currentVideoClipTimeStart(self) -> QTime:
-        return self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.current_rectangle_index].timeStart
+    def currentVideoClipTimeStart(self, clipIndex : int) -> QTime:
+        return self.videos[self._currentVideoIndex].clips[clipIndex].timeStart
 
     @staticmethod
     def clamp(x, minimum, maximum):
