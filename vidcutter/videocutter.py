@@ -33,7 +33,6 @@ from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
 
-import filelock as filelock
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
                           Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
@@ -750,16 +749,24 @@ class VideoCutter(QWidget):
         self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
 
+        self.videoLayout.replaceWidget(self.videoplayerWidget, self.novideoWidget)
         self.frameCounter.hide()
         self.timeCounter.hide()
         self.videoplayerWidget.hide()
         self.novideoWidget.show()
-        self.videoLayout.replaceWidget(self.videoplayerWidget, self.novideoWidget)
         self.mpvWidget.setEnabled(False)
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
+
+        if not self.folderOpened:
+            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
+            self.frameCounter.show()
+            self.timeCounter.show()
+            self.videoplayerWidget.show()
+            self.novideoWidget.hide()
+            self.folderOpened = True
 
         filepath = self.videoList.currentVideoFilepath(self._dataFolder)
         if not os.path.isfile(filepath):
@@ -791,14 +798,7 @@ class VideoCutter(QWidget):
                                  'and make sure to include your operating system, video card, the invalid media file '
                                  'and the version of VidCutter you are currently using.</p>')
 
-        if not self.folderOpened:
-            self.frameCounter.show()
-            self.timeCounter.show()
-            self.videoplayerWidget.show()
-            self.novideoWidget.hide()
-            self.mpvWidget.setEnabled(True)
-            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
-            self.folderOpened = True
+
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
         if self.currentMedia is None:
@@ -807,7 +807,6 @@ class VideoCutter(QWidget):
         self.parent.setEnabled(False)
         data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
         data_filepath = os.path.join(self._dataFolder, self._dataFilename)
-        lock = filelock.FileLock(data_filepath_temporary)
         try:
             with open(data_filepath_temporary, 'wb') as f:
                 pickle.dump(self.videoList, f)
