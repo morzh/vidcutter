@@ -801,8 +801,8 @@ class VideoCutter(QWidget):
             self.folderOpened = True
 
     def saveProject(self, reboot: bool = False) -> None: #should replace saveProject
-        # if self.currentMedia is None:
-        #     return
+        if self.currentMedia is None:
+            return
         self.showText('saving...')
         self.parent.setEnabled(False)
         data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
