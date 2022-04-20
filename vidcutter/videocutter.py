@@ -741,10 +741,6 @@ class VideoCutter(QWidget):
         self.videoSlider.setUpdatesEnabled(True)
         self.cliplist.clear()
 
-        self.videoSlider.clearRegions()
-        self.videoSlider.setEnabled(False)
-        self.videoSlider.setSliderPosition(0)
-
         self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
 
@@ -754,6 +750,8 @@ class VideoCutter(QWidget):
         self.videoplayerWidget.hide()
         self.novideoWidget.show()
         self.mpvWidget.setEnabled(False)
+        self.mediaAvailable = False
+        self.initMediaControls(False)
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)

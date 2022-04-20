@@ -78,7 +78,6 @@ class VideoDescriptionDialog(QDialog):
             return
         self.checkedIssuesList.clear()
         for rowIndex in range(self.issuesTable.rowCount()):
-            print(self.issuesTable.item(rowIndex, 0))
             if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
                 self.checkedIssuesList.append(rowIndex)
 
