@@ -732,15 +732,18 @@ class VideoCutter(QWidget):
                 return callback()
             else:
                 return
+
         self._dataFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
         filepath = os.path.join(self._dataFolder, self._dataFilename)
         with open(filepath, 'rb') as f:
             self.videoList = pickle.load(f)
 
-        self.videoListWidget.renderList(self.videoList)
         self.videoSlider.setUpdatesEnabled(True)
+        self.videoSlider.removeThumbs()
         self.cliplist.clear()
 
+
+        self.videoListWidget.renderList(self.videoList)
         self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
 
