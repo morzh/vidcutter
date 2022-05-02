@@ -21,13 +21,16 @@ class scalableTimeline(QWidget):
         self.initUI()
 
     def initUI(self):
+        self.sliderBaseWidth = 770
+        self.factor = 1
+        self.factor_maximum = 16
         scrollAreaLayout = QVBoxLayout(self)
 
         self.scrollBar = QScrollBar()
         self.scrollBar.setOrientation(Qt.Horizontal)
         self.slider = QSlider()
         self.slider.setOrientation(Qt.Horizontal)
-        self.slider.setFixedSize(1800, 10)
+        self.slider.setFixedSize(self.sliderBaseWidth, 10)
 
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.slider)
@@ -39,8 +42,14 @@ class scalableTimeline(QWidget):
         buttton_plus.setText('+')
         buttton_minus = QPushButton()
         buttton_minus.setText('-')
+        self.label_factor = QLabel()
+        self.label_factor.setText('1')
         buttonLayout.addWidget(buttton_plus)
         buttonLayout.addWidget(buttton_minus)
+        buttonLayout.addWidget(self.label_factor)
+
+        buttton_plus.clicked.connect(self.increaseSliderWidth)
+        buttton_minus.clicked.connect(self.decreaseSliderWidth)
 
         scrollAreaLayout.addLayout(buttonLayout)
 
@@ -49,6 +58,26 @@ class scalableTimeline(QWidget):
         self.setWindowTitle('Slider Scroll Text')
         self.show()
 
+    def clip(self, val, min_, max_):
+        return min_ if val < min_ else max_ if val > max_ else val
+
+    def increaseSliderWidth(self):
+        if self.factor == 1:
+            self.factor += 1
+        else:
+            self.factor += 2
+        self.factor = self.clip(self.factor, 1, self.factor_maximum)
+        self.label_factor.setText(str(self.factor))
+        self.slider.setFixedWidth(self.factor * self.sliderBaseWidth)
+
+    def decreaseSliderWidth(self):
+        if self.factor == 2:
+            self.factor -= 1
+        else:
+            self.factor -= 2
+        self.factor = self.clip(self.factor, 1, self.factor_maximum)
+        self.label_factor.setText(str(self.factor))
+        self.slider.setFixedWidth(self.factor * self.sliderBaseWidth)
 
 class SliderInsideScroll(QScrollBar):
     pass
