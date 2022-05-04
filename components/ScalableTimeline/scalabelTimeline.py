@@ -18,9 +18,7 @@ from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, 
 class scalableTimeline(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
 
-    def initUI(self):
         self.sliderBaseWidth = 770
         self.factor = 1
         self.factor_maximum = 16
@@ -31,6 +29,7 @@ class scalableTimeline(QWidget):
         self.slider = QSlider()
         self.slider.setOrientation(Qt.Horizontal)
         self.slider.setFixedSize(self.sliderBaseWidth, 10)
+        self.slider.setTickInterval(self.sliderBaseWidth)
 
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.slider)
@@ -69,6 +68,7 @@ class scalableTimeline(QWidget):
         self.factor = self.clip(self.factor, 1, self.factor_maximum)
         self.label_factor.setText(str(self.factor))
         self.slider.setFixedWidth(self.factor * self.sliderBaseWidth)
+        self.slider.setMaximum(self.factor * self.sliderBaseWidth)
 
     def decreaseSliderWidth(self):
         if self.factor == 2:
@@ -78,6 +78,7 @@ class scalableTimeline(QWidget):
         self.factor = self.clip(self.factor, 1, self.factor_maximum)
         self.label_factor.setText(str(self.factor))
         self.slider.setFixedWidth(self.factor * self.sliderBaseWidth)
+        self.slider.setMaximum(self.factor * self.sliderBaseWidth)
 
 class SliderInsideScroll(QScrollBar):
     pass
