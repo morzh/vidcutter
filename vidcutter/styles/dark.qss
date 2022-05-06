@@ -744,6 +744,24 @@ VCToolBarButton QLabel:disabled, VCToolBarButton#savebutton QLabel:disabled {
 
 /* -------------------------------------------------------------------------- */
 
+VCToolBarButton QPushButton#toolbar-plus {
+    border-image: url(:/images/dark/toolbar-open.png);
+}
+
+VCToolBarButton QPushButton:disabled#toolbar-plus {
+    border-image: url(:/images/dark/toolbar-open-disabled.png);
+}
+
+VCToolBarButton QPushButton:hover#toolbar-plus {
+    border-image: url(:/images/dark/toolbar-open-hover.png);
+}
+
+VCToolBarButton QPushButton:pressed#toolbar-plus {
+    border-image: url(:/images/dark/toolbar-open-pressed.png);
+}
+
+/* -------------------------------------------------------------------------- */
+
 VCToolBarButton QPushButton#toolbar-open {
     border-image: url(:/images/dark/toolbar-open.png);
 }

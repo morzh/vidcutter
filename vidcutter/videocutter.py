@@ -339,6 +339,24 @@ class VideoCutter(QWidget):
         # toolbarLayout.addStretch(1)
         # toolbarLayout.addWidget(self.toolbar_send)
 
+        self.timeline_plus_button = QPushButton()
+        self.timeline_plus_button.setObjectName('toolbar-plus')
+        self.timeline_factor_label = QLabel()
+        self.timeline_factor_label.setText('1')
+        self.timeline_factor_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.timeline_factor_label.setFixedSize(40, 40)
+        self.timeline_factor_label.setAlignment(Qt.AlignCenter)
+        # self.timeline_factor_label.setMinimumSize(30, 30)
+        self.timeline_minus_button = QPushButton()
+
+        scale_timeline_layout = QHBoxLayout()
+        scale_timeline_layout.setContentsMargins(0, 0, 0, 0)
+        scale_timeline_layout.addStretch(1)
+        scale_timeline_layout.setContentsMargins(0, 0, 0, 0)
+        scale_timeline_layout.addWidget(self.timeline_minus_button)
+        scale_timeline_layout.addWidget(self.timeline_factor_label)
+        scale_timeline_layout.addWidget(self.timeline_plus_button)
+
         self.toolbarGroup = QGroupBox()
         self.toolbarGroup.setLayout(toolbarLayout)
         self.toolbarGroup.setStyleSheet('QGroupBox { border: 0; }')
@@ -365,7 +383,7 @@ class VideoCutter(QWidget):
             controlsLayout.addSpacing(5)
         else:
             controlsLayout.setContentsMargins(10, 10, 10, 0)
-        # controlsLayout.addLayout(togglesLayout)
+        controlsLayout.addLayout(scale_timeline_layout)
         controlsLayout.addSpacing(20)
         controlsLayout.addStretch(1)
         controlsLayout.addWidget(self.toolbarGroup)
