@@ -726,6 +726,39 @@ VCToolBarButton QLabel:disabled, VCToolBarButton#savebutton QLabel:disabled {
 }
 
 /* -------------------------------------------------------------------------- */
+VCToolBarButton QPushButton#toolbar-plus {
+    border-image: url(:/images/light/toolbar-plus.png);
+}
+
+VCToolBarButton QPushButton:disabled#toolbar-plus {
+    border-image: url(:/images/light/toolbar-plus-disabled.png);
+}
+
+VCToolBarButton QPushButton:hover#toolbar-plus {
+    border-image: url(:/images/light/toolbar-plus-hover.png);
+}
+
+VCToolBarButton QPushButton:pressed#toolbar-plus {
+    border-image: url(:/images/light/toolbar-plus-pressed.png);
+}
+/* -------------------------------------------------------------------------- */
+VCToolBarButton QPushButton#toolbar-minus {
+    border-image: url(:/images/light/toolbar-minus.png);
+}
+
+VCToolBarButton QPushButton:disabled#toolbar-minus {
+    border-image: url(:/images/light/toolbar-minus-disabled.png);
+}
+
+VCToolBarButton QPushButton:hover#toolbar-minus {
+    border-image: url(:/images/light/toolbar-minus-hover.png);
+}
+
+VCToolBarButton QPushButton:pressed#toolbar-minus {
+    border-image: url(:/images/light/toolbar-minus-pressed.png);
+}
+/* -------------------------------------------------------------------------- */
+
 
 VCToolBarButton QPushButton#toolbar-open {
     border-image: url(:/images/light/toolbar-open.png);
