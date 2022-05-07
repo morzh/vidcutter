@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import (qApp, QDialog, QDialogButtonBox, QDoubleSpinBox, QG
 class VCToolBarButton(QWidget):
     clicked = pyqtSignal(bool)
 
-    def __init__(self, label: str, statustip: str, labelstyle: str='beside', parent=None):
+    def __init__(self, label: str, statustip: str, labelstyle: str='beside', parent=None, has_label: bool = True):
         super(VCToolBarButton, self).__init__(parent)
         self.setFocusPolicy(Qt.NoFocus)
         self.button = QPushButton(parent)
@@ -58,7 +58,7 @@ class VCToolBarButton(QWidget):
         layout.addWidget(self.label1, 0, 1)
         layout.addWidget(self.label2, 1, 0)
         self.setLayout(layout)
-        self.setLabelStyle(labelstyle)
+        self.setLabelStyle(labelstyle, has_label)
 
     def setup(self, label: str, statustip: str, reset: bool=False) -> None:
         self.button.setToolTip(label)
@@ -69,11 +69,11 @@ class VCToolBarButton(QWidget):
             self.label2.setText(label)
             self.button.setStyleSheet('')
 
-    def setLabelStyle(self, labelstyle: str) -> None:
+    def setLabelStyle(self, labelstyle: str, has_label: bool = True) -> None:
         if labelstyle == 'under':
             self.label1.setVisible(False)
             self.label2.setVisible(True)
-        elif labelstyle == 'none':
+        elif labelstyle == 'none' or not has_label:
             self.label1.setVisible(False)
             self.label2.setVisible(False)
         else:

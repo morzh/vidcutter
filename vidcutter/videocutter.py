@@ -95,6 +95,7 @@ class VideoCutter(QWidget):
         self._dataFilenameTemp = 'data.pickle.tmp'
         self.previewPostfix = '.preview.mp4'
         self.folderOpened = False
+        self.factor = 1
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -341,14 +342,20 @@ class VideoCutter(QWidget):
 
         # self.timeline_plus_button = QPushButton()
         # self.timeline_plus_button.setStyleSheet('toolbar-plus')
-        self.timeline_plus_button = VCToolBarButton('Plus', 'Increase timeline scale', parent=self)
+        self.timeline_plus_button = VCToolBarButton('Plus', 'Increase timeline scale', parent=self, has_label=False)
+        self.timeline_plus_button.button.setFixedSize(30, 32)
+        self.timeline_plus_button.clicked.connect(self.toolbarPlus)
         self.timeline_factor_label = QLabel()
         self.timeline_factor_label.setText('1')
         self.timeline_factor_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.timeline_factor_label.setFixedSize(40, 40)
         self.timeline_factor_label.setAlignment(Qt.AlignCenter)
+        self.timeline_factor_label.setFont(QFont('Verdana', 15))
+        self.timeline_factor_label.setStyleSheet("font-weight: bold; color: grey")
         # self.timeline_factor_label.setMinimumSize(30, 30)
-        self.timeline_minus_button = VCToolBarButton('Minus', 'Increase timeline scale', parent=self)
+        self.timeline_minus_button = VCToolBarButton('Minus', 'Increase timeline scale', parent=self, has_label=False)
+        self.timeline_minus_button.button.setFixedSize(30, 32)
+        self.timeline_minus_button.clicked.connect(self.toolbarMinus)
 
         scale_timeline_layout = QHBoxLayout()
         scale_timeline_layout.setContentsMargins(0, 0, 0, 0)
@@ -405,6 +412,25 @@ class VideoCutter(QWidget):
         self.setLayout(layout)
         self.videoSlider.initStyle()
 
+    def clip(self, val, min_, max_):
+        return min_ if val < min_ else max_ if val > max_ else val
+
+    def toolbarPlus(self):
+        if self.factor == 1:
+            self.factor += 1
+        else:
+            self.factor += 2
+        self.factor = self.clip(self.factor, 1, 18)
+        self.timeline_factor_label.setText(str(self.factor))
+
+
+    def toolbarMinus(self):
+        if self.factor == 2:
+            self.factor -= 1
+        else:
+            self.factor -= 2
+        self.factor = self.clip(self.factor, 1, 18)
+        self.timeline_factor_label.setText(str(self.factor))
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
