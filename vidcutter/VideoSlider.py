@@ -10,8 +10,8 @@ from enum import Enum
 
 from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot, QPoint
 from PyQt5.QtGui import QColor, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent
-from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle,
-                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication)
+from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle, QScrollArea,
+                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QVBoxLayout, QApplication, QScrollBar)
 
 from vidcutter.libs.videoservice import VideoService
 
@@ -26,6 +26,25 @@ class RectangleEditState(Enum):
     BEGIN_SIDE_EDIT = 3
     END_SIDE_EDIT = 4
     RECTANGLE_MOVE = 5
+
+class VideoSliderScaleContainer(QWidget):
+    def __init__(self, parent=None):
+        super(VideoSliderScaleContainer, self).__init__(parent)
+        scrollAreaLayout = QVBoxLayout(self)
+        self.parent = parent
+
+        self.scrollBar = QScrollBar()
+        self.scrollBar.setOrientation(Qt.Horizontal)
+        self.slider = VideoSlider(self)
+        # self.slider.setOrientation(Qt.Horizontal)
+        # self.slider.setFixedSize(self.sliderBaseWidth, 10)
+        # self.slider.setTickInterval(self.sliderBaseWidth)
+
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidget(self.slider)
+        self.scrollArea.setAlignment(Qt.AlignVCenter)
+        scrollAreaLayout.addWidget(self.scrollArea)
+        self.setLayout(scrollAreaLayout)
 
 class VideoSlider(QSlider):
     def __init__(self, parent=None):

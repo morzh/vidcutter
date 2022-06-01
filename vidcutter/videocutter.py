@@ -51,7 +51,7 @@ from vidcutter.mediastream import StreamSelector
 from vidcutter.dialogs.settings import SettingsDialog
 from vidcutter.dialogs.updater import Updater
 from vidcutter.VideoClipsListWidget import VideoClipsListWidget
-from vidcutter.VideoSlider import VideoSlider
+from vidcutter.VideoSlider import VideoSlider, VideoSliderScaleContainer
 from vidcutter.VideoSliderWidget import VideoSliderWidget
 from vidcutter.VideoStyle import VideoStyleDark, VideoStyleLight
 
@@ -100,7 +100,8 @@ class VideoCutter(QWidget):
         self.initTheme()
         self.updater = Updater(self.parent)
 
-        self.videoSlider = VideoSlider(self)
+        # self.videoSlider = VideoSlider(self)
+        self.videoSlider = VideoSliderScaleContainer(self)
         self.videoSlider.setEnabled(False)
         self.videoSlider.setTracking(True)
         self.videoSlider.setMouseTracking(True)
@@ -1169,7 +1170,6 @@ class VideoCutter(QWidget):
         else:
             self.clipindex_move_up.setEnabled(False)
             self.clipindex_move_down.setEnabled(False)
-
 
     def renderClipIndex(self) -> None: #should replace renderClipIndex()
         self.videoSlider.clearRegions()
