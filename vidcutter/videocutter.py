@@ -100,8 +100,8 @@ class VideoCutter(QWidget):
         self.initTheme()
         self.updater = Updater(self.parent)
 
-        # self.videoSlider = VideoSlider(self)
-        self.videoSlider = VideoSliderScaleContainer(self)
+        self.videoSlider = VideoSlider(self)
+        # self.videoSlider = VideoSliderScaleContainer(self)
         self.videoSlider.setEnabled(False)
         self.videoSlider.setTracking(True)
         self.videoSlider.setMouseTracking(True)
