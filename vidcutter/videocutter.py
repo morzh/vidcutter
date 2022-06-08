@@ -51,7 +51,7 @@ from vidcutter.mediastream import StreamSelector
 from vidcutter.dialogs.settings import SettingsDialog
 from vidcutter.dialogs.updater import Updater
 from vidcutter.VideoClipsListWidget import VideoClipsListWidget
-from vidcutter.VideoSlider import VideoSlider, VideoSliderScaleContainer
+from vidcutter.VideoSlider import VideoSlider
 from vidcutter.VideoSliderWidget import VideoSliderWidget
 from vidcutter.VideoStyle import VideoStyleDark, VideoStyleLight
 
@@ -60,8 +60,8 @@ from vidcutter.libs.mpvwidget import mpvWidget
 from vidcutter.libs.notifications import JobCompleteNotification
 from vidcutter.libs.taskbarprogress import TaskbarProgress
 from vidcutter.libs.videoservice import VideoService
-from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCChapterInputDialog, VCMessageBox, VCProgressDialog, VCTimeCounter,
-                                    VCToolBarButton, VCVolumeSlider, VCConfirmDialog)
+from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCChapterInputDialog, VCMessageBox,
+                                    VCProgressDialog, VCTimeCounter, VCToolBarButton, VCVolumeSlider, VCConfirmDialog)
 
 from vidcutter.VideoItemClip import VideoItemClip
 
@@ -418,9 +418,11 @@ class VideoCutter(QWidget):
         self.videoSlider.initStyle()
 
         windowSize = self.parent.size()
-        print(windowSize)
-        self.sliderWidgetScroll.setFixedWidth(windowSize.width())
-        self.videoSlider.setFixedWidth(windowSize.width() - 22)
+        self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
+        self.sliderWidgetScroll.setFixedHeight(157)
+        self.sliderWidget.setFixedHeight(155)
+        self.videoSlider.setFixedHeight(153)
+        self.sliderWidget.setFixedWidth(windowSize.width() - 20)
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val

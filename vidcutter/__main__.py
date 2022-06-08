@@ -90,22 +90,7 @@ class MainWindow(QMainWindow):
         self.scale = 'LOW' if screen_size.width() <= 1024 else 'NORMAL'
         self.setMinimumSize(self.get_size(self.scale))
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    '''
-    @pyqtSlot(str)
-    def file_opener(self, filename: str) -> None:
-        try:
-            if QFileInfo(filename).suffix() == 'vcp':
-                self.cutter.openProject(project_file=filename)
-                if filename == os.path.join(QDir.tempPath(), MainWindow.TEMP_PROJECT_FILE):
-                    os.remove(os.path.join(QDir.tempPath(), MainWindow.TEMP_PROJECT_FILE))
-            else:
-                self.cutter.loadMedia(filename)
-        except (FileNotFoundError, PermissionError):
-            QMessageBox.critical(self, 'Error loading file', sys.exc_info()[0])
-            logging.exception('Error loading file')
-            qApp.restoreOverrideCursor()
-            self.restart()
-    '''
+
     @staticmethod
     def get_size(mode: str='NORMAL') -> QSize:
         modes = {
