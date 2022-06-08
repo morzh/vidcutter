@@ -419,9 +419,9 @@ class VideoCutter(QWidget):
 
         windowSize = self.parent.size()
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
-        self.sliderWidgetScroll.setFixedHeight(157)
-        self.sliderWidget.setFixedHeight(155)
-        self.videoSlider.setFixedHeight(153)
+        self.sliderWidgetScroll.setFixedHeight(120)
+        self.sliderWidget.setFixedHeight(118)
+        self.videoSlider.setFixedHeight(116)
         self.sliderWidget.setFixedWidth(windowSize.width() - 20)
 
     def clip(self, val, min_, max_):

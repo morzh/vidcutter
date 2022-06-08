@@ -27,25 +27,6 @@ class RectangleEditState(Enum):
     END_SIDE_EDIT = 4
     RECTANGLE_MOVE = 5
 
-class VideoSliderScaleContainer(QWidget):
-    def __init__(self, parent=None):
-        super(VideoSliderScaleContainer, self).__init__(parent)
-        scrollAreaLayout = QVBoxLayout(self)
-        self.parent = parent
-
-        self.scrollBar = QScrollBar()
-        self.scrollBar.setOrientation(Qt.Horizontal)
-        self.slider = VideoSlider(self)
-        # self.slider.setOrientation(Qt.Horizontal)
-        # self.slider.setFixedSize(self.sliderBaseWidth, 10)
-        # self.slider.setTickInterval(self.sliderBaseWidth)
-
-        self.scrollArea = QScrollArea()
-        self.scrollArea.setWidget(self.slider)
-        self.scrollArea.setAlignment(Qt.AlignVCenter)
-        scrollAreaLayout.addWidget(self.scrollArea)
-        self.setLayout(scrollAreaLayout)
-
 class VideoSlider(QSlider):
     def __init__(self, parent=None):
         super(VideoSlider, self).__init__(parent)
@@ -114,6 +95,8 @@ class VideoSlider(QSlider):
 
         self.widgetWidth = int()
         self.frameCounterMaximum = -1
+
+        self.thumbsize = QSize()
 
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
