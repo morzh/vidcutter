@@ -38,7 +38,7 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget)
+                             QVBoxLayout, QWidget, QScrollArea)
 
 import sip
 
@@ -112,6 +112,8 @@ class VideoCutter(QWidget):
         self.sliderWidget.setLoader(True)
         self.sliderWidget.setMouseTracking(False)
 
+        self.sliderWidgetScroll = QScrollArea()
+        # self.sliderWidgetScroll.add
         self.taskbar = TaskbarProgress(self.parent)
 
 
