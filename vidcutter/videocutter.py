@@ -113,9 +113,13 @@ class VideoCutter(QWidget):
         self.sliderWidget.setMouseTracking(False)
 
         self.sliderWidgetScroll = QScrollArea()
+        self.sliderWidgetScroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.sliderWidgetScroll.setFixedHeight(62)
+        self.sliderWidgetScroll.setWidget(self.sliderWidget)
+        self.sliderWidgetScroll.setAlignment(Qt.AlignCenter)
+        self.sliderWidgetScroll.setContentsMargins(0, 0, 0, 0)
         # self.sliderWidgetScroll.add
         self.taskbar = TaskbarProgress(self.parent)
-
 
         self.videoList = None
         self.videoListWidget = VideoListWidget(parent=self)
@@ -405,12 +409,15 @@ class VideoCutter(QWidget):
         layout.setSpacing(0)
         layout.setContentsMargins(10, 10, 10, 0)
         layout.addLayout(self.videoLayout)
-        layout.addWidget(self.sliderWidget)
+        layout.addWidget(self.sliderWidgetScroll)
+        # layout.addWidget(self.sliderWidget)
         layout.addSpacing(5)
         layout.addLayout(controlsLayout)
 
         self.setLayout(layout)
         self.videoSlider.initStyle()
+
+
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
