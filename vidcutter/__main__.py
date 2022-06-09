@@ -279,6 +279,7 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
+        self.cutter.setTimelineSize()
         try:
             if self.isEnabled() and self.cutter.mediaAvailable and self.cutter.thumbnailsButton.isChecked():
                 if self.cutter.videoSlider.thumbnailsOn:

@@ -441,11 +441,8 @@ class VideoCutter(QWidget):
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
         self.setTimelineSize()
-
-        if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
-            if self.videoSlider.thumbnailsOn:
-                self.sliderWidget.setLoader(True)
-                self.sliderWidget.hideThumbs()
+        self.videoSlider.initThumbs()
+        self.renderClipIndex()
 
     def toolbarMinus(self):
         if self.factor == 2:
@@ -455,6 +452,8 @@ class VideoCutter(QWidget):
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
         self.setTimelineSize()
+        self.videoSlider.initThumbs()
+        self.renderClipIndex()
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
@@ -1198,13 +1197,15 @@ class VideoCutter(QWidget):
             self.clipindex_move_down.setEnabled(False)
 
     def renderClipIndex(self) -> None: #should replace renderClipIndex()
+        if not self.mediaAvailable:
+            return
         self.videoSlider.clearRegions()
         self.totalRuntime = 0
         self.cliplist.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
         if len(self.videoList.videos[self.videoList.currentVideoIndex].clips) and not self.inCut:
             self.toolbar_save.setEnabled(True)
             self.saveProjectAction.setEnabled(True)
-        if self.inCut or len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0 or  self.videoList.videos[self.videoList.currentVideoIndex].clips[0].timeEnd.isNull():
+        if self.inCut or len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0 or self.videoList.videos[self.videoList.currentVideoIndex].clips[0].timeEnd.isNull():
             self.toolbar_save.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
