@@ -441,8 +441,9 @@ class VideoCutter(QWidget):
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
         self.setTimelineSize()
-        self.videoSlider.initThumbs()
-        self.renderClipIndex()
+        if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
+            self.videoSlider.initThumbs()
+            self.renderClipIndex()
 
     def toolbarMinus(self):
         if self.factor == 2:
@@ -452,8 +453,9 @@ class VideoCutter(QWidget):
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
         self.setTimelineSize()
-        self.videoSlider.initThumbs()
-        self.renderClipIndex()
+        if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
+            self.videoSlider.initThumbs()
+            self.renderClipIndex()
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
