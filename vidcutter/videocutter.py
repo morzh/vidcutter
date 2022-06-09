@@ -443,8 +443,9 @@ class VideoCutter(QWidget):
         self.timeline_factor_label.setText(str(self.factor))
         # self.videoSlider.removeThumbs()
         self.setTimelineSize()
-        if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
-            self.videoSlider.initThumbs()
+        if self.parent.isEnabled() and self.mediaAvailable:
+            if self.thumbnailsButton.isChecked():
+                self.videoSlider.initThumbs()
             self.renderClipIndex()
 
     @pyqtSlot()
@@ -457,8 +458,9 @@ class VideoCutter(QWidget):
         self.timeline_factor_label.setText(str(self.factor))
         # self.videoSlider.removeThumbs()
         self.setTimelineSize()
-        if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
-            self.videoSlider.initThumbs()
+        if self.parent.isEnabled() and self.mediaAvailable:
+            if self.thumbnailsButton.isChecked():
+                self.videoSlider.initThumbs()
             self.renderClipIndex()
 
     @pyqtSlot()
