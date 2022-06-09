@@ -10,8 +10,8 @@ from enum import Enum
 
 from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot, QPoint
 from PyQt5.QtGui import QColor, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent
-from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle, QScrollArea,
-                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QVBoxLayout, QApplication, QScrollBar)
+from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle,
+                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication, QScrollBar)
 
 from vidcutter.libs.videoservice import VideoService
 
@@ -216,14 +216,10 @@ class VideoSlider(QSlider):
         if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
             begin = self._regions[self.currentRectangleIndex].topLeft()
             end = self._regions[self.currentRectangleIndex].bottomLeft()
-            # brushcolor = QColor(237, 242, 255, 150)
-            # painter.setBrush(brushcolor)
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_ON_END_SIDE:
             begin = self._regions[self.currentRectangleIndex].topRight()
             end = self._regions[self.currentRectangleIndex].bottomRight()
-            brushcolor = QColor(237, 242, 255, 150)
-            # painter.setBrush(brushcolor)
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_IS_INSIDE:
             brushcolor = QColor(237, 242, 255, 150)
@@ -397,6 +393,7 @@ class VideoSlider(QSlider):
             thumbslayout.addWidget(thumblabel)
         thumbnails = QWidget(self)
         thumbnails.setLayout(thumbslayout)
+        '''
         filmlabel = QLabel()
         filmlabel.setObjectName('filmstrip')
         filmlabel.setFixedHeight(VideoService.config.thumbnails['TIMELINE'].height() + 2)
@@ -405,10 +402,11 @@ class VideoSlider(QSlider):
         filmlayout.setContentsMargins(0, 0, 0, 16)
         filmlayout.setSpacing(0)
         filmlayout.addWidget(filmlabel)
+        '''
         filmstrip = QWidget(self)
-        filmstrip.setLayout(filmlayout)
+        # filmstrip.setLayout(filmlayout)
         self.removeThumbs()
-        self.parent.sliderWidget.addWidget(filmstrip)
+        # self.parent.sliderWidget.addWidget(filmstrip)
         self.parent.sliderWidget.addWidget(thumbnails)
         self.thumbnailsOn = True
         self.initStyle()

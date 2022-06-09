@@ -118,6 +118,7 @@ class VideoCutter(QWidget):
         self.sliderWidgetScroll.setWidget(self.sliderWidget)
         self.sliderWidgetScroll.setAlignment(Qt.AlignCenter)
         self.sliderWidgetScroll.setContentsMargins(0, 0, 0, 0)
+        self.sliderWidgetScroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         # self.sliderWidgetScroll.add
         self.taskbar = TaskbarProgress(self.parent)
 
@@ -416,13 +417,18 @@ class VideoCutter(QWidget):
 
         self.setLayout(layout)
         self.videoSlider.initStyle()
+        self.setTimelineSize()
 
+
+    def setTimelineSize(self):
         windowSize = self.parent.size()
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
-        self.sliderWidgetScroll.setFixedHeight(118)
-        self.sliderWidget.setFixedHeight(116)
-        self.videoSlider.setFixedHeight(114)
-        self.sliderWidget.setFixedWidth(windowSize.width() - 20)
+        self.sliderWidgetScroll.setFixedHeight(126)
+        self.sliderWidget.setFixedHeight(110)
+        self.sliderWidget.setFixedWidth(self.factor*windowSize.width() - 20)
+        self.videoSlider.setFixedHeight(108)
+        self.videoSlider.setFixedWidth(self.factor*windowSize.width() - 20)
+
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -434,7 +440,12 @@ class VideoCutter(QWidget):
             self.factor += 2
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
+        self.setTimelineSize()
 
+        if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
+            if self.videoSlider.thumbnailsOn:
+                self.sliderWidget.setLoader(True)
+                self.sliderWidget.hideThumbs()
 
     def toolbarMinus(self):
         if self.factor == 2:
@@ -443,6 +454,7 @@ class VideoCutter(QWidget):
             self.factor -= 2
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
+        self.setTimelineSize()
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
