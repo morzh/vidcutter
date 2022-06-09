@@ -433,6 +433,7 @@ class VideoCutter(QWidget):
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
 
+    @pyqtSlot()
     def toolbarPlus(self):
         if self.factor == 1:
             self.factor += 1
@@ -445,6 +446,7 @@ class VideoCutter(QWidget):
             self.videoSlider.initThumbs()
             self.renderClipIndex()
 
+    @pyqtSlot()
     def toolbarMinus(self):
         if self.factor == 2:
             self.factor -= 1
@@ -841,6 +843,7 @@ class VideoCutter(QWidget):
         filepath = self.videoList.currentVideoFilepath(self._dataFolder)
         if not os.path.isfile(filepath):
             return
+        self.videoSlider.removeThumbs()
         self.currentMedia = filepath
         self.currentMediaPreview = filepath + self.previewPostfix
         self.projectDirty, self.projectSaved = False, False
