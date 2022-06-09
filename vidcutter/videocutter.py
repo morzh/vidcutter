@@ -441,6 +441,7 @@ class VideoCutter(QWidget):
             self.factor += 2
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
+        # self.videoSlider.removeThumbs()
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
             self.videoSlider.initThumbs()
@@ -454,6 +455,7 @@ class VideoCutter(QWidget):
             self.factor -= 2
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
+        # self.videoSlider.removeThumbs()
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable and self.thumbnailsButton.isChecked():
             self.videoSlider.initThumbs()
