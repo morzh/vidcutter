@@ -6,9 +6,9 @@ from vidcutter.VideoItem import VideoItem
 
 
 class VideoList:
-    def __init__(self, videoIssues: list):
+    def __init__(self, videoIssues):
         self._description = ''
-        self._currentVideoIndex = 0
+        self._current_video_index = 0
         self.videos = []
         self._videoIssuesClasses = videoIssues
 
@@ -21,8 +21,8 @@ class VideoList:
             video.print()
             print('-' * 50)
 
-    def currentVideoClipTimeStart(self, clipIndex : int) -> QTime:
-        return self.videos[self._currentVideoIndex].clips[clipIndex].timeStart
+    def currentVideoClipTimeStart(self, clip_index: int) -> QTime:
+        return self.videos[self._current_video_index].clips[clip_index].timeStart
 
     @staticmethod
     def clamp(x, minimum, maximum):
@@ -77,48 +77,48 @@ class VideoList:
         self._absolutePath = path
 
     @property
-    def currentVideoIndex(self):
-        return self._currentVideoIndex
+    def current_video_index(self):
+        return self._current_video_index
 
-    @currentVideoIndex.setter
-    def currentVideoIndex(self, index: int) -> None:
+    @current_video_index.setter
+    def current_video_index(self, index: int) -> None:
         if index < 0:
             index *= -1
-        self._currentVideoIndex = index
+        self._current_video_index = index
 
     def setCurrentVideoIndex(self, index: int) -> None:
         if index < 0:
             index *= -1
-        self._currentVideoIndex = index
+        self._current_video_index = index
 
-    def currentVideoFilepath(self, folderPath: str):
-        return os.path.join(folderPath, self.videos[self._currentVideoIndex].filename)
+    def currentVideoFilepath(self, folder_path: str):
+        return os.path.join(folder_path, self.videos[self._current_video_index].filename)
 
     def setCurrentVideoClipIndex(self, index):
         if len(self.videos):
-            self.videos[self._currentVideoIndex].currentClipIndex = index
+            self.videos[self._current_video_index].currentClipIndex = index
 
     def setCurrentVideoClipStartTime(self, time: QTime):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].timeStart = time
+        currentClipIndex = self.videos[self._current_video_index].currentClipIndex
+        self.videos[self._current_video_index].clips[currentClipIndex].timeStart = time
 
     def setCurrentVideoClipEndTime(self, time: QTime):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].timeEnd = time
+        currentClipIndex = self.videos[self._current_video_index].currentClipIndex
+        self.videos[self._current_video_index].clips[currentClipIndex].timeEnd = time
 
     def setCurrentVideoClipThumbnail(self, thumbnail: QPixmap):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].thumbnail = thumbnail
+        currentClipIndex = self.videos[self._current_video_index].currentClipIndex
+        self.videos[self._current_video_index].clips[currentClipIndex].thumbnail = thumbnail
 
     def setCurrentVideoClipName(self, name: str):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].name = name
+        currentClipIndex = self.videos[self._current_video_index].currentClipIndex
+        self.videos[self._current_video_index].clips[currentClipIndex].name = name
 
     def setCurrentVideoClipDescription(self, description: str):
-        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].description = description
+        currentClipIndex = self.videos[self._current_video_index].currentClipIndex
+        self.videos[self._current_video_index].clips[currentClipIndex].description = description
 
     def setCurrentVideoClipVisibility(self, visibility: int):
         visibility = VideoList.clamp(visibility, 0, 2)
-        currentClipIndex = self.videos[self._currentVideoIndex].currentClipIndex
-        self.videos[self._currentVideoIndex].clips[currentClipIndex].visibility = visibility
+        currentClipIndex = self.videos[self._current_video_index].currentClipIndex
+        self.videos[self._current_video_index].clips[currentClipIndex].visibility = visibility

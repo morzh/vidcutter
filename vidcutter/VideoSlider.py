@@ -98,6 +98,12 @@ class VideoSlider(QSlider):
 
         self.thumbsize = QSize()
 
+    def init_attributes(self):
+        self.setEnabled(False)
+        self.setTracking(True)
+        self.setMouseTracking(True)
+        self.setUpdatesEnabled(False)
+
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()

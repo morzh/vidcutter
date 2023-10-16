@@ -53,6 +53,11 @@ class VideoSliderWidget(QStackedWidget):
         sliderWidget.setLayout(sliderLayout)
         self.addWidget(sliderWidget)
 
+    def init_attributes(self):
+        self.setLoader(True)
+        self.setMouseTracking(False)
+
+
     def setLoader(self, enabled: bool=True) -> None:
         if hasattr(self.parent, 'toolbar') and self.parent.mediaAvailable:
             self.parent.toolbar.setEnabled(not enabled)

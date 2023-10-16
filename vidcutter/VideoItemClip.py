@@ -22,6 +22,10 @@ class VideoItemClip:
 
         self._clipClass = 'squat'  # for future challenges
 
+    def __str__(self):
+        print('\t',  'name:',  self._name, 'start time', self._timeStart, ' time end:',
+              self._timeEnd, ' visibility:',  self._visibility, ' description:',  self._description)
+
     @property
     def timeStart(self) -> QTime:
         return self._timeStart
@@ -73,8 +77,4 @@ class VideoItemClip:
     @description.setter
     def description(self, description: str):
         self._description = description
-
-    def print(self):
-        print('\t',  'name:',  self._name, 'start time', self._timeStart, ' time end:',
-              self._timeEnd, ' visibility:',  self._visibility, ' description:',  self._description)
 

@@ -40,7 +40,7 @@ from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, 
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
                              QVBoxLayout, QWidget, QScrollArea)
 
-import sip
+# import sip
 
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
@@ -102,15 +102,11 @@ class VideoCutter(QWidget):
 
         self.videoSlider = VideoSlider(self)
         # self.videoSlider = VideoSliderScaleContainer(self)
-        self.videoSlider.setEnabled(False)
-        self.videoSlider.setTracking(True)
-        self.videoSlider.setMouseTracking(True)
-        self.videoSlider.setUpdatesEnabled(False)
+        self.videoSlider.init_attributes()
         self.videoSlider.sliderMoved.connect(self.setPosition)
 
         self.sliderWidget = VideoSliderWidget(self, self.videoSlider)
-        self.sliderWidget.setLoader(True)
-        self.sliderWidget.setMouseTracking(False)
+        self.sliderWidget.init_attributes()
 
         self.sliderWidgetScroll = QScrollArea()
         self.sliderWidgetScroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -814,10 +810,11 @@ class VideoCutter(QWidget):
         with open(filepath, 'rb') as f:
             self.videoList = pickle.load(f)
 
+        # print(self.videoList)
+
         self.videoSlider.setUpdatesEnabled(True)
         self.videoSlider.removeThumbs()
         self.cliplist.clear()
-
 
         self.videoListWidget.renderList(self.videoList)
         self.sliderWidget.hideThumbs()
@@ -835,7 +832,6 @@ class VideoCutter(QWidget):
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
-
         if not self.folderOpened:
             self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
             self.frameCounter.show()
@@ -929,7 +925,7 @@ class VideoCutter(QWidget):
 
     def playMediaTimeClip(self, index) -> None:
         # if not len(self.clipTimes) or not self.videoList.videos[self.videoList.currentVideoIndex].clipsLength():
-        if not self.videoList.videos[self.videoList.currentVideoIndex].clipsLength():
+        if not len(self.videoList.videos[self.videoList.currentVideoIndex]):
             return
 
         playstate = self.mpvWidget.property('pause')
@@ -1159,10 +1155,10 @@ class VideoCutter(QWidget):
 
     def clipEnd(self) -> None:
         # item = self.clipTimes[len(self.clipTimes) - 1]
-        clipItemLast = self.videoList.videos[self.videoList.currentVideoIndex].clipsLast()
-        endTime = self.delta2QTime(self.videoSlider.value())
-        clipItemLast.timeEnd = endTime
-        clipItemLast.visibility = 2
+        clip_item_last = self.videoList.videos[self.videoList.currentVideoIndex][-1]  # .clipsLast()
+        end_time = self.delta2QTime(self.videoSlider.value())
+        clip_item_last.timeEnd = end_time
+        clip_item_last.visibility = 2
 
         self.toolbar_start.setEnabled(True)
         self.toolbar_end.setDisabled(True)
@@ -1171,13 +1167,13 @@ class VideoCutter(QWidget):
         self.timeCounter.setMinimum()
         self.videoSlider.setRestrictValue(0, False)
         self.inCut = False
-        self.showText('clip ends at {}'.format(endTime.toString(self.timeformat)))
+        self.showText('clip ends at {}'.format(end_time.toString(self.timeformat)))
         self.renderClipIndex()
         self.cliplist.scrollToBottom()
 
     @pyqtSlot()
     @pyqtSlot(bool)
-    def setProjectDirty(self, dirty: bool=True) -> None:
+    def setProjectDirty(self, dirty: bool = True) -> None:
         self.projectDirty = dirty
 
     # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal

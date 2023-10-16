@@ -1,4 +1,6 @@
 # from operator import itemgetter
+from typing import List
+
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
@@ -12,23 +14,30 @@ class VideoItem:
             self.description = ''
             self.youtube_id = ''
             self.issues = []
-            self.clips = []
+            self.clips: List[VideoItemClip] = []
             self._currentCLipIndex = 0
         elif len(args) == 2:
             self.thumb = args[0]
             self.filename = args[1]
 
-    def print(self):
+    def __str__(self):
         print('filename:', self._filename)
         print('description:', self.description)
         print('youtube id:', self.youtube_id)
         # print('issues classes:', itemgetter(*self.issues)(a))
         print('issues classes:', self.issues)
         print('clips:')
-        # print('-' * 30)
         for clip in self.clips:
-            clip.print()
-            # print('-' * 30)
+            print(clip)
+
+    def __getitem__(self, item):
+        if len(self.clips):
+            return self.clips[item]
+        else:
+            raise IndexError
+
+    def __len__(self):
+        return len(self.clips)
 
     def clipsLast(self):
         if len(self.clips):

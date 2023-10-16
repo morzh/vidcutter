@@ -1,12 +1,14 @@
 import os
 import sys
 import copy
+from typing import List
 
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
 from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent
 from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QProgressBar, QSizePolicy, QStyle,
                              QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication)
 
+from vidcutter import VideoItem
 # import PyQt5.QtCore.
 
 from vidcutter.libs.graphicseffects import OpacityEffect
@@ -40,20 +42,21 @@ class VideoListWidget(QListWidget):
         self.setGraphicsEffect(self.opacityEffect)
         self.videosHasRendered = False
 
-    def renderList(self, videoList) -> None:
+    def renderList(self, video_list) -> None:
         self.clear()
-        for video in videoList.videos:
-            listitem = QListWidgetItem(self)
-            listitem.setToolTip(video.filename)
-            listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
-            listitem.setTextAlignment(Qt.AlignVCenter)
-            listitem.setData(Qt.DecorationRole + 1, video.thumbnail)
-            listitem.setData(Qt.UserRole + 1, video.filename)
-            listitem.setData(Qt.UserRole + 2, video.duration.toString(self.parent.timeformat))
-            listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            self.addItem(listitem)
+        for video in video_list.videos:
+            list_item = QListWidgetItem(self)
+            list_item.setToolTip(video.filename)
+            list_item.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
+            list_item.setTextAlignment(Qt.AlignVCenter)
+            list_item.setData(Qt.DecorationRole + 1, video.thumbnail)
+            list_item.setData(Qt.UserRole + 1, video.filename)
+            list_item.setData(Qt.UserRole + 2, video.duration.toString(self.parent.timeformat))
+            list_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            self.addItem(list_item)
 
         self.videosHasRendered = True
+
 
 class VideoListItemStyle(QStyledItemDelegate):
     def __init__(self, parent: VideoListWidget=None):
