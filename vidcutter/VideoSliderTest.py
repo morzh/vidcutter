@@ -450,12 +450,14 @@ class VideoSliderTest(QSlider):
         self.logger.error(error)
         sys.stderr.write(error)
 
+    '''
     def reloadThumbs(self) -> None:
         if self.parent.mediaAvailable and self.parent.thumbnailsButton.isChecked():
             if self.thumbnailsOn:
                 self.parent.sliderWidget.hideThumbs()
             self.initThumbs()
             self.parent.renderClipIndex()
+    '''
 
     @pyqtSlot(int)
     def on_valueChanged(self, value: int) -> None:
@@ -464,12 +466,7 @@ class VideoSliderTest(QSlider):
 
     @pyqtSlot()
     def on_rangeChanged(self) -> None:
-        if self.parent.thumbnailsButton.isChecked():
-            self.parent.sliderWidget.setLoader(True)
-            self.parent.sliderWidget.hideThumbs()
-            self.initThumbs()
-        else:
-            self.parent.sliderWidget.setLoader(False)
+        self.parent.sliderWidget.setLoader(False)
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         if self.parent.mediaAvailable:
@@ -489,11 +486,11 @@ class VideoSliderTest(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
+            if len(self.parent.videoList.videos[self.parent.videoList.current_video_index].clips) == 0:
                 return False
 
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex].thumbnail = thumbnail
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0

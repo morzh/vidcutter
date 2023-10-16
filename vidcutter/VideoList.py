@@ -6,19 +6,19 @@ from vidcutter.VideoItem import VideoItem
 
 
 class VideoList:
-    def __init__(self, videoIssues):
-        self._description = ''
-        self._current_video_index = 0
-        self.videos = []
-        self._videoIssuesClasses = videoIssues
+    def __init__(self, video_issues):
+        self._description: str = ''
+        self._current_video_index: int = 0
+        self.videos: list[VideoItem] = []
+        self._video_issues_classes = video_issues
 
-    def print(self):
+    def __str__(self):
         print('description:', self._description)
-        print('video issues classes:', self._videoIssuesClasses)
+        print('video issues classes:', self._video_issues_classes)
         print('videos:')
         print('-' * 50)
         for video in self.videos:
-            video.print()
+            print(video)
             print('-' * 50)
 
     def currentVideoClipTimeStart(self, clip_index: int) -> QTime:
@@ -47,8 +47,8 @@ class VideoList:
         pass
     '''
     @property
-    def videoIssuesClasses(self):
-        return self._videoIssuesClasses
+    def video_issues_classes(self):
+        return self._video_issues_classes
 
     @property
     def description(self) -> str:
@@ -58,7 +58,7 @@ class VideoList:
     def description(self, description: str) -> None:
         if isinstance(description, str):
             self._description = description
-
+    '''
     @property
     def videoIssues(self) -> list:
         return self._video_issues
@@ -67,7 +67,8 @@ class VideoList:
     def videoIssues(self, issues: list) -> None:
         if isinstance(issues, list):
             self._video_issues = issues
-
+    '''
+    '''
     @property
     def absolutePath(self) -> str:
         return self._absolutePath
@@ -75,7 +76,7 @@ class VideoList:
     @absolutePath.setter
     def absolutePath(self, path: str) -> None:
         self._absolutePath = path
-
+    '''
     @property
     def current_video_index(self):
         return self._current_video_index

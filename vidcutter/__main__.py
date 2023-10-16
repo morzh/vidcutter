@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event: QResizeEvent) -> None:
         self.cutter.setTimelineSize()
         try:
-            if self.isEnabled() and self.cutter.mediaAvailable and self.cutter.thumbnailsButton.isChecked():
+            if self.isEnabled() and self.cutter.mediaAvailable and False:
                 if self.cutter.videoSlider.thumbnailsOn:
                     self.cutter.sliderWidget.setLoader(True)
                     self.cutter.sliderWidget.hideThumbs()
@@ -293,7 +293,7 @@ class MainWindow(QMainWindow):
 
     def timerEvent(self, event: QTimerEvent) -> None:
         try:
-            self.cutter.videoSlider.reloadThumbs()
+            # self.cutter.videoSlider.reloadThumbs()
             self.killTimer(self.resizeTimer)
             self.resizeTimer = 0
         except AttributeError:

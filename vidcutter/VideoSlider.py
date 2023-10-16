@@ -117,6 +117,7 @@ class VideoSlider(QSlider):
         timeline = ''
         self._regionHeight = 32
         if not self.thumbnailsOn:
+            '''
             if self.parent.thumbnailsButton.isChecked():
                 timeline = 'background: #000 url(:images/filmstrip.png) repeat-x left;'
             else:
@@ -125,6 +126,7 @@ class VideoSlider(QSlider):
                 height = 15
                 handle = 'handle-nothumbs-select.png' if self._handleHover else 'handle-nothumbs.png'
                 self._regionHeight = 12
+            '''
             self._styles += '''
             QSlider::groove:horizontal {{
                 border: 1px ridge #444;
@@ -200,7 +202,7 @@ class VideoSlider(QSlider):
 
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
-        if not len(self._progressbars) and (not self.parent.thumbnailsButton.isChecked() or self.thumbnailsOn):
+        if not len(self._progressbars):
             if len(self._regions) == len(self._regionsVisibility): # should always be true
                 for rect, rectViz in zip(self._regions, self._regionsVisibility):
                     if rectViz == 0:
@@ -438,7 +440,7 @@ class VideoSlider(QSlider):
         sys.stderr.write(error)
 
     def reloadThumbs(self) -> None:
-        if self.parent.mediaAvailable and self.parent.thumbnailsButton.isChecked():
+        if self.parent.mediaAvailable and False:
             if self.thumbnailsOn:
                 self.parent.sliderWidget.hideThumbs()
             self.initThumbs()
@@ -451,12 +453,7 @@ class VideoSlider(QSlider):
 
     @pyqtSlot()
     def on_rangeChanged(self) -> None:
-        if self.parent.thumbnailsButton.isChecked():
-            self.parent.sliderWidget.setLoader(True)
-            self.parent.sliderWidget.hideThumbs()
-            self.initThumbs()
-        else:
-            self.parent.sliderWidget.setLoader(False)
+        self.parent.sliderWidget.setLoader(False)
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         if self.parent.mediaAvailable:
@@ -476,11 +473,11 @@ class VideoSlider(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
+            if len(self.parent.videoList.videos[self.parent.videoList.current_video_index].clips) == 0:
                 return False
 
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex].thumbnail = thumbnail
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0
