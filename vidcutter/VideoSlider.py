@@ -69,7 +69,7 @@ class VideoSlider(QSlider):
         self._regionSelected = -1
         self._handleHover = False
         self._cutStarted = False
-        self.showThumbs = False
+        self.showThumbs = True
         self.thumbnailsOn = False
         self.offset = 6
         self.setOrientation(Qt.Horizontal)
@@ -93,7 +93,7 @@ class VideoSlider(QSlider):
         self.end = QPoint()
         self.currentRectangleIndex = -1
 
-        self.widgetWidth: int
+        self.widgetWidth = int()
         self.frameCounterMaximum = -1
 
         self.thumbsize = QSize()
@@ -112,7 +112,8 @@ class VideoSlider(QSlider):
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
         height = 25
         handle = 'handle-select.png' if self._handleHover else 'handle.png'
-        handle_height = 10
+        handle_height = 0
+        margin = 0
         timeline = ''
         self._regionHeight = 15
         if not self.thumbnailsOn:
@@ -191,7 +192,8 @@ class VideoSlider(QSlider):
                     painter.drawLine(x, y, x, y - h)
                     if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
                         painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset, self.width() - (self.offset * 2))
+                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset,
+                                                                  self.width() - (self.offset * 2))
                         timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
                         painter.drawText(x + 4, y + 6, timecode)
                 if x + 30 > self.width():
