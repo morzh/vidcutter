@@ -24,23 +24,19 @@
 
 import logging
 import os
-import re
 import sys
-import time
 import pickle
 import shutil
 from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
 
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
-                          Qt, QTime, QTimer, QUrl)
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
                              QVBoxLayout, QWidget, QScrollArea)
 
-# import sip
 
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
@@ -50,7 +46,7 @@ from vidcutter.dialogs.mediainfo import MediaInfo
 from vidcutter.mediastream import StreamSelector
 from vidcutter.dialogs.settings import SettingsDialog
 from vidcutter.dialogs.updater import Updater
-from vidcutter.VideoClipsListWidget import VideoClipsListWidget
+from vidcutter.VideoChaptersListWidget import VideoClipsListWidget
 from vidcutter.VideoSlider import VideoSlider
 from vidcutter.VideoSliderWidget import VideoSliderWidget
 from vidcutter.VideoStyle import VideoStyleDark, VideoStyleLight
@@ -65,7 +61,6 @@ from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMe
 
 from vidcutter.VideoItemClip import VideoItemClip
 
-from vidcutter.VideoList import VideoList
 from vidcutter.VideoListWidget import VideoListWidget
 from vidcutter.QPixmapPickle import QPixmapPickle
 from vidcutter.dialogs.VideoDescriptionDialog import VideoDescriptionDialog
@@ -279,10 +274,7 @@ class VideoCutter(QWidget):
         self.thumbnailsButton.toggled.connect(self.toggleThumbs)
         if self.timelineThumbs:
             self.videoSlider.setObjectName('nothumbs')
-        '''
 
-
-        '''
         # noinspection PyArgumentList
         self.osdButton = QPushButton(self, flat=True, checkable=True, objectName='osdButton', toolTip='Toggle OSD', statusTip='Toggle on-screen display', cursor=Qt.PointingHandCursor)
         self.osdButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
@@ -392,7 +384,7 @@ class VideoCutter(QWidget):
         settingsLayout.addSpacing(5)
         settingsLayout.addWidget(self.menuButton)
 
-        groupLayout = QVBoxLayout()
+        groupLayout = QHBoxLayout()
         groupLayout.addLayout(audioLayout)
         groupLayout.addSpacing(10)
         groupLayout.addLayout(settingsLayout)
@@ -1007,7 +999,6 @@ class VideoCutter(QWidget):
         try:
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
-
             # self.clipTimes[item_index][5] = item_state
             self.videoList.videos[self.videoList.current_video_index].clips[item_index].visibility = item_state
             self.renderClipIndex()
@@ -1017,7 +1008,7 @@ class VideoCutter(QWidget):
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
     def videosVisibility(self, item) -> None:
-        if self.cliplist.clipsHasRendered:
+        if self.cliplist.clips_has_rendered:
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
 

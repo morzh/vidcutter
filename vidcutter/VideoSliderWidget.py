@@ -41,7 +41,7 @@ class VideoSliderWidget(QStackedWidget):
         self.layout().setStackingMode(QStackedLayout.StackAll)
         self.genlabel = QLabel(self.parent)
         self.genlabel.setContentsMargins(0, 0, 0, 14)
-        self.genlabel.setPixmap(QPixmap(':/images/generating-thumbs.png'))
+        # self.genlabel.setPixmap(QPixmap(':/images/generating-thumbs.png'))
         self.genlabel.setAlignment(Qt.AlignCenter)
         self.genlabel.hide()
         sliderLayout = QGridLayout()

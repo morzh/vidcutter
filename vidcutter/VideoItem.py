@@ -10,7 +10,7 @@ class VideoItem:
         if not len(args):
             self._thumbnail = QPixmap()
             self._duration = QTime()
-            self._filename = ''
+            self._filename: str = ''
             self.description = ''
             self.youtube_id = ''
             self.issues = []
@@ -53,8 +53,8 @@ class VideoItem:
         return self._filename
 
     @filename.setter
-    def filename(self, fp: str):
-        self._filename = fp
+    def filename(self, filename: str):
+        self._filename = filename
 
     @property
     def thumbnail(self) -> QPixmap:

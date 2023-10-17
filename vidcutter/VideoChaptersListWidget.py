@@ -63,35 +63,32 @@ class VideoClipsListWidget(QListWidget):
         self.opacityEffect = OpacityEffect(0.3)
         self.opacityEffect.setEnabled(False)
         self.setGraphicsEffect(self.opacityEffect)
-        self.clipsHasRendered = False
+        self.clips_has_rendered = False
 
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
-    def renderClips(self, videoClipItems: list) -> None:
-        self.clipsHasRendered = False
+    def renderClips(self, video_clip_items: list) -> None:
+        self.clips_has_rendered = False
         self.clear()
-        for index, videoClip in enumerate(videoClipItems):
-            listitem = QListWidgetItem(self)
-            listitem.setToolTip('Drag to reorder clips')
-            endItem = videoClip.timeEnd.toString(self.parent.timeformat)
-            # if len(videoClip.description):
-            #     listitem.setToolTip(videoClip.description)
-            #     externalCount += 1
-            listitem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
-            listitem.setTextAlignment(Qt.AlignVCenter)
-            listitem.setData(Qt.DecorationRole + 1, videoClip.thumbnail)
-            listitem.setData(Qt.DisplayRole + 1, videoClip.timeStart.toString(self.parent.timeformat))
-            listitem.setData(Qt.UserRole + 1, endItem)
-            listitem.setData(Qt.UserRole + 2, videoClip.description)
-            listitem.setData(Qt.UserRole + 3, videoClip.name)
-            listitem.setData(Qt.CheckStateRole, videoClip.visibility)
-            listitem.setCheckState(videoClip.visibility)
-            listitem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
-            self.addItem(listitem)
+        for index, videoClip in enumerate(video_clip_items):
+            list_item = QListWidgetItem(self)
+            list_item.setToolTip('Drag to reorder clips')
+            end_item = videoClip.timeEnd.toString(self.parent.runtimeformat)
+            list_item.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
+            list_item.setTextAlignment(Qt.AlignVCenter)
+            list_item.setData(Qt.DecorationRole + 1, videoClip.thumbnail)
+            list_item.setData(Qt.DisplayRole + 1, videoClip.timeStart.toString(self.parent.runtimeformat))
+            list_item.setData(Qt.UserRole + 1, end_item)
+            list_item.setData(Qt.UserRole + 2, videoClip.description)
+            list_item.setData(Qt.UserRole + 3, videoClip.name)
+            list_item.setData(Qt.CheckStateRole, videoClip.visibility)
+            list_item.setCheckState(videoClip.visibility)
+            list_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
+            self.addItem(list_item)
             self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
-        self.clipsHasRendered = True
+        self.clips_has_rendered = True
 
     def showProgress(self, steps: int) -> None:
         for row in range(self.count()):

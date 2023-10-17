@@ -2,8 +2,8 @@
 
 import sys
 
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTextStream, QTime, QTimer, QUrl)
-from PyQt5.QtWidgets import (QListWidget, QWidget, QMessageBox, QApplication, QVBoxLayout, QPushButton, QFileDialog)
+from PyQt5.QtCore import (QDir)
+from PyQt5.QtWidgets import (QWidget, QMessageBox, QApplication, QVBoxLayout, QPushButton, QFileDialog)
 from vidcutter.VideoList import VideoList
 from vidcutter.VideoListWidget import VideoListWidget
 

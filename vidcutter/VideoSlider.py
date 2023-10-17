@@ -65,13 +65,13 @@ class VideoSlider(QSlider):
         self._progressbars = []
         self._regions = []
         self._regionsVisibility = []
-        self._regionHeight = 32
+        self._regionHeight= 20
         self._regionSelected = -1
         self._handleHover = False
         self._cutStarted = False
-        self.showThumbs = True
+        self.showThumbs = False
         self.thumbnailsOn = False
-        self.offset = 8
+        self.offset = 6
         self.setOrientation(Qt.Horizontal)
         self.setObjectName('videoslider')
         self.setStatusTip('Set clip start and end points')
@@ -93,7 +93,7 @@ class VideoSlider(QSlider):
         self.end = QPoint()
         self.currentRectangleIndex = -1
 
-        self.widgetWidth = int()
+        self.widgetWidth: int
         self.frameCounterMaximum = -1
 
         self.thumbsize = QSize()
@@ -110,19 +110,18 @@ class VideoSlider(QSlider):
 
     def initStyle(self) -> None:
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
-        height = 60
+        height = 25
         handle = 'handle-select.png' if self._handleHover else 'handle.png'
-        handleHeight = 85
-        margin = 0
+        handle_height = 10
         timeline = ''
-        self._regionHeight = 32
+        self._regionHeight = 15
         if not self.thumbnailsOn:
             '''
             if self.parent.thumbnailsButton.isChecked():
                 timeline = 'background: #000 url(:images/filmstrip.png) repeat-x left;'
             else:
                 timeline = 'background: #000 url(:images/filmstrip-nothumbs.png) repeat-x left;'
-                handleHeight = 42
+                handle_height = 42
                 height = 15
                 handle = 'handle-nothumbs-select.png' if self._handleHover else 'handle-nothumbs.png'
                 self._regionHeight = 12
@@ -152,7 +151,7 @@ class VideoSlider(QSlider):
             subpageHeight=height + 2,
             subpageLeftMargin=margin,
             handleImage=handle,
-            handleHeight=handleHeight,
+            handleHeight=handle_height,
             timelineBackground=timeline))
 
     def setRestrictValue(self, value: int = 0, force: bool = False) -> None:
@@ -177,7 +176,7 @@ class VideoSlider(QSlider):
             x = 8
             for i in range(self.minimum(), self.width(), 8):
                 if i % 5 == 0:
-                    h, w, z = 18, 1, 13
+                    h, w, z = 16, 1, 13
                 else:
                     h, w, z = 8, 1, 23
                 tickcolor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
@@ -192,8 +191,7 @@ class VideoSlider(QSlider):
                     painter.drawLine(x, y, x, y - h)
                     if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
                         painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset,
-                                                                  self.width() - (self.offset * 2))
+                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset, self.width() - (self.offset * 2))
                         timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
                         painter.drawText(x + 4, y + 6, timecode)
                 if x + 30 > self.width():
@@ -389,6 +387,8 @@ class VideoSlider(QSlider):
 
     @pyqtSlot(list)
     def buildTimeline(self, thumbs: list) -> None:
+
+        '''
         thumbslayout = QHBoxLayout()
         thumbslayout.setSizeConstraint(QLayout.SetFixedSize)
         thumbslayout.setSpacing(0)
@@ -401,7 +401,7 @@ class VideoSlider(QSlider):
             thumbslayout.addWidget(thumblabel)
         thumbnails = QWidget(self)
         thumbnails.setLayout(thumbslayout)
-        '''
+
         filmlabel = QLabel()
         filmlabel.setObjectName('filmstrip')
         filmlabel.setFixedHeight(VideoService.config.thumbnails['TIMELINE'].height() + 2)
@@ -413,10 +413,10 @@ class VideoSlider(QSlider):
         '''
         filmstrip = QWidget(self)
         # filmstrip.setLayout(filmlayout)
-        self.removeThumbs()
+        # self.removeThumbs()
         # self.parent.sliderWidget.addWidget(filmstrip)
-        self.parent.sliderWidget.addWidget(thumbnails)
-        self.thumbnailsOn = True
+        # self.parent.sliderWidget.addWidget(thumbnails)
+        # self.thumbnailsOn = True
         self.initStyle()
 
         self.parent.sliderWidget.setLoader(False)

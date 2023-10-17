@@ -23,7 +23,7 @@ class VideoListWidget(QListWidget):
         self._progressbars = []
         self.setMouseTracking(True)
         self.setDropIndicatorShown(True)
-        self.setFixedWidth(190)
+        self.setFixedWidth(170)
         self.setAttribute(Qt.WA_MacShowFocusRect, False)
         self.setContentsMargins(0, 0, 0, 0)
         self.setItemDelegate(VideoListItemStyle(self))
@@ -44,14 +44,15 @@ class VideoListWidget(QListWidget):
 
     def renderList(self, video_list) -> None:
         self.clear()
-        for video in video_list.videos:
+        for index, video in enumerate(video_list.videos):
             list_item = QListWidgetItem(self)
-            list_item.setToolTip(video.filename)
+            tooltip_string = ''.join(['FILENAME: \n', video.filename, '\n', 'DURATION:\n', video.duration.toString(self.parent.timeformat)])
+            list_item.setToolTip(tooltip_string)
             list_item.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             list_item.setTextAlignment(Qt.AlignVCenter)
             list_item.setData(Qt.DecorationRole + 1, video.thumbnail)
-            list_item.setData(Qt.UserRole + 1, video.filename)
-            list_item.setData(Qt.UserRole + 2, video.duration.toString(self.parent.timeformat))
+            list_item.setData(Qt.UserRole + 1, index + 1)
+            # list_item.setData(Qt.UserRole + 2, video.duration.toString(self.parent.timeformat))
             list_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             self.addItem(list_item)
 
@@ -80,14 +81,20 @@ class VideoListItemStyle(QStyledItemDelegate):
         painter.drawRect(r)
 
         pixmap = index.data(Qt.DecorationRole + 1)
-        thumbnailIcon = QIcon(pixmap)
-        filename = index.data(Qt.UserRole + 1)
-        duration = index.data(Qt.UserRole + 2)
+        thumbnail_icon = QIcon(pixmap)
+        video_index = str(index.data(Qt.UserRole + 1)).zfill(4)
+        # duration = index.data(Qt.UserRole + 2)
+        # video_index = str(index.data(Qt.UserRole)).zfill(4)
 
         painter.setPen(QPen(pencolor, 1, Qt.SolidLine))
-        r = option.rect.adjusted(0, 0, -20, -20)
-        thumbnailIcon.paint(painter, r, Qt.AlignTop | Qt.AlignLeft)
+        r = option.rect.adjusted(5, 5, -5, -5)
+        thumbnail_icon.paint(painter, r, Qt.AlignTop | Qt.AlignRight)
 
+        r = option.rect.adjusted(15, 0, 0, 0)
+        painter.setFont(QFont('Arial', 13 if sys.platform == 'darwin' else 11, QFont.Bold))
+        painter.drawText(r, Qt.AlignLeft | Qt.AlignVCenter, video_index)
+
+        '''
         r = option.rect.adjusted(90, 10, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
         painter.drawText(r, Qt.AlignLeft, 'DURATION:')
@@ -106,11 +113,12 @@ class VideoListItemStyle(QStyledItemDelegate):
             cfont.setPointSizeF(11 if sys.platform == 'darwin' else 10)
             painter.setFont(cfont)
             painter.drawText(r, Qt.AlignLeft, self.clipText(filename, painter, True))
+        '''
 
     def clipText(self, text: str, painter: QPainter, chapter: bool=False) -> str:
         metrics = painter.fontMetrics()
         return metrics.elidedText(text, Qt.ElideRight, (self.parent.width() - 10 if chapter else 100 - 10))
 
     def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
-        return QSize(105, 105)
+        return QSize(80, 80)
 
