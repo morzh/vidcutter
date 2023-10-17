@@ -440,7 +440,6 @@ class VideoCutter(QWidget):
             self.factor += 2
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
-        # self.videoSlider.removeThumbs()
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
             # if self.thumbnailsButton.isChecked():
@@ -455,7 +454,6 @@ class VideoCutter(QWidget):
             self.factor -= 2
         self.factor = self.clip(self.factor, 1, 18)
         self.timeline_factor_label.setText(str(self.factor))
-        # self.videoSlider.removeThumbs()
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
             # if self.thumbnailsButton.isChecked():
@@ -812,7 +810,6 @@ class VideoCutter(QWidget):
         # print(self.videoList)
 
         self.videoSlider.setUpdatesEnabled(True)
-        self.videoSlider.removeThumbs()
         self.cliplist.clear()
 
         self.videoListWidget.renderList(self.videoList)
@@ -842,7 +839,6 @@ class VideoCutter(QWidget):
         filepath = self.videoList.currentVideoFilepath(self._dataFolder)
         if not os.path.isfile(filepath):
             return
-        self.videoSlider.removeThumbs()
         self.currentMedia = filepath
         self.currentMediaPreview = filepath + self.previewPostfix
         self.projectDirty, self.projectSaved = False, False
@@ -1048,20 +1044,6 @@ class VideoCutter(QWidget):
         self.settings.setValue('volume', vol)
         if self.mediaAvailable:
             self.mpvWidget.volume(vol)
-
-    @pyqtSlot(bool)
-    def toggleThumbs(self, checked: bool) -> None:
-        self.videoSlider.showThumbs = checked
-        self.saveSetting('timelineThumbs', checked)
-        if checked:
-            # self.showText('thumbnails enabled')
-            self.videoSlider.initStyle()
-            if self.mediaAvailable:
-                self.videoSlider.reloadThumbs()
-        else:
-            # self.showText('thumbnails disabled')
-            self.videoSlider.removeThumbs()
-            self.videoSlider.initStyle()
 
     @pyqtSlot(bool)
     def toggleConsole(self) -> None:
