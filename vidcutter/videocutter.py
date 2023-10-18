@@ -63,7 +63,7 @@ from vidcutter.VideoItemClip import VideoItemClip
 
 from vidcutter.VideoListWidget import VideoListWidget
 from vidcutter.QPixmapPickle import QPixmapPickle
-from vidcutter.dialogs.VideoDescriptionDialog import VideoDescriptionDialog
+from vidcutter.dialogs.VideoInfoDialog import VideoDescriptionDialog
 
 
 class VideoCutter(QWidget):
@@ -266,22 +266,6 @@ class VideoCutter(QWidget):
         self.videoplayerWidget.setVisible(False)
         self.videoplayerWidget.setLayout(self.videoplayerLayout)
 
-        '''
-        # noinspection PyArgumentList
-        self.thumbnailsButton = QPushButton(self, flat=True, checkable=True, objectName='thumbnailsButton',  statusTip='Toggle timeline thumbnails', cursor=Qt.PointingHandCursor, toolTip='Toggle thumbnails')
-        self.thumbnailsButton.setFixedSize(32, 29 if self.theme == 'dark' else 31)
-        self.thumbnailsButton.setChecked(False)
-        self.thumbnailsButton.toggled.connect(self.toggleThumbs)
-        if self.timelineThumbs:
-            self.videoSlider.setObjectName('nothumbs')
-
-        # noinspection PyArgumentList
-        self.osdButton = QPushButton(self, flat=True, checkable=True, objectName='osdButton', toolTip='Toggle OSD', statusTip='Toggle on-screen display', cursor=Qt.PointingHandCursor)
-        self.osdButton.setFixedSize(31, 29 if self.theme == 'dark' else 31)
-        self.osdButton.setChecked(self.enableOSD)
-        self.osdButton.toggled.connect(self.toggleOSD)
-        '''
-
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
             os.environ['DEBUG'] = '1'
@@ -353,8 +337,7 @@ class VideoCutter(QWidget):
         self.timeline_factor_label.setFixedSize(40, 40)
         self.timeline_factor_label.setAlignment(Qt.AlignCenter)
         self.timeline_factor_label.setFont(QFont('Verdana', 12))
-        self.timeline_factor_label.setStyleSheet("font-weight: bold; color: black")
-        # self.timeline_factor_label.setStyleSheet("font-weight: bold; color: light grey")
+        self.timeline_factor_label.setStyleSheet("font-weight: bold; color: {}".format('black' if self.theme == 'dark' else '#C1C2C4'))
 
         self.timeline_plus_button = VCToolBarButton('Plus', 'Increase timeline scale', parent=self, has_label=False)
         self.timeline_plus_button.button.setFixedSize(30, 32)
@@ -857,6 +840,7 @@ class VideoCutter(QWidget):
             self.mediaAvailable = True
             self.timeline_minus_button.button.setEnabled(True)
             self.timeline_factor_label.setStyleSheet("font-weight: bold; color: light grey")
+            self.timeline_factor_label.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timeline_plus_button.button.setEnabled(True)
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -870,7 +854,7 @@ class VideoCutter(QWidget):
                                  'and the version of VidCutter you are currently using.</p>')
 
     def saveProject(self, reboot: bool = False) -> None:
-        if self.currentMedia is None:
+        if self.projectSaved:
             return
         self.parent.setEnabled(False)
         data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
@@ -1399,10 +1383,6 @@ class VideoCutter(QWidget):
                 self.mpvWidget.originalParent = self
                 self.mpvWidget.setGeometry(qApp.desktop().screenGeometry(self))
                 self.mpvWidget.showFullScreen()
-
-    def toggleOSD(self, checked: bool) -> None:
-        self.showText('on-screen display {}'.format('enabled' if checked else 'disabled'), override=True)
-        self.saveSetting('enableOSD', checked)
 
     @property
     def _osdfont(self) -> str:

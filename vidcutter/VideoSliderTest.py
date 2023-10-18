@@ -15,17 +15,21 @@ from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, Q
 
 from vidcutter.libs.videoservice import VideoService
 
+
 class CursorStates(Enum):
     CURSOR_ON_BEGIN_SIDE = 1
     CURSOR_ON_END_SIDE = 2
     CURSOR_IS_INSIDE = 3
     CURSOR_OFF = 4
+
+
 class RectangleEditState(Enum):
     FREE_STATE = 1
     BUILDING_SQUARE = 2
     BEGIN_SIDE_EDIT = 3
     END_SIDE_EDIT = 4
     RECTANGLE_MOVE = 5
+
 
 class VideoSliderScaleContainer(QWidget):
     def __init__(self, parent=None):
@@ -45,6 +49,7 @@ class VideoSliderScaleContainer(QWidget):
         self.scrollArea.setAlignment(Qt.AlignVCenter)
         scrollAreaLayout.addWidget(self.scrollArea)
         self.setLayout(scrollAreaLayout)
+
 
 class VideoSliderTest(QSlider):
     def __init__(self, parent=None):
@@ -114,6 +119,7 @@ class VideoSliderTest(QSlider):
 
         self.widgetWidth = int()
         self.frameCounterMaximum = -1
+
 
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
@@ -347,104 +353,6 @@ class VideoSliderTest(QSlider):
             progress.deleteLater()
         self.parent.cliplist.clearProgress()
         self._progressbars.clear()
-
-    def initThumbs(self) -> None:
-        framesize = self.parent.videoService.framesize()
-        thumbsize = QSize(
-            int(VideoService.config.thumbnails['TIMELINE'].height() * (framesize.width() / framesize.height())),
-            int(VideoService.config.thumbnails['TIMELINE'].height()))
-        positions, frametimes = [], []
-        thumbs = int(math.ceil((self.rect().width() - (self.offset * 2)) / thumbsize.width()))
-        for pos in range(thumbs):
-            val = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), (thumbsize.width() * pos) - self.offset, self.rect().width() - (self.offset * 2))
-            positions.append(val)
-        positions[0] = 1000
-        [frametimes.append(self.parent.delta2QTime(msec).toString(self.parent.timeformat)) for msec in positions]
-
-        class ThumbWorker(QObject):
-            completed = pyqtSignal(list)
-
-            def __init__(self, settings: QSettings, media: str, times: list, size: QSize):
-                super(ThumbWorker, self).__init__()
-                self.settings = settings
-                self.media = media
-                self.times = times
-                self.size = size
-
-            @pyqtSlot()
-            def generate(self):
-                frames = list()
-                [
-                    frames.append(VideoService.captureFrame(self.settings, self.media, frame, self.size))
-                    for frame in self.times
-                ]
-                self.completed.emit(frames)
-
-        self.thumbsThread = QThread(self)
-
-        if os.path.isfile(self.parent.currentMediaPreview):
-            currentMedia = self.parent.currentMediaPreview
-        else:
-            currentMedia = self.parent.currentMedia
-
-        self.thumbsWorker = ThumbWorker(self.parent.settings, currentMedia, frametimes, thumbsize)
-        self.thumbsWorker.moveToThread(self.thumbsThread)
-
-        self.thumbsThread.started.connect(self.parent.sliderWidget.setLoader)
-        self.thumbsThread.started.connect(self.thumbsWorker.generate)
-
-        self.thumbsThread.finished.connect(self.thumbsThread.deleteLater, Qt.DirectConnection)
-
-        self.thumbsWorker.completed.connect(self.buildTimeline)
-        self.thumbsWorker.completed.connect(self.thumbsWorker.deleteLater, Qt.DirectConnection)
-        self.thumbsWorker.completed.connect(self.thumbsThread.quit, Qt.DirectConnection)
-        self.thumbsThread.start()
-
-    @pyqtSlot(list)
-    def buildTimeline(self, thumbs: list) -> None:
-        thumbslayout = QHBoxLayout()
-        thumbslayout.setSizeConstraint(QLayout.SetFixedSize)
-        thumbslayout.setSpacing(0)
-        thumbslayout.setContentsMargins(0, 16, 0, 0)
-        for thumb in thumbs:
-            thumblabel = QLabel()
-            thumblabel.setStyleSheet('padding: 0; margin: 0;')
-            thumblabel.setFixedSize(thumb.size())
-            thumblabel.setPixmap(thumb)
-            thumbslayout.addWidget(thumblabel)
-        thumbnails = QWidget(self)
-        thumbnails.setLayout(thumbslayout)
-        filmlabel = QLabel()
-        filmlabel.setObjectName('filmstrip')
-        filmlabel.setFixedHeight(VideoService.config.thumbnails['TIMELINE'].height() + 2)
-        filmlabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        filmlayout = QHBoxLayout()
-        filmlayout.setContentsMargins(0, 0, 0, 16)
-        filmlayout.setSpacing(0)
-        filmlayout.addWidget(filmlabel)
-        filmstrip = QWidget(self)
-        filmstrip.setLayout(filmlayout)
-        self.removeThumbs()
-        self.parent.sliderWidget.addWidget(filmstrip)
-        self.parent.sliderWidget.addWidget(thumbnails)
-        self.thumbnailsOn = True
-        self.initStyle()
-
-        self.parent.sliderWidget.setLoader(False)
-        if self.parent.newproject:
-            self.parent.renderClipIndex()
-            self.parent.newproject = False
-
-    def removeThumbs(self) -> None:
-        if self.parent.sliderWidget.count() == 3:
-            stripWidget = self.parent.sliderWidget.widget(1)
-            thumbWidget = self.parent.sliderWidget.widget(2)
-            self.parent.sliderWidget.removeWidget(stripWidget)
-            self.parent.sliderWidget.removeWidget(thumbWidget)
-            stripWidget.deleteLater()
-            thumbWidget.deleteLater()
-            self.setObjectName('nothumbs')
-            self.thumbnailsOn = False
 
     def errorHandler(self, error: str) -> None:
         self.logger.error(error)

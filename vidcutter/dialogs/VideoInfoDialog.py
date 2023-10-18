@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QLabel, QSc
 
 from vidcutter.libs.config import cached_property
 import vidcutter
+import vidcutter.dialogs.VideoInfoDialogStyleSheet as styleSheet
 
 
 class VideoDescriptionDialog(QDialog):
@@ -60,17 +61,22 @@ class VideoDescriptionDialog(QDialog):
         self.setLayout(self.layout)
         self.setWindowTitle(title)
 
+        if parent.theme == 'dark':
+            self.setStyleSheet(styleSheet.video_info_style_sheet_dark)
+        else:
+            self.setStyleSheet(styleSheet.video_info_style_sheet_light)
+
     def addIssuestableItems(self, checked_issues):
         self.issuesTable.horizontalHeader().setStretchLastSection(True)
         for idx in range(len(self.issuesList)):
-            chkBoxItem = QTableWidgetItem()
-            chkBoxItem.setText(self.issuesList[idx])
-            chkBoxItem.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            checkbox_item = QTableWidgetItem()
+            checkbox_item.setText(self.issuesList[idx])
+            checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             if idx in checked_issues:
-                chkBoxItem.setCheckState(Qt.Checked)
+                checkbox_item.setCheckState(Qt.Checked)
             else:
-                chkBoxItem.setCheckState(Qt.Unchecked)
-            self.issuesTable.setItem(idx, 0, chkBoxItem)
+                checkbox_item.setCheckState(Qt.Unchecked)
+            self.issuesTable.setItem(idx, 0, checkbox_item)
         self.issuesTableIsComplete = True
 
     def on_issuesTableChanged(self):
@@ -80,6 +86,9 @@ class VideoDescriptionDialog(QDialog):
         for rowIndex in range(self.issuesTable.rowCount()):
             if self.issuesTable.item(rowIndex, 0).checkState() == Qt.Checked:
                 self.checkedIssuesList.append(rowIndex)
+        self.parent.projectSaved = False
+        self.parent.saveProjectAction.setEnabled(True)
+        self.parent.toolbar_save.setEnabled(True)
 
     def getQTableWidgetSize(self):
         w = self.issuesTable.verticalHeader().width() + 4  # +4 seems to be needed

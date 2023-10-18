@@ -10,11 +10,11 @@ class VideoList:
         self._description: str = ''
         self._current_video_index: int = 0
         self.videos: list[VideoItem] = []
-        self._video_issues_classes = video_issues
+        self._videoIssuesClasses = video_issues
 
     def __str__(self):
         print('description:', self._description)
-        print('video issues classes:', self._video_issues_classes)
+        print('video issues classes:', self._videoIssuesClasses)
         print('videos:')
         print('-' * 50)
         for video in self.videos:
@@ -47,8 +47,8 @@ class VideoList:
         pass
     '''
     @property
-    def video_issues_classes(self):
-        return self._video_issues_classes
+    def video_issues_classes(self) -> list:
+        return self._videoIssuesClasses
 
     @property
     def description(self) -> str:
@@ -58,25 +58,7 @@ class VideoList:
     def description(self, description: str) -> None:
         if isinstance(description, str):
             self._description = description
-    '''
-    @property
-    def videoIssues(self) -> list:
-        return self._video_issues
 
-    @videoIssues.setter
-    def videoIssues(self, issues: list) -> None:
-        if isinstance(issues, list):
-            self._video_issues = issues
-    '''
-    '''
-    @property
-    def absolutePath(self) -> str:
-        return self._absolutePath
-
-    @absolutePath.setter
-    def absolutePath(self, path: str) -> None:
-        self._absolutePath = path
-    '''
     @property
     def current_video_index(self):
         return self._current_video_index
