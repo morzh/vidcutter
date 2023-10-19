@@ -118,9 +118,6 @@ class VideoCutter(QWidget):
         self.videoListWidget.itemDoubleClicked.connect(self.loadMedia)
         self.videoListWidget.itemClicked.connect(self.editVideoDescription)
 
-        # self.videos = []
-        # self.videoList.current_video_index = 0
-        # self.clipTimes = []
         self.inCut, self.newproject = False, False
         self.finalFilename = ''
         self.totalRuntime, self.frameRate = 0, 0
@@ -154,6 +151,7 @@ class VideoCutter(QWidget):
         self.appmenu = QMenu(self.parent)
         self.help_menu = QMenu('Help n Logs', self.appmenu)
         self.clipindex_removemenu = QMenu(self)
+        self.clipindex_contextmenu = QMenu(self)
         self._initMenus()
         self._initNoVideo()
 
@@ -167,54 +165,17 @@ class VideoCutter(QWidget):
         self.cliplist.model().rowsMoved.connect(self.setProjectDirty)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
 
-        self.clipindex_move_up = QPushButton(self)
-        self.clipindex_move_up.setObjectName('clip_move_up')
-        self.clipindex_move_up.clicked.connect(self.moveItemUp)
-        self.clipindex_move_up.setToolTip('Move clip up')
-        self.clipindex_move_up.setStatusTip('Moves clip one row up')
-        self.clipindex_move_up.setCursor(Qt.PointingHandCursor)
-        self.clipindex_move_up.setEnabled(False)
-
-        self.clipindex_move_down = QPushButton(self)
-        self.clipindex_move_down.setObjectName('clip_move_down')
-        self.clipindex_move_down.clicked.connect(self.moveItemDown)
-        self.clipindex_move_down.setToolTip('Move clip down')
-        self.clipindex_move_down.setStatusTip('Moves clip one row down')
-        self.clipindex_move_down.setCursor(Qt.PointingHandCursor)
-        self.clipindex_move_down.setEnabled(False)
-
-        self.clipindex_clips_remove = QPushButton(self)
-        self.clipindex_clips_remove.setObjectName('clipremove')
-        self.clipindex_clips_remove.setToolTip('Remove clips')
-        self.clipindex_clips_remove.setStatusTip('Remove clips from your index')
-        self.clipindex_clips_remove.setLayoutDirection(Qt.RightToLeft)
-        self.clipindex_clips_remove.setMenu(self.clipindex_removemenu)
-        self.clipindex_clips_remove.setCursor(Qt.PointingHandCursor)
-        self.clipindex_clips_remove.setEnabled(False)
-
         if sys.platform in {'win', 'darwin'}:
             self.clipindex_move_up.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_move_down.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_clips_remove.setStyle(QStyleFactory.create('Fusion'))
-
-        clipindex_layout = QHBoxLayout()
-        clipindex_layout.setSpacing(1)
-        clipindex_layout.setContentsMargins(0, 0, 0, 0)
-        clipindex_layout.addWidget(self.clipindex_move_up)
-        clipindex_layout.addWidget(self.clipindex_move_down)
-        clipindex_layout.addSpacing(15)
-        clipindex_layout.addWidget(self.clipindex_clips_remove)
-
-        clipindexTools = QWidget(self)
-        clipindexTools.setObjectName('clipindextools')
-        clipindexTools.setLayout(clipindex_layout)
 
         self.clipIndexLayout = QVBoxLayout()
         self.clipIndexLayout.setSpacing(0)
         self.clipIndexLayout.setContentsMargins(0, 0, 0, 0)
         self.clipIndexLayout.addWidget(self.cliplist)
         self.clipIndexLayout.addSpacing(3)
-        self.clipIndexLayout.addWidget(clipindexTools)
+        # self.clipIndexLayout.addWidget(clipindexTools)
 
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
@@ -309,7 +270,6 @@ class VideoCutter(QWidget):
         self.toolbar_save.setEnabled(False)
         self.toolbar_save.clicked.connect(self.saveProject)
 
-
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
         toolbarLayout.addStretch(1)
@@ -361,8 +321,6 @@ class VideoCutter(QWidget):
         settingsLayout = QHBoxLayout()
         settingsLayout.setSpacing(0)
         settingsLayout.setContentsMargins(0, 0, 0, 0)
-        # settingsLayout.addWidget(self.osdButton)
-        # settingsLayout.addWidget(self.thumbnailsButton)
 
         settingsLayout.addSpacing(5)
         settingsLayout.addWidget(self.menuButton)
@@ -393,7 +351,6 @@ class VideoCutter(QWidget):
         layout.setContentsMargins(10, 10, 10, 0)
         layout.addLayout(self.videoLayout)
         layout.addWidget(self.sliderWidgetScroll)
-        # layout.addWidget(self.sliderWidget)
         layout.addSpacing(5)
         layout.addLayout(controlsLayout)
 
@@ -586,6 +543,9 @@ class VideoCutter(QWidget):
         self.help_menu.addAction(self.updateCheckAction)
         self.appmenu.addAction(self.quitAction)
 
+        self.clipindex_contextmenu.addAction(self.removeItemAction)
+        self.clipindex_contextmenu.addAction(self.removeAllAction)
+
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
 
@@ -661,8 +621,6 @@ class VideoCutter(QWidget):
 
     def itemMenu(self, pos: QPoint) -> None:
         globalPos = self.cliplist.mapToGlobal(pos)
-        self.moveItemUpAction.setEnabled(False)
-        self.moveItemDownAction.setEnabled(False)
         self.initRemoveMenu()
         index = self.cliplist.currentRow()
         if index != -1:
@@ -727,11 +685,8 @@ class VideoCutter(QWidget):
         elif len(self.videoList.videos[self.videoList.current_video_index].clips) == 0:
             self.initMediaControls(False)
 
-        del self.videoList.videos[self.videoList.current_video_index].clips[index]
+        self.videoList.videos[self.videoList.current_video_index].clips.pop(index)
 
-        if len(self.videoList.videos[self.videoList.current_video_index].clips) <= 1:
-            self.clipindex_move_up.setDisabled(True)
-            self.clipindex_move_down.setDisabled(True)
         if not len(self.videoList.videos[self.videoList.current_video_index].clips):
             self.clipindex_clips_remove.setDisabled(True)
 
@@ -1114,8 +1069,8 @@ class VideoCutter(QWidget):
         self.toolbar_start.setDisabled(True)
         self.toolbar_end.setEnabled(True)
 
-        self.clipindex_move_up.setDisabled(True)
-        self.clipindex_move_down.setDisabled(True)
+        # self.clipindex_move_up.setDisabled(True)
+        # self.clipindex_move_down.setDisabled(True)
 
         self.videoSlider.setRestrictValue(self.videoSlider.value(), True)
         self.inCut = True
@@ -1163,17 +1118,18 @@ class VideoCutter(QWidget):
         # self.renderVideoClipIndex()
 
     def updateClipIndexButtonsState(self):
-        if self.videoList.videos[self.videoList.current_video_index].clipsLength() > 0:
-            self.clipindex_clips_remove.setEnabled(True)
-        else:
-            self.clipindex_clips_remove.setEnabled(False)
+        pass
+        # if self.videoList.videos[self.videoList.current_video_index].clipsLength() > 0:
+        #     self.clipindex_clips_remove.setEnabled(True)
+        # else:
+        #     self.clipindex_clips_remove.setEnabled(False)
 
-        if self.videoList.videos[self.videoList.current_video_index].clipsLength() > 1:
-            self.clipindex_move_up.setEnabled(True)
-            self.clipindex_move_down.setEnabled(True)
-        else:
-            self.clipindex_move_up.setEnabled(False)
-            self.clipindex_move_down.setEnabled(False)
+        # if self.videoList.videos[self.videoList.current_video_index].clipsLength() > 1:
+        #     self.clipindex_move_up.setEnabled(True)
+        #     self.clipindex_move_down.setEnabled(True)
+        # else:
+        #     self.clipindex_move_up.setEnabled(False)
+        #     self.clipindex_move_down.setEnabled(False)
 
     def renderClipIndex(self) -> None: #should replace renderClipIndex()
         if not self.mediaAvailable:

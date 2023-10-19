@@ -118,7 +118,7 @@ class VideoSlider(QSlider):
         handle_height = 0
         margin = 0
         timeline = ''
-        self._regionHeight = 15
+        self._regionHeight = 19
         if not self.thumbnailsOn:
             '''
             if self.parent.thumbnailsButton.isChecked():
@@ -222,20 +222,23 @@ class VideoSlider(QSlider):
         if not self.free_cursor_on_side:
             return
 
-        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+
         # print('painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))')
         if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
             begin = self._regions[self.currentRectangleIndex].topLeft()
             end = self._regions[self.currentRectangleIndex].bottomLeft()
+            painter.setPen(QPen(QColor(200, 50, 50, 255), 3, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_ON_END_SIDE:
             begin = self._regions[self.currentRectangleIndex].topRight()
             end = self._regions[self.currentRectangleIndex].bottomRight()
+            painter.setPen(QPen(QColor(50, 200, 50, 255), 3, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_IS_INSIDE:
+            painter.setPen(QPen(QColor(50, 60, 200, 255), 3, Qt.SolidLine))
             brushcolor = QColor(237, 242, 255, 150)
             painter.setBrush(brushcolor)
-            painter.drawRect(self._regions[self.currentRectangleIndex]) #rect is drawing above rect
+            painter.drawRect(self._regions[self.currentRectangleIndex])
 
 
     def setRegionVizivility(self, index, state):
@@ -260,7 +263,6 @@ class VideoSlider(QSlider):
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return CursorStates.CURSOR_IS_INSIDE
         return 0
-
 
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
@@ -288,34 +290,6 @@ class VideoSlider(QSlider):
         self._regionsVisibility.clear()
         self._regionSelected = -1
         self.update()
-
-    def applyEvent(self, event):
-        if self.state == RectangleEditState.BEGIN_SIDE_EDIT:
-            rectangle_left_value = max(event.x(), 0)
-            self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
-            time_start = self.parent.delta2QTime(value_begin)
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            # self.parent.videoList.videos.pop(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipStartTime(time_start)
-        elif self.state == RectangleEditState.END_SIDE_EDIT:
-            rectangle_right_value = min(event.x(), self.width() - 1)
-            self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
-            value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            time = self.parent.delta2QTime(value)
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipEndTime(time)
-        elif self.state == RectangleEditState.RECTANGLE_MOVE:
-            delta_value = event.x() - self.dragPosition.x()
-            shift_value = self.dragRectPosition.x() + delta_value
-            self._regions[self.currentRectangleIndex].moveLeft(shift_value)
-            rectangle_left_value = max(self._regions[self.currentRectangleIndex].left(), 0)
-            rectangle_right_value = min(self._regions[self.currentRectangleIndex].right(), self.width() - 1)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
-            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
-            self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
 
     @pyqtSlot(int)
     def showProgress(self, steps: int) -> None:
@@ -377,6 +351,34 @@ class VideoSlider(QSlider):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         qApp.sendEvent(self.parent, event)
+
+    def applyEvent(self, event):
+        if self.state == RectangleEditState.BEGIN_SIDE_EDIT:
+            rectangle_left_value = max(event.x(), 0)
+            self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
+            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            time_start = self.parent.delta2QTime(value_begin)
+            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            # self.parent.videoList.videos.pop(self.currentRectangleIndex)
+            self.parent.videoList.setCurrentVideoClipStartTime(time_start)
+        elif self.state == RectangleEditState.END_SIDE_EDIT:
+            rectangle_right_value = min(event.x(), self.width() - 1)
+            self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
+            value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
+            time = self.parent.delta2QTime(value)
+            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoList.setCurrentVideoClipEndTime(time)
+        elif self.state == RectangleEditState.RECTANGLE_MOVE:
+            delta_value = event.x() - self.dragPosition.x()
+            shift_value = self.dragRectPosition.x() + delta_value
+            self._regions[self.currentRectangleIndex].moveLeft(shift_value)
+            rectangle_left_value = max(self._regions[self.currentRectangleIndex].left(), 0)
+            rectangle_right_value = min(self._regions[self.currentRectangleIndex].right(), self.width() - 1)
+            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
+            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
+            self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
 
     def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
         modifierPressed = QApplication.keyboardModifiers()
