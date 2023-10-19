@@ -110,6 +110,7 @@ class VideoSlider(QSlider):
         self.widgetWidth = self.parent.sliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()
 
+
     def initStyle(self) -> None:
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
         height = 25
@@ -236,37 +237,12 @@ class VideoSlider(QSlider):
             painter.setBrush(brushcolor)
             painter.drawRect(self._regions[self.currentRectangleIndex]) #rect is drawing above rect
 
+
     def setRegionVizivility(self, index, state):
         if len(self._regionsVisibility) > 0:
             self._regionsVisibility[index] = state
             self.update()
 
-    def applyEvent(self, event):
-        if self.state == RectangleEditState.BEGIN_SIDE_EDIT:
-            rectangle_left_value = max(event.x(), 0)
-            self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
-            timeStart = self.parent.delta2QTime(value_begin)
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipStartTime(timeStart)
-        elif self.state == RectangleEditState.END_SIDE_EDIT:
-            rectangle_right_value = min(event.x(), self.width() - 1)
-            self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
-            value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            time = self.parent.delta2QTime(value)
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipEndTime(time)
-        elif self.state == RectangleEditState.RECTANGLE_MOVE:
-            delta_value = event.x() - self.dragPosition.x()
-            shift_value = self.dragRectPosition.x() + delta_value
-            self._regions[self.currentRectangleIndex].moveLeft(shift_value)
-            rectangle_left_value = max(self._regions[self.currentRectangleIndex].left(), 0)
-            rectangle_right_value = min(self._regions[self.currentRectangleIndex].right(), self.width() - 1)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
-            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
-            self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
 
     def cursorOnSide(self, e_pos) -> int:
         if len(self._regions) > 0:
@@ -284,6 +260,8 @@ class VideoSlider(QSlider):
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return CursorStates.CURSOR_IS_INSIDE
         return 0
+
+
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
         x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
@@ -310,6 +288,34 @@ class VideoSlider(QSlider):
         self._regionsVisibility.clear()
         self._regionSelected = -1
         self.update()
+
+    def applyEvent(self, event):
+        if self.state == RectangleEditState.BEGIN_SIDE_EDIT:
+            rectangle_left_value = max(event.x(), 0)
+            self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
+            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            time_start = self.parent.delta2QTime(value_begin)
+            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            # self.parent.videoList.videos.pop(self.currentRectangleIndex)
+            self.parent.videoList.setCurrentVideoClipStartTime(time_start)
+        elif self.state == RectangleEditState.END_SIDE_EDIT:
+            rectangle_right_value = min(event.x(), self.width() - 1)
+            self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
+            value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
+            time = self.parent.delta2QTime(value)
+            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoList.setCurrentVideoClipEndTime(time)
+        elif self.state == RectangleEditState.RECTANGLE_MOVE:
+            delta_value = event.x() - self.dragPosition.x()
+            shift_value = self.dragRectPosition.x() + delta_value
+            self._regions[self.currentRectangleIndex].moveLeft(shift_value)
+            rectangle_left_value = max(self._regions[self.currentRectangleIndex].left(), 0)
+            rectangle_right_value = min(self._regions[self.currentRectangleIndex].right(), self.width() - 1)
+            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
+            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
+            self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
 
     @pyqtSlot(int)
     def showProgress(self, steps: int) -> None:
@@ -383,6 +389,12 @@ class VideoSlider(QSlider):
 
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
             self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex].thumbnail = thumbnail
+
+            clip = self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex]
+            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips.pop(self.currentRectangleIndex)
+            self.currentRectangleIndex = self.parent.videoList.videos[self.parent.videoList.current_video_index].clips.bisect_right(clip)
+            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips.add(clip)
+
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0

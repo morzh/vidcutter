@@ -4,6 +4,7 @@ from typing import List
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
+from sortedcontainers import SortedList
 
 class VideoItem:
     def __init__(self, *args):
@@ -14,7 +15,7 @@ class VideoItem:
             self.description = ''
             self.youtube_id = ''
             self.issues = []
-            self.clips: List[VideoItemClip] = []
+            self.clips: SortedList[VideoItemClip] = SortedList()
             self._currentCLipIndex = 0
         elif len(args) == 2:
             self.thumb = args[0]

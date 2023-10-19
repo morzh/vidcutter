@@ -809,6 +809,7 @@ class VideoCutter(QWidget):
         self.initMediaControls(False)
 
     def loadMedia(self, item) -> None:
+        from sortedcontainers import SortedList
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
         if not self.folderOpened:
@@ -831,6 +832,7 @@ class VideoCutter(QWidget):
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
 
         try:
+            self.videoList.videos[self.videoList.current_video_index].clips = SortedList(self.videoList.videos[self.videoList.current_video_index].clips)
             self.mpvWidget.setEnabled(True)
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
@@ -1099,26 +1101,40 @@ class VideoCutter(QWidget):
         starttime = self.delta2QTime(self.videoSlider.value())
         clipsNumber = len(self.videoList.videos[self.videoList.current_video_index].clips)
         defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
+
         clip = VideoItemClip(starttime, QTime(), self.captureImage(self.currentMedia, starttime), defaultClipName, 0)
-        self.videoList.videos[self.videoList.current_video_index].clips.append(clip)
+        bisect_index = self.videoList.videos[self.videoList.current_video_index].clips.bisect_right(clip)
+        self.videoList.videos[self.videoList.current_video_index].bisect_index = bisect_index
+        self.videoList.videos[self.videoList.current_video_index].clips.add(clip)
+
         self.timeCounter.setMinimum(starttime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
         self.clipindex_clips_remove.setDisabled(True)
+
         self.toolbar_start.setDisabled(True)
         self.toolbar_end.setEnabled(True)
+
         self.clipindex_move_up.setDisabled(True)
         self.clipindex_move_down.setDisabled(True)
+
         self.videoSlider.setRestrictValue(self.videoSlider.value(), True)
         self.inCut = True
+
+        sorted(self.videoList.videos[self.videoList.current_video_index].clips)
+
         self.renderClipIndex()
         self.cliplist.scrollToBottom()
 
     def clipEnd(self) -> None:
         # item = self.clipTimes[len(self.clipTimes) - 1]
-        clip_item_last = self.videoList.videos[self.videoList.current_video_index][-1]  # .clipsLast()
-        end_time = self.delta2QTime(self.videoSlider.value())
-        clip_item_last.timeEnd = end_time
-        clip_item_last.visibility = 2
+        clip_item_last = self.videoList.videos[self.videoList.current_video_index].bisect_index  # .clipsLast()
+        # clip_item_last = self.videoList.videos[self.videoList.current_video_index][-1]  # .clipsLast()
+        bisect_index = self.videoList.videos[self.videoList.current_video_index].bisect_index
+        time_end = self.delta2QTime(self.videoSlider.value())
+        self.videoList.videos[self.videoList.current_video_index].clips[bisect_index].timeEnd = time_end
+        self.videoList.videos[self.videoList.current_video_index].clips[bisect_index].visibility = 2
+        # clip_item_last.timeEnd = time_end
+        # clip_item_last.visibility = 2
 
         self.toolbar_start.setEnabled(True)
         self.toolbar_end.setDisabled(True)
@@ -1164,7 +1180,9 @@ class VideoCutter(QWidget):
             return
         self.videoSlider.clearRegions()
         self.totalRuntime = 0
+        # force to update sorted list
         self.cliplist.renderClips(self.videoList.videos[self.videoList.current_video_index].clips)
+
         if len(self.videoList.videos[self.videoList.current_video_index].clips) and not self.inCut:
             self.toolbar_save.setEnabled(True)
             self.saveProjectAction.setEnabled(True)

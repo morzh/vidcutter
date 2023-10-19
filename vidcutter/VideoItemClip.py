@@ -26,6 +26,18 @@ class VideoItemClip:
         print('\t',  'name:',  self._name, 'start time', self._timeStart, ' time end:',
               self._timeEnd, ' visibility:',  self._visibility, ' description:',  self._description)
 
+    def __lt__(self, other):
+        return self.timeStart < other.timeStart
+
+    def __le__(self, other):
+        return self.timeStart <= other.timeStart
+
+    def __gt__(self, other):
+        return self.timeStart > other.timeStart
+
+    def __ge__(self, other):
+        return self.timeStart >= other.timeStart
+
     @property
     def timeStart(self) -> QTime:
         return self._timeStart

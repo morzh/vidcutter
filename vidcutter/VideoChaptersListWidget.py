@@ -52,22 +52,22 @@ class VideoClipsListWidget(QListWidget):
     def renderClips(self, video_clip_items: list) -> None:
         self.clips_has_rendered = False
         self.clear()
-        for index, videoClip in enumerate(video_clip_items):
+        for index, video_clip in enumerate(video_clip_items):
             list_item = QListWidgetItem(self)
             list_item.setToolTip('Drag to reorder clips')
-            end_item = videoClip.timeEnd.toString(self.parent.runtimeformat)
+            end_item = video_clip.timeEnd.toString(self.parent.runtimeformat)
             list_item.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             list_item.setTextAlignment(Qt.AlignVCenter)
-            list_item.setData(Qt.DecorationRole + 1, videoClip.thumbnail)
-            list_item.setData(Qt.DisplayRole + 1, videoClip.timeStart.toString(self.parent.runtimeformat))
+            list_item.setData(Qt.DecorationRole + 1, video_clip.thumbnail)
+            list_item.setData(Qt.DisplayRole + 1, video_clip.timeStart.toString(self.parent.runtimeformat))
             list_item.setData(Qt.UserRole + 1, end_item)
-            list_item.setData(Qt.UserRole + 2, videoClip.description)
-            list_item.setData(Qt.UserRole + 3, videoClip.name)
-            list_item.setData(Qt.CheckStateRole, videoClip.visibility)
-            list_item.setCheckState(videoClip.visibility)
+            list_item.setData(Qt.UserRole + 2, video_clip.description)
+            list_item.setData(Qt.UserRole + 3, video_clip.name)
+            list_item.setData(Qt.CheckStateRole, video_clip.visibility)
+            list_item.setCheckState(video_clip.visibility)
             list_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
             self.addItem(list_item)
-            self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            self.parent.videoSlider.addRegion(video_clip.timeStart.msecsSinceStartOfDay(), video_clip.timeEnd.msecsSinceStartOfDay(), video_clip.visibility)
         self.clips_has_rendered = True
 
     def showProgress(self, steps: int) -> None:

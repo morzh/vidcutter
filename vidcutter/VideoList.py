@@ -3,6 +3,7 @@ import os
 from PyQt5.QtCore import QTime
 from PyQt5.QtGui import QPixmap
 from vidcutter.VideoItem import VideoItem
+from sortedcontainers import SortedList
 
 
 class VideoList:
@@ -60,18 +61,14 @@ class VideoList:
             self._description = description
 
     @property
-    def current_video_index(self):
+    def current_video_index(self) -> int:
         return self._current_video_index
 
     @current_video_index.setter
     def current_video_index(self, index: int) -> None:
-        if index < 0:
-            index *= -1
         self._current_video_index = index
 
     def setCurrentVideoIndex(self, index: int) -> None:
-        if index < 0:
-            index *= -1
         self._current_video_index = index
 
     def currentVideoFilepath(self, folder_path: str):
