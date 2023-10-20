@@ -9,13 +9,43 @@ import copy
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
 from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent
 from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QProgressBar, QSizePolicy, QStyle,
-                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication)
+                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QStyleOptionComboBox)
 
-# import PyQt5.QtCore.
+# from PySide2 import QtGui, QtCore, QtWidgets
 
 from vidcutter.libs.graphicseffects import OpacityEffect
 from vidcutter.VideoItemClip import VideoItemClip
 
+'''
+class ComboBoxDelegate(QtWidgets.QItemDelegate):
+    def __init__(self, parent=None):
+        super(ComboBoxDelegate, self).__init__(parent)
+        self.items = []
+
+    def setItems(self, items):
+        self.items = items
+
+    def createEditor(self, widget, option, index):
+        editor = QtGui.QComboBox(widget)
+        editor.addItems(self.items)
+        return editor
+
+    def setEditorData(self, editor, index):
+        value = index.model().data(index, QtCore.Qt.EditRole)
+        if value:
+            editor.setCurrentIndex(int(value))
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.currentIndex(), QtCore.Qt.EditRole)
+
+    def updateEditorGeometry(self, editor, option, index):
+        editor.setGeometry(option.rect)
+
+    def paint(self, painter, option, index):
+        text = self.items[index.row()]
+        option.text = text
+        QtGui.QApplication.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter)
+'''
 
 class VideoClipsListWidget(QListWidget):
     def __init__(self, parent=None):
@@ -63,6 +93,7 @@ class VideoClipsListWidget(QListWidget):
             list_item.setData(Qt.UserRole + 1, end_item)
             list_item.setData(Qt.UserRole + 2, video_clip.description)
             list_item.setData(Qt.UserRole + 3, video_clip.name)
+            list_item.setData(Qt.UserRole + 4, ['Barbel Row', 'Other'])
             list_item.setData(Qt.CheckStateRole, video_clip.visibility)
             list_item.setCheckState(video_clip.visibility)
             list_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
@@ -152,24 +183,30 @@ class VideoClipItemStyle(QStyledItemDelegate):
                 painter.setBrush(Qt.transparent if index.row() % 2 == 0 else brushcolor)
         painter.setPen(Qt.NoPen)
         painter.drawRect(r)
-        thumbicon = QIcon(index.data(Qt.DecorationRole + 1))
-        starttime = index.data(Qt.DisplayRole + 1)
-        endtime = index.data(Qt.UserRole + 1)
-        externalPath = index.data(Qt.UserRole + 2)
-        chapterName = index.data(Qt.UserRole + 3)
+        thumb_icon = QIcon(index.data(Qt.DecorationRole + 1))
+        start_time = index.data(Qt.DisplayRole + 1)
+        end_time = index.data(Qt.UserRole + 1)
+        combo_box_classes = index.data(Qt.UserRole + 4)
 
-        cbOpt = QStyleOptionButton()
-        cbOpt.QStyleOption = option
-        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, cbOpt)
-        cbOpt.rect = option.rect.adjusted(165, -85, checker_rect.width(), checker_rect.height())
-        isChecked = bool(index.data(Qt.CheckStateRole))
+        cb_opt_combo_box = QStyleOptionComboBox()
+        cb_opt_combo_box.QStyleOption = option
+        cb_opt_combo_box.rect = option.rect.adjusted(3, 5, -44, -78)
+        cb_opt_combo_box.editable = True
+        cb_opt_combo_box.currentText = 'ertertet'
 
-        if isChecked:
-            cbOpt.state |= QStyle.State_On
+        cb_opt_checker = QStyleOptionButton()
+        cb_opt_checker.QStyleOption = option
+        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, cb_opt_checker)
+        cb_opt_checker.rect = option.rect.adjusted(165, -85, checker_rect.width(), checker_rect.height())
+        is_checked = bool(index.data(Qt.CheckStateRole))
+
+        if is_checked:
+            cb_opt_checker.state |= QStyle.State_On
         else:
-            cbOpt.state |= QStyle.State_Off
+            cb_opt_checker.state |= QStyle.State_Off
 
         painter.setPen(QPen(pencolor, 1, Qt.SolidLine))
+        '''
         if len(chapterName):
             offset = 20
             r = option.rect.adjusted(5, 5, 0, 0)
@@ -181,27 +218,28 @@ class VideoClipItemStyle(QStyledItemDelegate):
         else:
             offset = 0
             r = option.rect.adjusted(5, 0, 0, 0)
+        '''
 
-        thumbicon.paint(painter, r, Qt.AlignVCenter | Qt.AlignLeft)
+        offset = 20
+        r = option.rect.adjusted(5, 5, -5, -5)
+        thumb_icon.paint(painter, r, Qt.AlignBottom | Qt.AlignLeft)
 
         r = option.rect.adjusted(110, 10 + offset, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
-        painter.drawText(r, Qt.AlignLeft, 'FILENAME' if len(externalPath) else 'START')
+        painter.drawText(r, Qt.AlignLeft, 'START')
         r = option.rect.adjusted(110, 23 + offset, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Normal))
-        if len(externalPath):
-            painter.drawText(r, Qt.AlignLeft, self.clipText(os.path.basename(externalPath), painter))
-        else:
-            painter.drawText(r, Qt.AlignLeft, starttime)
-        if len(endtime) > 0:
+        painter.drawText(r, Qt.AlignLeft, start_time)
+        if len(end_time) > 0:
             r = option.rect.adjusted(110, 48 + offset, 0, 0)
             painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
-            painter.drawText(r, Qt.AlignLeft, 'RUNTIME' if len(externalPath) else 'END')
+            painter.drawText(r, Qt.AlignLeft, 'END')
             r = option.rect.adjusted(110, 60 + offset, 0, 0)
             painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Normal))
-            painter.drawText(r, Qt.AlignLeft, endtime)
+            painter.drawText(r, Qt.AlignLeft, end_time)
 
-        QApplication.style().drawControl(QStyle.CE_CheckBox, cbOpt, painter)
+        QApplication.style().drawControl(QStyle.CE_CheckBox, cb_opt_checker, painter)
+        QApplication.style().drawComplexControl(QStyle.CC_ComboBox, cb_opt_combo_box, painter)
 
     def clipText(self, text: str, painter: QPainter, chapter: bool=False) -> str:
         metrics = painter.fontMetrics()

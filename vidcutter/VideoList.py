@@ -28,25 +28,7 @@ class VideoList:
     @staticmethod
     def clamp(x, minimum, maximum):
         return max(minimum, min(x, maximum))
-    '''
-    def readData(self):
-        filepath = os.path.join(self._absolutePath, self._data_filename)
-        with open(filepath, 'rb') as f:
-            self.videos = pickle.load(f)
 
-    def saveData(self):
-        data_filepath_temporary = os.path.join(self._absolutePath, self._data_temporary_filename)
-        data_filepath = os.path.join(self._absolutePath, self._data_filename)
-        try:
-            with open(data_filepath_temporary, 'wb') as f:
-                pickle.dump(self.videos, f)
-            os.rename(data_filepath_temporary, data_filepath)
-        except OSError:
-            print('project save failed')
-
-    def saveDataQtThread(self):
-        pass
-    '''
     @property
     def video_issues_classes(self) -> list:
         return self._videoIssuesClasses

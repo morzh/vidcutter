@@ -6,10 +6,12 @@ import logging
 import math
 import os.path
 import sys
+from copy import copy
 from enum import Enum
 
+import PySide2
 from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot, QPoint
-from PyQt5.QtGui import QColor, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent
+from PyQt5.QtGui import QColor, QFont, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent, QPainter
 from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle,
                              QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication, QScrollBar)
 
@@ -184,7 +186,7 @@ class VideoSlider(QSlider):
                 else:
                     h, w, z = 8, 1, 23
                 tickcolor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
-                pen = QPen(tickcolor)
+                pen = QPen(tickcolor)  # , Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
                 pen.setWidthF(w)
                 painter.setPen(pen)
                 if self.tickPosition() in (QSlider.TicksBothSides, QSlider.TicksAbove):
@@ -195,8 +197,7 @@ class VideoSlider(QSlider):
                     painter.drawLine(x, y, x, y - h)
                     if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
                         painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset,
-                                                                  self.width() - (self.offset * 2))
+                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset, self.width() - (self.offset * 2))
                         timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
                         painter.drawText(x + 4, y + 6, timecode)
                 if x + 30 > self.width():
@@ -206,22 +207,29 @@ class VideoSlider(QSlider):
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
         if not len(self._progressbars):
-            if len(self._regions) == len(self._regionsVisibility): # should always be true
+            if len(self._regions) == len(self._regionsVisibility):  # should always be true
+                visible_region = self.visibleRegion().boundingRect()
                 for rect, rectViz in zip(self._regions, self._regionsVisibility):
                     if rectViz == 0:
                         continue
                     rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
                     rect.setHeight(self._regionHeight)
+                    rect_class = rect.adjusted(0, 0, 0, 0)
                     brushcolor = QColor(150, 190, 78, 150) if self._regions.index(rect) == self._regionSelected else QColor(237, 242, 255, 150)
                     painter.setBrush(brushcolor)
                     painter.setPen(QColor(50, 50, 50, 170))
-                    painter.drawRect(rect)
+                    painter.setRenderHints(QPainter.HighQualityAntialiasing)
+                    painter.drawRoundedRect(rect, 2, 2)
+                    painter.setFont(QFont('Noto Sans', 13 if sys.platform == 'darwin' else 11, QFont.SansSerif))
+                    painter.setPen(Qt.black if self.theme == 'dark' else Qt.white)
+                    rect_class = rect_class.intersected(visible_region)
+                    rect_class = rect_class.adjusted(5, 0, -5, 0)
+                    painter.drawText(rect_class, Qt.AlignBottom | Qt.AlignLeft, 'Some Class')
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
 
         if not self.free_cursor_on_side:
             return
-
 
         # print('painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))')
         if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
@@ -238,7 +246,8 @@ class VideoSlider(QSlider):
             painter.setPen(QPen(QColor(50, 60, 200, 255), 3, Qt.SolidLine))
             brushcolor = QColor(237, 242, 255, 150)
             painter.setBrush(brushcolor)
-            painter.drawRect(self._regions[self.currentRectangleIndex])
+            painter.setRenderHints(QPainter.HighQualityAntialiasing)
+            painter.drawRoundedRect(self._regions[self.currentRectangleIndex], 2, 2)
 
 
     def setRegionVizivility(self, index, state):
@@ -263,7 +272,6 @@ class VideoSlider(QSlider):
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return CursorStates.CURSOR_IS_INSIDE
         return 0
-
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
         x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
