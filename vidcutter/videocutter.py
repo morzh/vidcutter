@@ -148,10 +148,10 @@ class VideoCutter(QWidget):
         self._initIcons()
         self._initActions()
 
-        self.appmenu = QMenu(self.parent)
-        self.help_menu = QMenu('Help n Logs', self.appmenu)
+        self.applicationMenu = QMenu(self.parent)
+        self.helpMenu = QMenu('Help n Logs', self.applicationMenu)
         self.clipindex_removemenu = QMenu(self)
-        self.clipindex_contextmenu = QMenu(self)
+        self.clipIndexContextmenu = QMenu(self)
         self._initMenus()
         self._initNoVideo()
 
@@ -166,8 +166,8 @@ class VideoCutter(QWidget):
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
 
         if sys.platform in {'win', 'darwin'}:
-            self.clipindex_move_up.setStyle(QStyleFactory.create('Fusion'))
-            self.clipindex_move_down.setStyle(QStyleFactory.create('Fusion'))
+            # self.clipindex_move_up.setStyle(QStyleFactory.create('Fusion'))
+            # self.clipindex_move_down.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_clips_remove.setStyle(QStyleFactory.create('Fusion'))
 
         self.clipIndexLayout = QVBoxLayout()
@@ -252,65 +252,65 @@ class VideoCutter(QWidget):
         audioLayout.addSpacing(5)
         audioLayout.addWidget(self.fullscreenButton)
 
-        self.toolbar_open = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
-        self.toolbar_open.clicked.connect(self.openFolder)
-        self.toolbar_play = VCToolBarButton('Play', 'Play currently loaded media file', parent=self)
-        self.toolbar_play.setEnabled(False)
-        self.toolbar_play.clicked.connect(self.playMedia)
+        self.toolbarOpen = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
+        self.toolbarOpen.clicked.connect(self.openFolder)
+        self.toolbarPlay = VCToolBarButton('Play', 'Play currently loaded media file', parent=self)
+        self.toolbarPlay.setEnabled(False)
+        self.toolbarPlay.clicked.connect(self.playMedia)
 
-        self.toolbar_start = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
-        self.toolbar_start.setEnabled(False)
-        self.toolbar_start.clicked.connect(self.clipStart)
+        self.toolbarStart = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
+        self.toolbarStart.setEnabled(False)
+        self.toolbarStart.clicked.connect(self.clipStart)
 
-        self.toolbar_end = VCToolBarButton('End Clip', 'End a new clip at the current timeline position', parent=self)
-        self.toolbar_end.setEnabled(False)
-        self.toolbar_end.clicked.connect(self.clipEnd)
+        self.toolbarEnd = VCToolBarButton('End Clip', 'End a new clip at the current timeline position', parent=self)
+        self.toolbarEnd.setEnabled(False)
+        self.toolbarEnd.clicked.connect(self.clipEnd)
 
-        self.toolbar_save = VCToolBarButton('Save', 'Save clips to a new media file', parent=self)
-        self.toolbar_save.setEnabled(False)
-        self.toolbar_save.clicked.connect(self.saveProject)
+        self.toolbarSave = VCToolBarButton('Save', 'Save clips to a new media file', parent=self)
+        self.toolbarSave.setEnabled(False)
+        self.toolbarSave.clicked.connect(self.saveProject)
 
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
         toolbarLayout.addStretch(1)
-        toolbarLayout.addWidget(self.toolbar_open)
+        toolbarLayout.addWidget(self.toolbarOpen)
         toolbarLayout.addStretch(1)
-        toolbarLayout.addWidget(self.toolbar_play)
+        toolbarLayout.addWidget(self.toolbarPlay)
         toolbarLayout.addStretch(1)
-        toolbarLayout.addWidget(self.toolbar_start)
+        toolbarLayout.addWidget(self.toolbarStart)
         toolbarLayout.addStretch(1)
-        toolbarLayout.addWidget(self.toolbar_end)
+        toolbarLayout.addWidget(self.toolbarEnd)
         toolbarLayout.addStretch(1)
-        toolbarLayout.addWidget(self.toolbar_save)
+        toolbarLayout.addWidget(self.toolbarSave)
         # toolbarLayout.addStretch(1)
         # toolbarLayout.addWidget(self.toolbar_send)
 
-        self.timeline_minus_button = VCToolBarButton('Minus', 'Increase timeline scale', parent=self, has_label=False)
-        self.timeline_minus_button.button.setFixedSize(30, 32)
-        self.timeline_minus_button.button.setEnabled(False)
-        self.timeline_minus_button.clicked.connect(self.toolbarMinus)
+        self.timelineMinusButton = VCToolBarButton('Minus', 'Increase timeline scale', parent=self, has_label=False)
+        self.timelineMinusButton.button.setFixedSize(30, 32)
+        self.timelineMinusButton.button.setEnabled(False)
+        self.timelineMinusButton.clicked.connect(self.toolbarMinus)
 
-        self.timeline_factor_label = QLabel()
-        self.timeline_factor_label.setText('1')
-        self.timeline_factor_label.setEnabled(False)
-        self.timeline_factor_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.timeline_factor_label.setFixedSize(40, 40)
-        self.timeline_factor_label.setAlignment(Qt.AlignCenter)
-        self.timeline_factor_label.setFont(QFont('Verdana', 12))
-        self.timeline_factor_label.setStyleSheet("font-weight: bold; color: {}".format('black' if self.theme == 'dark' else '#C1C2C4'))
+        self.timelineFactorLabel = QLabel()
+        self.timelineFactorLabel.setText('1')
+        self.timelineFactorLabel.setEnabled(False)
+        self.timelineFactorLabel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.timelineFactorLabel.setFixedSize(40, 40)
+        self.timelineFactorLabel.setAlignment(Qt.AlignCenter)
+        self.timelineFactorLabel.setFont(QFont('Verdana', 12))
+        self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('black' if self.theme == 'dark' else '#C1C2C4'))
 
-        self.timeline_plus_button = VCToolBarButton('Plus', 'Increase timeline scale', parent=self, has_label=False)
-        self.timeline_plus_button.button.setFixedSize(30, 32)
-        self.timeline_plus_button.button.setEnabled(False)
-        self.timeline_plus_button.clicked.connect(self.toolbarPlus)
+        self.timelinePlusButton = VCToolBarButton('Plus', 'Increase timeline scale', parent=self, has_label=False)
+        self.timelinePlusButton.button.setFixedSize(30, 32)
+        self.timelinePlusButton.button.setEnabled(False)
+        self.timelinePlusButton.clicked.connect(self.toolbarPlus)
 
-        scale_timeline_layout = QHBoxLayout()
-        scale_timeline_layout.setContentsMargins(0, 0, 0, 0)
-        scale_timeline_layout.addStretch(1)
-        scale_timeline_layout.setContentsMargins(0, 0, 0, 0)
-        scale_timeline_layout.addWidget(self.timeline_minus_button)
-        scale_timeline_layout.addWidget(self.timeline_factor_label)
-        scale_timeline_layout.addWidget(self.timeline_plus_button)
+        scaleTimelineLayout = QHBoxLayout()
+        scaleTimelineLayout.setContentsMargins(0, 0, 0, 0)
+        scaleTimelineLayout.addStretch(1)
+        scaleTimelineLayout.setContentsMargins(0, 0, 0, 0)
+        scaleTimelineLayout.addWidget(self.timelineMinusButton)
+        scaleTimelineLayout.addWidget(self.timelineFactorLabel)
+        scaleTimelineLayout.addWidget(self.timelinePlusButton)
 
         self.toolbarGroup = QGroupBox()
         self.toolbarGroup.setLayout(toolbarLayout)
@@ -336,7 +336,7 @@ class VideoCutter(QWidget):
             controlsLayout.addSpacing(5)
         else:
             controlsLayout.setContentsMargins(10, 10, 10, 0)
-        controlsLayout.addLayout(scale_timeline_layout)
+        controlsLayout.addLayout(scaleTimelineLayout)
         controlsLayout.addSpacing(20)
         controlsLayout.addStretch(1)
         controlsLayout.addWidget(self.toolbarGroup)
@@ -379,7 +379,7 @@ class VideoCutter(QWidget):
         else:
             self.factor += 2
         self.factor = self.clip(self.factor, 1, 18)
-        self.timeline_factor_label.setText(str(self.factor))
+        self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
             # if self.thumbnailsButton.isChecked():
@@ -393,7 +393,7 @@ class VideoCutter(QWidget):
         else:
             self.factor -= 2
         self.factor = self.clip(self.factor, 1, 18)
-        self.timeline_factor_label.setText(str(self.factor))
+        self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
             # if self.thumbnailsButton.isChecked():
@@ -403,9 +403,9 @@ class VideoCutter(QWidget):
     @pyqtSlot()
     def showAppMenu(self) -> None:
         pos = self.menuButton.mapToGlobal(self.menuButton.rect().topLeft())
-        pos.setX(pos.x() - self.appmenu.sizeHint().width() + 30)
+        pos.setX(pos.x() - self.applicationMenu.sizeHint().width() + 30)
         pos.setY(pos.y() - 28)
-        self.appmenu.popup(pos, self.quitAction)
+        self.applicationMenu.popup(pos, self.quitAction)
 
     def initTheme(self) -> None:
         qApp.setStyle(VideoStyleDark() if self.theme == 'dark' else VideoStyleLight())
@@ -532,26 +532,26 @@ class VideoCutter(QWidget):
         return menu
 
     def _initMenus(self) -> None:
-        self.appmenu.addAction(self.settingsAction)
-        self.appmenu.addSeparator()
-        self.appmenu.addMenu(self.help_menu)
-        self.help_menu.addAction(self.keyRefAction)
-        self.help_menu.addAction(self.viewLogsAction)
-        self.help_menu.addAction(self.toggleConsoleAction)
-        self.help_menu.addAction(self.aboutAction)
-        self.help_menu.addAction(self.aboutQtAction)
-        self.help_menu.addAction(self.updateCheckAction)
-        self.appmenu.addAction(self.quitAction)
+        self.applicationMenu.addAction(self.settingsAction)
+        self.applicationMenu.addSeparator()
+        self.applicationMenu.addMenu(self.helpMenu)
+        self.helpMenu.addAction(self.keyRefAction)
+        self.helpMenu.addAction(self.viewLogsAction)
+        self.helpMenu.addAction(self.toggleConsoleAction)
+        self.helpMenu.addAction(self.aboutAction)
+        self.helpMenu.addAction(self.aboutQtAction)
+        self.helpMenu.addAction(self.updateCheckAction)
+        self.applicationMenu.addAction(self.quitAction)
 
-        self.clipindex_contextmenu.addAction(self.removeItemAction)
-        self.clipindex_contextmenu.addAction(self.removeAllAction)
+        self.clipIndexContextmenu.addAction(self.removeItemAction)
+        self.clipIndexContextmenu.addAction(self.removeAllAction)
 
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
 
         if sys.platform in {'win', 'darwin'}:
-            self.appmenu.setStyle(QStyleFactory.create('Fusion'))
-            self.clipindex_contextmenu.setStyle(QStyleFactory.create('Fusion'))
+            self.applicationMenu.setStyle(QStyleFactory.create('Fusion'))
+            self.clipIndexContextmenu.setStyle(QStyleFactory.create('Fusion'))
             self.clipindex_removemenu.setStyle(QStyleFactory.create('Fusion'))
 
     def _initClipIndexHeader(self) -> None:
@@ -631,7 +631,7 @@ class VideoCutter(QWidget):
                     self.moveItemUpAction.setEnabled(True)
                 if index < self.cliplist.count() - 1:
                     self.moveItemDownAction.setEnabled(True)
-        self.clipindex_contextmenu.exec_(globalPos)
+        self.clipIndexContextmenu.exec_(globalPos)
 
     def videoListDoubleClick(self) -> None:
         index = self.cliplist.currentRow()
@@ -795,10 +795,10 @@ class VideoCutter(QWidget):
             self.videoSlider.setFocus()
             self.sliderWidget.setEnabled(True)
             self.mediaAvailable = True
-            self.timeline_minus_button.button.setEnabled(True)
-            self.timeline_factor_label.setStyleSheet("font-weight: bold; color: light grey")
-            self.timeline_factor_label.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
-            self.timeline_plus_button.button.setEnabled(True)
+            self.timelineMinusButton.button.setEnabled(True)
+            self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
+            self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
+            self.timelinePlusButton.button.setEnabled(True)
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
@@ -845,13 +845,13 @@ class VideoCutter(QWidget):
         self.videoList.videos[index].description = description
         self.projectSaved = False
         self.saveProjectAction.setEnabled(True)
-        self.toolbar_save.setEnabled(True)
+        self.toolbarSave.setEnabled(True)
 
 
     def setPlayButton(self, playing: bool=False) -> None:
-        self.toolbar_play.setup('{} Media'.format('Pause' if playing else 'Play'),
+        self.toolbarPlay.setup('{} Media'.format('Pause' if playing else 'Play'),
                                 'Pause currently playing media' if playing else 'Play currently loaded media',
-                                True)
+                               True)
 
     def playMedia(self) -> None:
         playstate = self.mpvWidget.property('pause')
@@ -883,10 +883,10 @@ class VideoCutter(QWidget):
             self.mpvWidget.showText(text, duration)
 
     def initMediaControls(self, flag: bool = True) -> None:
-        self.toolbar_play.setEnabled(flag)
-        self.toolbar_start.setEnabled(flag)
-        self.toolbar_end.setEnabled(False)
-        self.toolbar_save.setEnabled(flag)
+        self.toolbarPlay.setEnabled(flag)
+        self.toolbarStart.setEnabled(flag)
+        self.toolbarEnd.setEnabled(False)
+        self.toolbarSave.setEnabled(flag)
         self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
         self.videoSlider.clearRegions()
@@ -945,7 +945,7 @@ class VideoCutter(QWidget):
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
     def videosVisibility(self, item) -> None:
-        if self.cliplist.clips_has_rendered:
+        if self.cliplist.clipsHasRendered:
             item_index = self.cliplist.row(item)
             item_state = item.checkState()
 
@@ -1066,8 +1066,8 @@ class VideoCutter(QWidget):
         self.frameCounter.lockMinimum()
         self.clipindex_clips_remove.setDisabled(True)
 
-        self.toolbar_start.setDisabled(True)
-        self.toolbar_end.setEnabled(True)
+        self.toolbarStart.setDisabled(True)
+        self.toolbarEnd.setEnabled(True)
 
         # self.clipindex_move_up.setDisabled(True)
         # self.clipindex_move_down.setDisabled(True)
@@ -1091,8 +1091,8 @@ class VideoCutter(QWidget):
         # clip_item_last.timeEnd = time_end
         # clip_item_last.visibility = 2
 
-        self.toolbar_start.setEnabled(True)
-        self.toolbar_end.setDisabled(True)
+        self.toolbarStart.setEnabled(True)
+        self.toolbarEnd.setDisabled(True)
 
         self.updateClipIndexButtonsState()
         self.timeCounter.setMinimum()
@@ -1140,10 +1140,10 @@ class VideoCutter(QWidget):
         self.cliplist.renderClips(self.videoList.videos[self.videoList.current_video_index].clips)
 
         if len(self.videoList.videos[self.videoList.current_video_index].clips) and not self.inCut:
-            self.toolbar_save.setEnabled(True)
+            self.toolbarSave.setEnabled(True)
             self.saveProjectAction.setEnabled(True)
         if self.inCut or len(self.videoList.videos[self.videoList.current_video_index].clips) == 0 or self.videoList.videos[self.videoList.current_video_index].clips[0].timeEnd.isNull():
-            self.toolbar_save.setEnabled(False)
+            self.toolbarSave.setEnabled(False)
             self.saveProjectAction.setEnabled(False)
         # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
 
@@ -1187,7 +1187,7 @@ class VideoCutter(QWidget):
             QFile.rename(filename, self.finalFilename)
         self.videoService.finalize(self.finalFilename)
         self.videoSlider.updateProgress()
-        self.toolbar_save.setEnabled(True)
+        self.toolbarSave.setEnabled(True)
         self.parent.lock_gui(False)
         self.notify = JobCompleteNotification(
             self.finalFilename,
@@ -1208,7 +1208,7 @@ class VideoCutter(QWidget):
             QTimer.singleShot(1500, self.cleanup)
         self.parent.lock_gui(False)
         self.videoSlider.clearProgress()
-        self.toolbar_save.setEnabled(True)
+        self.toolbarSave.setEnabled(True)
         self.parent.errorHandler(errormsg)
 
     def cleanup(self) -> None:
@@ -1419,9 +1419,9 @@ class VideoCutter(QWidget):
 
             if event.key() in {Qt.Key_Return, Qt.Key_Enter} and \
                     (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
-                if self.toolbar_start.isEnabled():
+                if self.toolbarStart.isEnabled():
                     self.clipStart()
-                elif self.toolbar_end.isEnabled():
+                elif self.toolbarEnd.isEnabled():
                     self.clipEnd()
                 return
 

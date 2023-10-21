@@ -82,9 +82,7 @@ class VideoListItemStyle(QStyledItemDelegate):
 
         pixmap = index.data(Qt.DecorationRole + 1)
         thumbnail_icon = QIcon(pixmap)
-        video_index = str(index.data(Qt.UserRole + 1)).zfill(4)
-        # duration = index.data(Qt.UserRole + 2)
-        # video_index = str(index.data(Qt.UserRole)).zfill(4)
+        video_index = str(index.data(Qt.UserRole + 1))
 
         painter.setPen(QPen(pencolor, 1, Qt.SolidLine))
         r = option.rect.adjusted(5, 5, -5, -5)

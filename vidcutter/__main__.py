@@ -253,7 +253,7 @@ class MainWindow(QMainWindow):
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         if event.reason() in {QContextMenuEvent.Mouse, QContextMenuEvent.Keyboard}:
-            self.cutter.appmenu.popup(event.globalPos())
+            self.cutter.applicationMenu.popup(event.globalPos())
         super(MainWindow, self).contextMenuEvent(event)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
