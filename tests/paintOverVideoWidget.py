@@ -47,7 +47,7 @@ class Widget(QtWidgets.QWidget):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._gv = QtWidgets.QGraphicsView(self._scene)
         # construct a videoitem for showing the video
-        self._videoitem = QtMultimediaWidgets.QGraphicsVideoItem()
+        self._videoitem = self.mpvWidget.QtMultimediaWidgets.QGraphicsVideoItem()
         # add it into the scene
         self._scene.addItem(self._videoitem)
 

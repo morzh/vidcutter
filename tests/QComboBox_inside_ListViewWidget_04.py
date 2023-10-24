@@ -3,7 +3,7 @@ import os
 from PyQt5.QtCore import QAbstractListModel, Qt, QRect, QSize, QModelIndex
 from PyQt5.QtGui import QColor, QFont, QIcon
 from PyQt5.QtWidgets import QStyledItemDelegate, QComboBox, QApplication, QListView, QListWidget, QStyle, QItemDelegate
-from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QComboBox, QProgressBar, QSizePolicy, QStyle,
+from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QComboBox, QProgressBar, QSizePolicy, QStyle, QVBoxLayout,
                              QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QStyleOptionComboBox, QStyleOptionMenuItem)
 
 import PyQt5
@@ -26,13 +26,17 @@ class QBDelegate(QItemDelegate):
             comboBox.setFixedWidth(80)
             comboBox.setContentsMargins(5, 5, 5, 5)
 
+            checkerBox = QCheckBox()
+
+            layout = QVBoxLayout()
+            layout.addWidget(comboBox)
+            layout.addWidget(checkerBox)
+
             # submit the data whenever the index changes
             comboBox.currentIndexChanged.connect(lambda: self.commitData.emit(comboBox))
-
-            checkBox = QCheckBox()
         else:
             comboBox = super().createEditor(parent, option, index)
-        return comboBox
+        return layout
 
     def setModelData(self, editor, model, index):
         if isinstance(editor, QComboBox):
@@ -45,67 +49,6 @@ class QBDelegate(QItemDelegate):
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
 
-    def paint(self, painter, option, index):
-        super(QBDelegate, self).paint(painter, option, index)
-        rectangle = option.rect
-
-        penColor = Qt.black
-        if option.state & QStyle.State_Selected:
-            painter.setBrush(QColor(150, 78, 190, 200))
-        elif option.state & QStyle.State_MouseOver:
-            painter.setBrush(QColor(227, 212, 232, 150))
-            penColor = Qt.black
-        else:
-            brushcolor = QColor('#EFF0F1')
-            painter.setBrush(Qt.transparent if index.row() % 2 == 0 else brushcolor)
-
-        painter.drawRect(rectangle)
-
-        title = 'Just title'  # index.data(TitleRole)
-        icon = QIcon('checker.png')  # index.data(IconRole)
-
-        # value, _ = index.model().data(index).toStr()
-        optionComboBox = QStyleOptionComboBox()
-        optionComboBox.QStyleOption = option
-        optionComboBox.rect = rectangle.adjusted(3, 3, -60, -50)
-        optionComboBox.currentText = 'sdfsdf'
-        is_pressed = bool(index.data(Qt.LeftButton))
-        # print('is pressed', is_pressed)
-
-        if is_pressed:
-            optionGroupBox = PyQt5.QtWidgets.QStyleOptionGroupBox()
-
-        # optionItemVewItem = QStyleOptionViewItem()
-        # optionItemVewItem.rect = rectangle.adjusted(3, 3, -60, -50)
-        # optionViewItem = QStyleOptionViewItem()
-
-        optionCheckBox = QStyleOptionButton()
-        optionCheckBox.QStyleOption = option
-        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, optionCheckBox)
-        optionCheckBox.rect = option.rect.adjusted(210, -60, checker_rect.width() + 2, checker_rect.height() + 2)
-        is_checked = bool(index.data(Qt.CheckStateRole))
-        if is_checked:
-            optionCheckBox.state |= QStyle.State_On
-        else:
-            optionCheckBox.state |= QStyle.State_Off
-
-        mode = QIcon.Normal
-        if not (option.state & QStyle.State_Enabled):
-            mode = QIcon.Disabled
-        elif option.state & QStyle.State_Selected:
-            mode = QIcon.Selected
-
-        state = (QIcon.On if option.state & QStyle.State_Open else QIcon.Off)
-
-        iconRect = QRect(rectangle.adjusted(0, 30, 0, 0))
-        iconRect.setSize(QSize(40, 40))
-        icon.paint(painter, iconRect, Qt.AlignLeft | Qt.AlignVCenter, mode, state)
-
-        QApplication.style().drawComplexControl(QStyle.CC_ComboBox, optionComboBox, painter)
-        QApplication.style().drawControl(QStyle.CE_ComboBoxLabel, optionComboBox, painter)
-        QApplication.style().drawControl(QStyle.CE_CheckBox, optionCheckBox, painter)
-
-        # self.parent.openPersistentEditor(index)
 
     def paintEvent(self, e):
         print('paintEvent')

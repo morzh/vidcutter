@@ -173,7 +173,7 @@ class VideoClipItemStyle(QStyledItemDelegate):
         return option.rect.adjusted(165, -85, checkerRectangle.width(), checkerRectangle.height())
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
-        r = option.rect
+        rectangle = option.rect
         penColor = Qt.white if self.theme == 'dark' else Qt.black
         if self.parent.isEnabled():
             if option.state & QStyle.State_Selected:
@@ -185,7 +185,7 @@ class VideoClipItemStyle(QStyledItemDelegate):
                 brushcolor = QColor(79, 85, 87, 150) if self.theme == 'dark' else QColor('#EFF0F1')
                 painter.setBrush(Qt.transparent if index.row() % 2 == 0 else brushcolor)
         painter.setPen(Qt.NoPen)
-        painter.drawRect(r)
+        painter.drawRect(rectangle)
         thumbnailIcon = QIcon(index.data(Qt.DecorationRole + 1))
         startTime = index.data(Qt.DisplayRole + 1)
         endTime = index.data(Qt.UserRole + 1)
@@ -198,51 +198,53 @@ class VideoClipItemStyle(QStyledItemDelegate):
         optionComboBox.currentText = comboBoxClasses[0]
         # optionComboBox.SO_MenuItem. subControls.SC_ComboBoxListBoxPopup
 
-        optionChecker = QStyleOptionButton()
-        optionChecker.QStyleOption = option
-        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, optionChecker)
-        optionChecker.rect = option.rect.adjusted(165, -85, checker_rect.width(), checker_rect.height())
+        # QStyleOptionViewItem
+
+        optionCheckBox = QStyleOptionButton()
+        optionCheckBox.QStyleOption = option
+        checker_rect = QApplication.style().subElementRect(QStyle.SE_ViewItemCheckIndicator, optionCheckBox)
+        optionCheckBox.rect = option.rect.adjusted(165, -85, checker_rect.width(), checker_rect.height())
         is_checked = bool(index.data(Qt.CheckStateRole))
 
         if is_checked:
-            optionChecker.state |= QStyle.State_On
+            optionCheckBox.state |= QStyle.State_On
         else:
-            optionChecker.state |= QStyle.State_Off
+            optionCheckBox.state |= QStyle.State_Off
 
         painter.setPen(QPen(penColor, 1, Qt.SolidLine))
         '''
         if len(chapterName):
             offset = 20
-            r = option.rect.adjusted(5, 5, 0, 0)
+            rectangle = option.rect.adjusted(5, 5, 0, 0)
             cfont = QFont('Futura LT', -1, QFont.Medium)
             cfont.setPointSizeF(12.25 if sys.platform == 'darwin' else 10.25)
             painter.setFont(cfont)
-            painter.drawText(r, Qt.AlignLeft, self.clipText(chapterName, painter, True))
-            r = option.rect.adjusted(5, offset, 0, 0)
+            painter.drawText(rectangle, Qt.AlignLeft, self.clipText(chapterName, painter, True))
+            rectangle = option.rect.adjusted(5, offset, 0, 0)
         else:
             offset = 0
-            r = option.rect.adjusted(5, 0, 0, 0)
+            rectangle = option.rect.adjusted(5, 0, 0, 0)
         '''
 
         offset = 20
-        r = option.rect.adjusted(5, 5, -5, -5)
-        thumbnailIcon.paint(painter, r, Qt.AlignBottom | Qt.AlignLeft)
+        rectangle = option.rect.adjusted(5, 5, -5, -5)
+        thumbnailIcon.paint(painter, rectangle, Qt.AlignBottom | Qt.AlignLeft)
 
-        r = option.rect.adjusted(110, 10 + offset, 0, 0)
+        rectangle = option.rect.adjusted(110, 10 + offset, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
-        painter.drawText(r, Qt.AlignLeft, 'START')
-        r = option.rect.adjusted(110, 23 + offset, 0, 0)
+        painter.drawText(rectangle, Qt.AlignLeft, 'START')
+        rectangle = option.rect.adjusted(110, 23 + offset, 0, 0)
         painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Normal))
-        painter.drawText(r, Qt.AlignLeft, startTime)
+        painter.drawText(rectangle, Qt.AlignLeft, startTime)
         if len(endTime) > 0:
-            r = option.rect.adjusted(110, 48 + offset, 0, 0)
+            rectangle = option.rect.adjusted(110, 48 + offset, 0, 0)
             painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
-            painter.drawText(r, Qt.AlignLeft, 'END')
-            r = option.rect.adjusted(110, 60 + offset, 0, 0)
+            painter.drawText(rectangle, Qt.AlignLeft, 'END')
+            rectangle = option.rect.adjusted(110, 60 + offset, 0, 0)
             painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Normal))
-            painter.drawText(r, Qt.AlignLeft, endTime)
+            painter.drawText(rectangle, Qt.AlignLeft, endTime)
 
-        QApplication.style().drawControl(QStyle.CE_CheckBox, optionChecker, painter)
+        QApplication.style().drawControl(QStyle.CE_CheckBox, optionCheckBox, painter)
         QApplication.style().drawComplexControl(QStyle.CC_ComboBox, optionComboBox, painter)
 
     def clipText(self, text: str, painter: QPainter, chapter: bool=False) -> str:

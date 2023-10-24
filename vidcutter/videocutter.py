@@ -14,7 +14,7 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget, QScrollArea)
+                             QVBoxLayout, QWidget, QScrollArea, QGraphicsScene, QGraphicsView)
 
 
 # noinspection PyUnresolvedReferences
@@ -60,7 +60,6 @@ class VideoCutter(QWidget):
         self.settings = self.parent.settings
         self.filter_settings = Config.filter_settings()
         self.currentMedia, self.mediaAvailable, self.mpvError = None, False, False
-        self.currentMediaPreview = None
         self.projectDirty, self.projectSaved, self.debugonstart = False, False, False
         self.smartcut_monitor, self.notify = None, None
         self.fonts = []
@@ -196,7 +195,20 @@ class VideoCutter(QWidget):
         self.videoplayerWidget.setMidLineWidth(0)
         self.videoplayerWidget.setVisible(False)
         self.videoplayerWidget.setLayout(self.videoplayerLayout)
+        '''
+        self._scene = QGraphicsScene(self)
+        self._gv = QGraphicsView(self._scene)
 
+        item = QGraphicsVideoItem()
+        self.mpvWidget.screen().
+        self._videoitem = QtMultimediaWidgets.QGraphicsVideoItem()
+
+        self._ellipse_item = QGraphicsEllipseItem(QtCore.QRectF(0, 0, 40, 40), self._videoitem)
+        self._ellipse_item.setBrush(QtGui.QBrush(QtCore.Qt.black))
+        self._ellipse_item.setPen(QtGui.QPen(QtCore.Qt.red))
+        # self._scene.addItem(self._ellipse_item)
+        self._gv.fitInView(self.mpvWidget.mpv)
+        '''
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
             os.environ['DEBUG'] = '1'
@@ -734,7 +746,6 @@ class VideoCutter(QWidget):
         if not os.path.isfile(filepath):
             return
         self.currentMedia = filepath
-        self.currentMediaPreview = filepath + self.previewPostfix
         self.projectDirty, self.projectSaved = False, False
         self.initMediaControls(True)
         self.totalRuntime = 0
@@ -746,6 +757,16 @@ class VideoCutter(QWidget):
             self.mpvWidget.setEnabled(True)
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
+            '''
+            print(self.mpvWidget.visibleRegion().boundingRect())
+            print(self.mpvWidget.frameSize())
+            print(self.mpvWidget.baseSize())
+            mpvContentMargins = self.mpvWidget.frameGeometry()
+            print(mpvContentMargins)
+            print(self.mpvWidget.rect())
+            print(self.mpvWidget.screen().size())
+            print(self.mpvWidget)
+            '''
             self.videoSlider.setEnabled(True)
             self.videoSlider.setFocus()
             self.sliderWidget.setEnabled(True)

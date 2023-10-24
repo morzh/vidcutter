@@ -301,3 +301,6 @@ class mpvWidget(QOpenGLWidget):
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         self.parent.videoSlider.wheelEvent(event)
+
+    def paintEngine(self):
+        pass

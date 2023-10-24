@@ -13,7 +13,7 @@ class VideoItem:
             self._duration = QTime()
             self._filename: str = ''
             self.description = ''
-            self.youtube_id = ''
+            self.youtubeId = ''
             self.issues = []
             self.clips: SortedList[VideoItemClip] = SortedList()
             self._currentCLipIndex = 0
@@ -24,7 +24,7 @@ class VideoItem:
     def __str__(self):
         print('filename:', self._filename)
         print('description:', self.description)
-        print('youtube id:', self.youtube_id)
+        print('youtube id:', self.youtubeId)
         # print('issues classes:', itemgetter(*self.issues)(a))
         print('issues classes:', self.issues)
         print('clips:')

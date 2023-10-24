@@ -89,4 +89,3 @@ class VideoItemClip:
     @description.setter
     def description(self, description: str):
         self._description = description
-

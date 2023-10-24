@@ -101,7 +101,7 @@ for video_file in video_files:
     videoItem.filename = video_file
     videoItem.duration = video_item_duration
     videoItem.thumbnail = QPixmapPickle(qt_pixmap)
-    videoItem.youtube_id = youtube_id
+    videoItem.youtubeId = youtube_id
 
     videos.append(videoItem)
 
