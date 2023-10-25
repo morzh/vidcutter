@@ -7,34 +7,31 @@ from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QC
 
 
 class ClipsListWidgetItem(QtWidgets.QWidget):
-    def __init__(self, comboList: list[str], parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.item = QtWidgets.QListWidgetItem()
         self.widget = QtWidgets.QWidget()
         self.comboBox = QtWidgets.QComboBox()
-        self.comboBox.addItems(comboList)
-        self.comboBox.setFixedWidth(160)
+        self.comboBox.setFixedWidth(180)
         self.checkBox = QCheckBox()
 
         self.layout1 = QtWidgets.QHBoxLayout()
         self.layout1.addWidget(self.comboBox)
-        self.layout1.setSpacing(8)
+        self.layout1.setSpacing(10)
         self.layout1.addWidget(self.checkBox)
 
         self.startTimeLabel = QtWidgets.QLabel("Start time")
-        self.timeStart = QTime(10, 30)
-        self.startTime = QTimeEdit(self)
-        self.startTime.setDisplayFormat('hh:mm:ss')
-        self.timeEnd = QTime(20, 30)
+        self.timeStart = QTimeEdit(self)
+        self.timeStart.setDisplayFormat('hh:mm:ss.zzz')
         self.endTimeLabel = QtWidgets.QLabel("End time")
-        self.endTime = QTimeEdit(self)
-        self.endTime.setDisplayFormat('hh:mm:ss')
+        self.timeEnd = QTimeEdit(self)
+        self.timeEnd.setDisplayFormat('hh:mm:ss.zzz')
 
         self.layoutTime = QtWidgets.QVBoxLayout()
         self.layoutTime.addWidget(self.startTimeLabel)
-        self.layoutTime.addWidget(self.startTime)
+        self.layoutTime.addWidget(self.timeStart)
         self.layoutTime.addWidget(self.endTimeLabel)
-        self.layoutTime.addWidget(self.endTime)
+        self.layoutTime.addWidget(self.timeEnd)
 
         self.pixmap = QPixmap('checker.png')
         self.pixmap = self.pixmap.scaled(QSize(95, 95), Qt.KeepAspectRatio)
@@ -53,6 +50,20 @@ class ClipsListWidgetItem(QtWidgets.QWidget):
         # self.item.setSizeHint(widget1.sizeHint())
         self.item.setSizeHint(QSize(120, 120))
 
+    def setComboBoxItems(self, items: list[str]) -> None:
+        self.comboBox.addItems(items)
+
+    def setVisibility(self, checked: bool):
+        self.checkBox.setChecked(checked)
+
+    def setThumbnail(self, pixmap: QPixmap):
+        self.pixmap = pixmap
+
+    def setTimeStart(self, timeStart: QTime):
+        self.timeStart.setTime(timeStart)
+
+    def setTimeEnd(self, timeEnd: QTime):
+        self.timeEnd.setTime(timeEnd)
 
 class VideoListItemStyle(QStyledItemDelegate):
     def __init__(self, parent: QListWidget=None):
@@ -87,12 +98,21 @@ workout_list = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell B
 number_items = 5
 funList = QListWidget()
 funList.setFixedHeight(800)
-funList.setFixedWidth(198)
+funList.setFixedWidth(222)
 funList.setItemDelegate(VideoListItemStyle(funList))
 funList.viewport().setAttribute(Qt.WA_Hover)
 
 for index in range(number_items):
-    listItem = ClipsListWidgetItem(workout_list)
+    timeStart = QTime(index, 20)
+    timeEnd = QTime(index + 10, 30)
+    isChecked = bool(index % 2)
+    pixmap = QPixmap('checker.png')
+    listItem = ClipsListWidgetItem()
+    listItem.setComboBoxItems(workout_list)
+    listItem.setVisibility(isChecked)
+    listItem.setThumbnail(pixmap)
+    listItem.setTimeStart(timeStart)
+    listItem.setTimeEnd(timeEnd)
     funList.addItem(listItem.item)
     funList.setItemWidget(listItem.item, listItem.widget)
 

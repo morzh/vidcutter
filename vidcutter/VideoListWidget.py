@@ -3,10 +3,10 @@ import sys
 import copy
 from typing import List
 
-from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
-from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent
-from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QProgressBar, QSizePolicy, QStyle,
-                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication)
+from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint, QTime
+from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent, QPixmap
+from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QWidget, QSizePolicy, QStyle, QComboBox, QHBoxLayout, QVBoxLayout, QTimeEdit, QCheckBox,
+                             QLabel, QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QLayout)
 
 from vidcutter import VideoItem
 # import PyQt5.QtCore.
@@ -93,18 +93,6 @@ class VideoListItemStyle(QStyledItemDelegate):
         painter.drawText(r, Qt.AlignLeft | Qt.AlignVCenter, video_index)
 
         '''
-        r = option.rect.adjusted(90, 10, 0, 0)
-        painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
-        painter.drawText(r, Qt.AlignLeft, 'DURATION:')
-        r = option.rect.adjusted(90, 30, 0, 0)
-        cfont = QFont('Futura LT', 8, QFont.Medium)
-        painter.setFont(cfont)
-        painter.drawText(r, Qt.AlignLeft, duration)
-
-        r = option.rect.adjusted(90, 70, 0, 0)
-        painter.setFont(QFont('Noto Sans', 11 if sys.platform == 'darwin' else 9, QFont.Bold))
-        painter.drawText(r, Qt.AlignLeft, 'FILE NAME:')
-
         if len(filename):
             r = option.rect.adjusted(5, 85, 0, 0)
             cfont = QFont('Futura LT', -1, QFont.Medium)

@@ -83,11 +83,16 @@ class VideoClipsListWidget(QListWidget):
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
     def renderClips(self, videoClipItems: list) -> None:
+        workout_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
         self.clipsHasRendered = False
         self.clear()
         for index, videoClip in enumerate(videoClipItems):
             listItem = QListWidgetItem(self)
-            listItem.setToolTip('Drag to reorder clips')
+            briefInfp = ''
+            listItem.setToolTip(briefInfp)
+
+
+
             endItem = videoClip.timeEnd.toString(self.parent.runtimeformat)
             listItem.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             listItem.setTextAlignment(Qt.AlignVCenter)

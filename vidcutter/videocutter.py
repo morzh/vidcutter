@@ -61,7 +61,7 @@ class VideoCutter(QWidget):
         self.filter_settings = Config.filter_settings()
         self.currentMedia, self.mediaAvailable, self.mpvError = None, False, False
         self.projectDirty, self.projectSaved, self.debugonstart = False, False, False
-        self.smartcut_monitor, self.notify = None, None
+        self.notify = None
         self.fonts = []
         self._dataFolder = ''
         self._dataFilename = 'data.pickle'
@@ -1120,17 +1120,7 @@ class VideoCutter(QWidget):
         thumbnail = VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat), external=external)
         return QPixmapPickle(thumbnail)
 
-    @pyqtSlot(bool, str)
-    def smartmonitor(self, success: bool = None, outputfile: str = None) -> None:
-        if success is not None:
-            if not success:
-                self.logger.error('SmartCut failed for {}'.format(outputfile))
-            self.smartcut_monitor.results.append(success)
-        if len(self.smartcut_monitor.results) == len(self.smartcut_monitor.clips) - self.smartcut_monitor.externals:
-            if False not in self.smartcut_monitor.results:
-                self.joinMedia(self.smartcut_monitor.clips)
-
-    def complete(self, rename: bool=True, filename: str=None) -> None:
+    def complete(self, rename: bool = True, filename: str = None) -> None:
         if rename and filename is not None:
             # noinspection PyCallByClass
             QFile.remove(self.finalFilename)
