@@ -261,7 +261,7 @@ vidcutter (3.5.0-1) stable; urgency=medium
    regular video editors
 
  * thumbnail previews on timeline; the entire timeline background is overlayed
-   with thumbnail previews which looks good + helps you target where you want
+   with thumbnail previews whi_ch looks good + helps you target where you want
    to mark a start/stop point. thumbnil generation is threaded so will not
    slow the app down or hinder your use of it. thumbnails will regenerate on
    app resize

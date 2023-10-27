@@ -65,6 +65,9 @@ class ClipsListWidgetItem(QtWidgets.QWidget):
     def setTimeEnd(self, timeEnd: QTime):
         self.timeEnd.setTime(timeEnd)
 
+    def sizeHint(self):
+        return QSize(222, 500)
+
 class VideoListItemStyle(QStyledItemDelegate):
     def __init__(self, parent: QListWidget=None):
         super(VideoListItemStyle, self).__init__(parent)

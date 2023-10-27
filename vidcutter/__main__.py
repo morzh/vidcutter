@@ -209,11 +209,11 @@ class MainWindow(QMainWindow):
     def lock_gui(self, locked: bool=True) -> None:
         if locked:
             qApp.setOverrideCursor(Qt.WaitCursor)
-            self.cutter.cliplist.setEnabled(False)
+            self.cutter.videoClipsList.setEnabled(False)
             self.setEnabled(False)
         else:
             self.setEnabled(True)
-            self.cutter.cliplist.setEnabled(True)
+            self.cutter.videoClipsList.setEnabled(True)
             qApp.restoreOverrideCursor()
         qApp.processEvents()
 
@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and self.cutter.mediaAvailable:
-            self.cutter.cliplist.clearSelection()
+            self.cutter.videoClipsList.clearSelection()
             self.cutter.timeCounter.clearFocus()
             self.cutter.frameCounter.clearFocus()
             # noinspection PyBroadException
@@ -284,7 +284,6 @@ class MainWindow(QMainWindow):
             if self.isEnabled() and self.cutter.mediaAvailable and False:
                 if self.cutter.videoSlider.thumbnailsOn:
                     self.cutter.sliderWidget.setLoader(True)
-                    self.cutter.sliderWidget.hideThumbs()
                 if self.resizeTimer:
                     self.killTimer(self.resizeTimer)
                 self.resizeTimer = self.startTimer(500)

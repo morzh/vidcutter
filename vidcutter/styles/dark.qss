@@ -687,18 +687,6 @@ QCheckBox {
     spacing: 5px;
 }
 
-QCheckBox::indicator:unchecked {
-    image: url(:images/dark/checkbox.png);
-}
-
-QCheckBox::indicator:unchecked:hover {
-    image: url(:images/dark/checkbox-hover.png);
-}
-
-QCheckBox::indicator:checked {
-    image: url(:images/dark/checkbox-checked.png);
-}
-
 /* -------------------------------------------------------------------------- */
 
 QRadioButton {

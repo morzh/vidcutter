@@ -333,7 +333,7 @@ class VideoSliderTest(QSlider):
         if len(self._regions):
             [self._progressbars.append(SliderProgress(steps, rect, self)) for rect in self._regions]
         else:
-            self.parent.cliplist.showProgress(steps)
+            self.parent.videoClipsList.showProgress(steps)
 
     @pyqtSlot()
     @pyqtSlot(int)
@@ -344,14 +344,14 @@ class VideoSliderTest(QSlider):
             else:
                 self._progressbars[region].setValue(self._progressbars[region].value() + 1)
         else:
-            self.parent.cliplist.updateProgress(region)
+            self.parent.videoClipsList.updateProgress(region)
 
     @pyqtSlot()
     def clearProgress(self) -> None:
         for progress in self._progressbars:
             progress.hide()
             progress.deleteLater()
-        self.parent.cliplist.clearProgress()
+        self.parent.videoClipsList.clearProgress()
         self._progressbars.clear()
 
     def errorHandler(self, error: str) -> None:
@@ -394,11 +394,11 @@ class VideoSliderTest(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            if len(self.parent.videoList.videos[self.parent.videoList.current_video_index].clips) == 0:
+            if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
                 return False
 
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0

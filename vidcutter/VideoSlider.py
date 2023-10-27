@@ -304,7 +304,7 @@ class VideoSlider(QSlider):
         if len(self._regions):
             [self._progressbars.append(SliderProgress(steps, rect, self)) for rect in self._regions]
         else:
-            self.parent.cliplist.showProgress(steps)
+            self.parent.videoClipsList.showProgress(steps)
 
     @pyqtSlot()
     @pyqtSlot(int)
@@ -315,21 +315,19 @@ class VideoSlider(QSlider):
             else:
                 self._progressbars[region].setValue(self._progressbars[region].value() + 1)
         else:
-            self.parent.cliplist.updateProgress(region)
+            self.parent.videoClipsList.updateProgress(region)
 
     @pyqtSlot()
     def clearProgress(self) -> None:
         for progress in self._progressbars:
             progress.hide()
             progress.deleteLater()
-        self.parent.cliplist.clearProgress()
+        self.parent.videoClipsList.clearProgress()
         self._progressbars.clear()
 
     @pyqtSlot(list)
     def buildTimeline(self, thumbs: list) -> None:
-        filmstrip = QWidget(self)
         self.initStyle()
-
         self.parent.sliderWidget.setLoader(False)
         if self.parent.newproject:
             self.parent.renderClipIndex()
@@ -394,16 +392,16 @@ class VideoSlider(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            if len(self.parent.videoList.videos[self.parent.videoList.current_video_index].clips) == 0:
+            if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
                 return False
 
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
 
-            clip = self.parent.videoList.videos[self.parent.videoList.current_video_index].clips[self.currentRectangleIndex]
-            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips.pop(self.currentRectangleIndex)
-            self.currentRectangleIndex = self.parent.videoList.videos[self.parent.videoList.current_video_index].clips.bisect_right(clip)
-            self.parent.videoList.videos[self.parent.videoList.current_video_index].clips.add(clip)
+            clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex]
+            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.pop(self.currentRectangleIndex)
+            self.currentRectangleIndex = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.bisect_right(clip)
+            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.add(clip)
 
             self.parent.renderClipIndex()
             self.state = RectangleEditState.FREE_STATE

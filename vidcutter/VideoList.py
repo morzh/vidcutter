@@ -22,6 +22,9 @@ class VideoList:
             print(video)
             print('-' * 50)
 
+    def __getitem__(self, item):
+        return self.videos[item]
+
     def currentVideoClipTimeStart(self, clip_index: int) -> QTime:
         return self.videos[self._currentVideoIndex].clips[clip_index].timeStart
 
@@ -43,11 +46,11 @@ class VideoList:
             self._description = description
 
     @property
-    def current_video_index(self) -> int:
+    def currentVideoIndex(self) -> int:
         return self._currentVideoIndex
 
-    @current_video_index.setter
-    def current_video_index(self, index: int) -> None:
+    @currentVideoIndex.setter
+    def currentVideoIndex(self, index: int) -> None:
         self._currentVideoIndex = index
 
     def setCurrentVideoIndex(self, index: int) -> None:
