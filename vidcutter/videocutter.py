@@ -92,7 +92,7 @@ class VideoCutter(QWidget):
         self.videoList = None
         self.videoListWidget = VideoListWidget(parent=self)
         self.videoListWidget.itemDoubleClicked.connect(self.loadMedia)
-        # self.videoListWidget.itemClicked.connect(self.editVideoDescription)
+        self.videoListWidget.itemClicked.connect(self.editVideoDescription)
 
         self.inCut, self.newproject = False, False
         self.finalFilename = ''
@@ -131,7 +131,7 @@ class VideoCutter(QWidget):
 
         self.videoClipsList = VideoClipsListWidget(parent=self)
         self.videoClipsList.clicked.connect(self.videoListSingleClick)
-        self.videoClipsList.doubleClicked.connect(self.videoListDoubleClick)
+        # self.videoClipsList.doubleClicked.connect(self.videoListDoubleClick)
         self.videoClipsList.customContextMenuRequested.connect(self.itemMenu)
         self.videoClipsList.itemChanged.connect(self.videosVisibility)
         self.videoClipsList.model().rowsInserted.connect(self.setProjectDirty)
