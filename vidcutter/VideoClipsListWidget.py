@@ -91,6 +91,7 @@ class VideoClipsListWidget(QListWidget):
         self._progressBars = []
         self.setMouseTracking(True)
         self.setDropIndicatorShown(True)
+        self.setFocus()
         self.setAttribute(Qt.WA_MacShowFocusRect, False)
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(235)
@@ -111,6 +112,10 @@ class VideoClipsListWidget(QListWidget):
         self.setGraphicsEffect(self.opacityEffect)
         self.clipsHasRendered = False
         self.viewport().setAttribute(Qt.WA_Hover)
+
+
+    def hasFocus(self):
+        return True
 
     def mousePressEvent(self, event):
         self._mouseButton = event.button()
@@ -133,7 +138,7 @@ class VideoClipsListWidget(QListWidget):
 
             listItem.checkBox.stateChanged.connect(lambda state, index=itemIndex: self.checkBoxStateChanged(state, index))
             listItem.timeStart.timeChanged.connect(lambda time, index=itemIndex: self.timeStartChanged(time, index))
-            listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.endTimeChanged(time, index))
+            listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
             self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
@@ -144,11 +149,17 @@ class VideoClipsListWidget(QListWidget):
         self.parent.videoList[indexVideo].clips[clipIndex].visibility = state
         self.parent.videoSlider.setRegionVizivility(clipIndex, state)
 
-    def timeStartChanged(self, time, index):
-        print('startTimeChanged', time, index)
+    def timeStartChanged(self, time, clipIndex):
+        # print('startTimeChanged', time, clipIndex)
+        indexVideo = self.parent.videoList.currentVideoIndex
+        self.parent.videoList[indexVideo].clips[clipIndex].timeStart = time
+        self.parent.renderClipIndex()
 
-    def timeEndChanged(self, time, index):
-        print('endTimeChanged', time, index)
+    def timeEndChanged(self, time, clipIndex):
+        # print('endTimeChanged', time, clipIndex)
+        indexVideo = self.parent.videoList.currentVideoIndex
+        self.parent.videoList[indexVideo].clips[clipIndex].timeEnd = time
+        self.parent.renderClipIndex()
 
     def showProgress(self, steps: int) -> None:
         for row in range(self.count()):
@@ -183,10 +194,6 @@ class VideoClipsListWidget(QListWidget):
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.EnabledChange:
             self.opacityEffect.setEnabled(not self.isEnabled())
-
-    # def resizeEvent(self, event: QResizeEvent) -> None:
-    #     self.setFixedWidth(210 if self.verticalScrollBar().isVisible() else 190)
-    #     self.parent.listheader.setFixedWidth(self.width())
 
     def clearSelection(self) -> None:
         # self.parent.seekSlider.selectRegion(-1)

@@ -249,12 +249,10 @@ class VideoSlider(QSlider):
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
             painter.drawRoundedRect(self._regions[self.currentRectangleIndex], 2, 2)
 
-
     def setRegionVizivility(self, index, state):
         if len(self._regionsVisibility) > 0:
             self._regionsVisibility[index] = state
             self.update()
-
 
     def cursorOnSide(self, e_pos) -> int:
         if len(self._regions) > 0:

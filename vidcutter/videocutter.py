@@ -10,6 +10,7 @@ from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+import sip
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
@@ -805,7 +806,6 @@ class VideoCutter(QWidget):
         self.saveProjectAction.setEnabled(True)
         self.toolbarSave.setEnabled(True)
 
-
     def setPlayButton(self, playing: bool=False) -> None:
         self.toolbarPlay.setup('{} Media'.format('Pause' if playing else 'Play'), 'Pause currently playing media' if playing else 'Play currently loaded media', True)
 
@@ -1340,7 +1340,8 @@ class VideoCutter(QWidget):
                     self.mpvWidget.seek(self.level1Seek, 'relative+exact')
                 return
 
-            if event.key() in {Qt.Key_Return, Qt.Key_Enter} and \
+            # if event.key() in {Qt.Key_Return, Qt.Key_Enter, Qt.Key_C} and \
+            if event.key() in {Qt.Key_C} and \
                     (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 if self.toolbarStart.isEnabled():
                     self.clipStart()
