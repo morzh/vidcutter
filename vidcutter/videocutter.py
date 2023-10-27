@@ -92,7 +92,7 @@ class VideoCutter(QWidget):
         self.videoList = None
         self.videoListWidget = VideoListWidget(parent=self)
         self.videoListWidget.itemDoubleClicked.connect(self.loadMedia)
-        self.videoListWidget.itemClicked.connect(self.editVideoDescription)
+        # self.videoListWidget.itemClicked.connect(self.editVideoDescription)
 
         self.inCut, self.newproject = False, False
         self.finalFilename = ''
@@ -328,7 +328,6 @@ class VideoCutter(QWidget):
 
         self.videoSlider.setFixedHeight(108)
         self.videoSlider.setFixedWidth(self.factor*windowSize.width() - 20)
-        self.videoSlider.clearRegions()
         self.renderClipIndex()
 
     def clip(self, val, min_, max_):
