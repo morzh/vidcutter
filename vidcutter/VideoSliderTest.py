@@ -399,7 +399,7 @@ class VideoSliderTest(QSlider):
 
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
             self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
-            self.parent.renderClipIndex()
+            self.parent.renderVideoClips()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0
             self.repaint()

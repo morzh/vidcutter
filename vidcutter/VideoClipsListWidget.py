@@ -121,7 +121,7 @@ class VideoClipsListWidget(QListWidget):
         self._mouseButton = event.button()
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
-    def renderClips(self, videoClipItems: list) -> None:
+    def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
         workout_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
         self.clipsHasRendered = False
         self.clear()
@@ -151,15 +151,23 @@ class VideoClipsListWidget(QListWidget):
 
     def timeStartChanged(self, time, clipIndex):
         # print('startTimeChanged', time, clipIndex)
-        indexVideo = self.parent.videoList.currentVideoIndex
-        self.parent.videoList[indexVideo].clips[clipIndex].timeStart = time
-        self.parent.renderClipIndex()
+        videoIndex = self.parent.videoList.currentVideoIndex
+        clip = self.parent.videoList.videos[videoIndex].clips[clipIndex]
+        self.parent.videoList.videos[videoIndex].clips.pop(clipIndex)
+
+        clip.timeStart = time
+        newIndex = self.parent.videoList.videos[videoIndex].clips.bisect_right(clip)
+        self.parent.videoList.videos[videoIndex].clips.add(clip)
+        self.renderClips(self.parent.videoList.videos[videoIndex].clips)
+        self.parent.renderVideoClips()
+        self.item(newIndex).setSelected(True)
+        self.setFocus()
 
     def timeEndChanged(self, time, clipIndex):
         # print('endTimeChanged', time, clipIndex)
-        indexVideo = self.parent.videoList.currentVideoIndex
-        self.parent.videoList[indexVideo].clips[clipIndex].timeEnd = time
-        self.parent.renderClipIndex()
+        videoIndex = self.parent.videoList.currentVideoIndex
+        self.parent.videoList[videoIndex].clips[clipIndex].timeEnd = time
+        self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
 
     def showProgress(self, steps: int) -> None:
         for row in range(self.count()):

@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, Q
                              QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication, QScrollBar)
 
 from vidcutter.libs.videoservice import VideoService
+from vidcutter.VideoItemClip import VideoItemClip
 
 
 class CursorStates(Enum):
@@ -24,12 +25,14 @@ class CursorStates(Enum):
     CURSOR_IS_INSIDE = 3
     CURSOR_OFF = 4
 
+
 class RectangleEditState(Enum):
     FREE_STATE = 1
     BUILDING_SQUARE = 2
     BEGIN_SIDE_EDIT = 3
     END_SIDE_EDIT = 4
     RECTANGLE_MOVE = 5
+
 
 class VideoSlider(QSlider):
     def __init__(self, parent=None):
@@ -112,7 +115,6 @@ class VideoSlider(QSlider):
         self.widgetWidth = self.parent.sliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()
 
-
     def initStyle(self) -> None:
         bground = 'rgba(200, 213, 236, 0.85)' if self._cutStarted else 'transparent'
         height = 25
@@ -169,6 +171,13 @@ class VideoSlider(QSlider):
             self._cutStarted = False
             self._handleHover = False
         self.initStyle()
+
+    def renderVideoSegments(self, clips: list[VideoItemClip]):
+        self.clearRegions()
+        # print(clips)
+        for videoClip in clips:
+            self.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+        self.update()
 
     def paintEvent(self, event: QPaintEvent) -> None:
         painter = QStylePainter(self)
@@ -328,7 +337,7 @@ class VideoSlider(QSlider):
         self.initStyle()
         self.parent.sliderWidget.setLoader(False)
         if self.parent.newproject:
-            self.parent.renderClipIndex()
+            self.parent.renderVideoClips()
             self.parent.newproject = False
 
     def errorHandler(self, error: str) -> None:
@@ -401,7 +410,7 @@ class VideoSlider(QSlider):
             self.currentRectangleIndex = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.bisect_right(clip)
             self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.add(clip)
 
-            self.parent.renderClipIndex()
+            self.parent.renderVideoClips()
             self.state = RectangleEditState.FREE_STATE
             self.free_cursor_on_side = 0
             self.repaint()
