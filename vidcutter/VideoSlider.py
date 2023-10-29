@@ -215,10 +215,11 @@ class VideoSlider(QSlider):
 
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
+        videoIndex = self.parent.videoList.currentVideoIndex
         if not len(self._progressbars):
             if len(self._regions) == len(self._regionsVisibility):  # should always be true
                 visible_region = self.visibleRegion().boundingRect()
-                for rect, rectViz in zip(self._regions, self._regionsVisibility):
+                for index, (rect, rectViz) in enumerate(zip(self._regions, self._regionsVisibility)):
                     if rectViz == 0:
                         continue
                     rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
@@ -233,7 +234,12 @@ class VideoSlider(QSlider):
                     painter.setPen(Qt.black if self.theme == 'dark' else Qt.white)
                     rect_class = rect_class.intersected(visible_region)
                     rect_class = rect_class.adjusted(5, 0, -5, 0)
-                    painter.drawText(rect_class, Qt.AlignBottom | Qt.AlignLeft, 'Some Class')
+                    actionClassIndex = self.parent.videoList[videoIndex].clips[index].actionClassIndex
+                    if actionClassIndex == -1:
+                        actionClassLabel = copy(self.parent.videoList.actionClassUnknownLabel)
+                    else:
+                        actionClassLabel = copy(self.parent.videoList.actionClassesLabels[actionClassIndex])
+                    painter.drawText(rect_class, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
 

@@ -19,6 +19,7 @@ class VideoItemClip:
             self._name = args[3]
             self._visibility = args[4]
             self._description = ''
+            self.actionClassIndex = -1
 
         self._clipClass = 'squat'  # for future challenges
 

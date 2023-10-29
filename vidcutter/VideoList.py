@@ -14,7 +14,6 @@ class VideoList:
         self._videoIssuesClasses = video_issues
         self.actionClassesLabels: list[str] = actionLabels
         self.actionClassUnknownLabel = 'Other'
-        self.actionClassesLabels.append(self.actionClassUnknownLabel)
 
     def __str__(self):
         print('description:', self._description)

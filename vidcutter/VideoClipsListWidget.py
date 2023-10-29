@@ -122,7 +122,9 @@ class VideoClipsListWidget(QListWidget):
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
-        action_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
+        actionClasses = copy.deepcopy(self.parent.videoList.actionClassesLabels)
+        actionClasses.append(self.parent.videoList.actionClassUnknownLabel)
+        otherIndex = len(actionClasses) - 1
         self.clipsHasRendered = False
         self.clear()
         self.parent.videoSlider.clearRegions()
@@ -131,12 +133,14 @@ class VideoClipsListWidget(QListWidget):
             briefInfo = 'Here should ba a tooltip'
             listItem = ClipsListWidgetItem()
             listItem.setToolTip(briefInfo)
-            listItem.setComboBoxItems(action_classes)
+            listItem.setComboBoxItems(actionClasses)
             listItem.setVisibility(videoClip.visibility)
             listItem.setThumbnail(videoClip.thumbnail)
             listItem.setTimeStart(videoClip.timeStart)
             listItem.setTimeEnd(videoClip.timeEnd)
 
+            listItem.comboBox.setCurrentIndex(otherIndex)
+            listItem.comboBox.currentIndexChanged.connect(lambda value, index=itemIndex: self.comboBoxIndexChanged(value, index))
             listItem.checkBox.stateChanged.connect(lambda state, index=itemIndex: self.checkBoxStateChanged(state, index))
             listItem.timeStart.timeChanged.connect(lambda time, index=itemIndex: self.timeStartChanged(time, index))
             listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
@@ -144,6 +148,14 @@ class VideoClipsListWidget(QListWidget):
             self.setItemWidget(listItem.item, listItem.widget)
             self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
         self.clipsHasRendered = True
+
+    def comboBoxIndexChanged(self, value, clipIndex):
+        videoIndex = self.parent.videoList.currentVideoIndex
+        if len(self.parent.videoList.actionClassesLabels) == clipIndex:
+            self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = -1
+        else:
+            self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = value
+        self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
 
     def checkBoxStateChanged(self, state, clipIndex: int):
         indexVideo = self.parent.videoList.currentVideoIndex

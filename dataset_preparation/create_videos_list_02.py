@@ -41,7 +41,17 @@ issues_list = ['video of a bad quality',
                'video is too long']
 
 
-action_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
+action_classes = ['Squat with V grip',
+                  'Leg Press',
+                  'Seated Cable Row',
+                  'Barbell Bench Press',
+                  'Barbell Squats',
+                  'Barbel Row',
+                  'Rope Tricep Pushdown',
+                  'Squats'
+                  ]
+
+action_classes = sorted(action_classes)
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
 videos = []
