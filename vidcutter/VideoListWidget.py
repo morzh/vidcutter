@@ -28,7 +28,7 @@ class VideoListWidget(QListWidget):
         self.setContentsMargins(0, 0, 0, 0)
         self.setItemDelegate(VideoListItemStyle(self))
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        # self.setUniformItemSizes(True)
+        self.setUniformItemSizes(True)
         self.setDragEnabled(False)
         self.setDragDropMode(QAbstractItemView.InternalMove)
         self.setContextMenuPolicy(Qt.CustomContextMenu)

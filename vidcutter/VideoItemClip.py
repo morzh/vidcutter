@@ -8,7 +8,7 @@ class VideoItemClip:
             self._timeStart = QTime()
             self._timeEnd = QTime()
             self._thumbnail = QPixmap()
-            self._name = ''
+            self.actionClassIndex = -1
             self._visibility = 2
             self._description = ''
 

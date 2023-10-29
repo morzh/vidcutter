@@ -740,16 +740,6 @@ class VideoCutter(QWidget):
             self.mpvWidget.setEnabled(True)
             self.videoService.setMedia(self.currentMedia)
             self.mpvWidget.play(self.currentMedia)
-            '''
-            print(self.mpvWidget.visibleRegion().boundingRect())
-            print(self.mpvWidget.frameSize())
-            print(self.mpvWidget.baseSize())
-            mpvContentMargins = self.mpvWidget.frameGeometry()
-            print(mpvContentMargins)
-            print(self.mpvWidget.rect())
-            print(self.mpvWidget.screen().size())
-            print(self.mpvWidget)
-            '''
             self.videoSlider.setEnabled(True)
             self.videoSlider.setFocus()
             self.sliderWidget.setEnabled(True)

@@ -122,15 +122,16 @@ class VideoClipsListWidget(QListWidget):
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
-        workout_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
+        action_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
         self.clipsHasRendered = False
         self.clear()
+        self.parent.videoSlider.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
             briefInfo = 'Here should ba a tooltip'
             listItem = ClipsListWidgetItem()
             listItem.setToolTip(briefInfo)
-            listItem.setComboBoxItems(workout_classes)
+            listItem.setComboBoxItems(action_classes)
             listItem.setVisibility(videoClip.visibility)
             listItem.setThumbnail(videoClip.thumbnail)
             listItem.setTimeStart(videoClip.timeStart)
@@ -156,12 +157,16 @@ class VideoClipsListWidget(QListWidget):
         self.parent.videoList.videos[videoIndex].clips.pop(clipIndex)
 
         clip.timeStart = time
-        newIndex = self.parent.videoList.videos[videoIndex].clips.bisect_right(clip)
+        newClipIndex = self.parent.videoList.videos[videoIndex].clips.bisect_right(clip)
         self.parent.videoList.videos[videoIndex].clips.add(clip)
-        self.renderClips(self.parent.videoList.videos[videoIndex].clips)
-        self.parent.renderVideoClips()
-        self.item(newIndex).setSelected(True)
-        self.setFocus()
+
+        # self.parent.renderVideoClips()
+        if clipIndex != newClipIndex:
+            self.renderClips(self.parent.videoList.videos[videoIndex].clips)
+            self.item(newClipIndex).setSelected(True)
+            # self.setFocus()
+        else:
+            self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
 
     def timeEndChanged(self, time, clipIndex):
         # print('endTimeChanged', time, clipIndex)

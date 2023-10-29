@@ -32,21 +32,33 @@ videos_list_path = '/home/anton/work/fitMate/datasets/ALEX_test_set_squats_001/'
 image_size = 128
 data_filename = 'data.pickle'
 
+app = QApplication(sys.argv)
+
+with open(os.path.join(videos_list_path, data_filename), 'rb') as f:
+    videoList = pickle.load(f)
+
+action_classes = ['Squat with V grip', 'Leg Press', 'Seated Cable Row', 'Barbell Bench Press', 'Rope Tricep Pushdown', 'Squats']
+
 issues_list = ['video of a bad quality',
                'video is too dark',
                'exercise is not performed',
                'strong occlusions',
                'too many people in video',
-               'camera shake',
+               'camera shake or movement',
                'video is too long']
+
+
+for video in videoList.videos:
+    for clip in video.clips:
+        print(clip)
 
 video_files = [f for f in os.listdir(videos_list_path) if os.path.isfile(os.path.join(videos_list_path, f))]
 videos = []
 preview_postfix = '.preview.mp4'
 
 video_list = VideoList(issues_list)
-app = QApplication(sys.argv)
 
+'''
 for video_file in video_files:
     print(video_file)
     if preview_postfix in video_file:
@@ -66,34 +78,22 @@ for video_file in video_files:
     except:
         youtube_id = ''
 
-
     video_file_clip.filename = video_file
     video_duration = video_file_clip.duration
     thumb = video_file_clip.get_frame(0.5 * video_duration)
 
-    video_preview_filepath = video_filepath + preview_postfix
-    if not os.path.isfile(video_preview_filepath):
-        clip_resized = moviepy.video.fx.all.resize(video_file_clip, height=128)
-        clip_resized.write_videofile(video_preview_filepath)
-
     video_item_duration = QTime(0, 0)
     video_item_duration = video_item_duration.addSecs(int(video_duration))
-    video_item_duration = video_item_duration.addMSecs(1000*(video_duration - int(video_duration)))
+    video_item_duration = video_item_duration.addMSecs(int(1000*(video_duration - video_duration)))
 
     height, width, channel = thumb.shape
     center = np.array([int(0.5 * height), int(0.5 * width)])
     minimum_side = min(height, width) - 1
     thumb_cropped = thumb[int(center[0] - 0.5 * minimum_side):int(center[0] + 0.5 * minimum_side), int(center[1] - 0.5 * minimum_side):int(center[1] + 0.5 * minimum_side)]
-    '''
-    plt.imshow(thumb)
-    plt.show()
 
-    plt.imshow(thumb_cropped)
-    plt.show()
-    '''
     height, width, channel = thumb_cropped.shape
     bytesPerLine = 3 * width
-    qt_image = QImage(thumb_cropped.data.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
+    qt_image = QImage(thumb_cropped.videoList.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
     qt_image.scaledToWidth(image_size)
     qt_pixmap = QPixmap.fromImage(qt_image)
 
@@ -109,3 +109,4 @@ video_list.videos = videos
 data_filepath = os.path.join(videos_list_path, data_filename)
 with open(data_filepath, 'wb') as json_file:
     pickle.dump(video_list, json_file)
+'''
