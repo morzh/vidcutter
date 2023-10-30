@@ -1,5 +1,58 @@
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
+import numpy as np
+
+
+class BoundingBox:
+    """
+    Image bounding box in normalized coordinates
+    """
+    def __init__(self):
+        self.x = 0.0
+        self.y = 0.0
+        self.width = 1.0
+        self.height = 1.0
+        self.confidence = 1.0
+
+    @property
+    def x(self) -> float:
+        return self.x
+
+    @x.setter
+    def x(self, value) -> None:
+        self.x = np.clip(value, 0, 1)
+
+    @property
+    def y(self) -> float:
+        return self.y
+
+    @y.setter
+    def y(self, value) -> None:
+        self.y = np.clip(value, 0, 1)
+
+    @property
+    def width(self) -> float:
+        return self.width
+
+    @width.setter
+    def width(self, value) -> None:
+        self.width = np.clip(value, 0, 1)
+
+    @property
+    def height(self) -> float:
+        return self.height
+
+    @height.setter
+    def height(self, value) -> None:
+        self.height = np.clip(value, 0, 1)
+
+    @property
+    def confidence(self) -> float:
+        return self.confidence
+
+    @confidence.setter
+    def confidence(self, value) -> None:
+        self.confidence = np.clip(value, 0, 1)
 
 
 class VideoItemClip:
@@ -8,20 +61,17 @@ class VideoItemClip:
             self._timeStart = QTime()
             self._timeEnd = QTime()
             self._thumbnail = QPixmap()
-            self.actionClassIndex = -1
             self._visibility = 2
-            self._description = ''
-
-        if len(args) == 5:
+        elif len(args) == 5:
             self._timeStart = args[0]
             self._timeEnd = args[1]
             self._thumbnail = args[2]
             self._name = args[3]
             self._visibility = args[4]
-            self._description = ''
-            self.actionClassIndex = -1
 
-        self._clipClass = 'squat'  # for future challenges
+        self._description = ''
+        self.actionClassIndex = -1
+        self.boundingBox = BoundingBox()
 
     def __str__(self):
         print('\t',  'name:',  self._name, 'start time', self._timeStart, ' time end:',

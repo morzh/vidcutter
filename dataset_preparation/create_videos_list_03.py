@@ -103,16 +103,19 @@ for video_file in video_files:
     plt.imshow(thumb_cropped)
     plt.show()
     '''
+
+    '''
     height, width, channel = thumb_cropped.shape
     bytesPerLine = 3 * width
     qt_image = QImage(thumb_cropped.data.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
     qt_image.scaledToWidth(image_size)
     qt_pixmap = QPixmap.fromImage(qt_image)
+    '''
 
     videoItem = VideoItem()
     videoItem.filename = video_file
     videoItem.duration = video_item_duration
-    videoItem.thumbnail = QPixmapPickle(qt_pixmap)
+    videoItem.thumbnail = thumb_cropped
     videoItem.youtubeId = youtube_id
 
     videos.append(videoItem)

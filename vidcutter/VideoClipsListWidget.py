@@ -125,6 +125,7 @@ class VideoClipsListWidget(QListWidget):
         actionClasses = copy.deepcopy(self.parent.videoList.actionClassesLabels)
         actionClasses.append(self.parent.videoList.actionClassUnknownLabel)
         otherIndex = len(actionClasses) - 1
+        videoIndex = self.parent.videoList.currentVideoIndex
         self.clipsHasRendered = False
         self.clear()
         self.parent.videoSlider.clearRegions()
@@ -139,7 +140,9 @@ class VideoClipsListWidget(QListWidget):
             listItem.setTimeStart(videoClip.timeStart)
             listItem.setTimeEnd(videoClip.timeEnd)
 
-            listItem.comboBox.setCurrentIndex(otherIndex)
+            currentClassIndex = self.parent.videoList[videoIndex].clips[itemIndex].actionClassIndex
+            currentClassIndex = (len(actionClasses) + currentClassIndex) %  len(actionClasses)
+            listItem.comboBox.setCurrentIndex(currentClassIndex)
             listItem.comboBox.currentIndexChanged.connect(lambda value, index=itemIndex: self.comboBoxIndexChanged(value, index))
             listItem.checkBox.stateChanged.connect(lambda state, index=itemIndex: self.checkBoxStateChanged(state, index))
             listItem.timeStart.timeChanged.connect(lambda time, index=itemIndex: self.timeStartChanged(time, index))

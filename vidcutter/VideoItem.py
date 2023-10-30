@@ -1,31 +1,27 @@
 # from operator import itemgetter
 from typing import List
 
+import numpy as np
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
 from sortedcontainers import SortedList
 
 class VideoItem:
-    def __init__(self, *args):
-        if not len(args):
-            self._thumbnail = QPixmap()
-            self._duration = QTime()
-            self._filename: str = ''
-            self.description = ''
-            self.youtubeId = ''
-            self.issues = []
-            self.clips: SortedList[VideoItemClip] = SortedList()
-            self._currentCLipIndex = 0
-        elif len(args) == 2:
-            self.thumb = args[0]
-            self.filename = args[1]
+    def __init__(self):
+        self._thumbnail = QPixmap()
+        self._duration = QTime()
+        self._currentCLipIndex = 0
+        self._filename = ''
+        self.description = ''
+        self.youtubeId = ''
+        self.issues: list[str] = []
+        self.clips: SortedList[VideoItemClip] = SortedList()
 
     def __str__(self):
         print('filename:', self._filename)
         print('description:', self.description)
         print('youtube id:', self.youtubeId)
-        # print('issues classes:', itemgetter(*self.issues)(a))
         print('issues classes:', self.issues)
         print('clips:')
         for clip in self.clips:
