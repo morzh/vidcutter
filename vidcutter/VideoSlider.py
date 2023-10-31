@@ -102,6 +102,8 @@ class VideoSlider(QSlider):
 
         self.widgetWidth = int()
         self.frameCounterMaximum = -1
+        self.numberGradientSteps = 50
+        self.regionOutlineWidth = 4
 
         # self.thumbsize = QSize()
 
@@ -246,20 +248,39 @@ class VideoSlider(QSlider):
         if not self.free_cursor_on_side:
             return
 
+        glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
-        # print('painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))')
+        glowColor = QColor(255, 255, 255, glowAlpha)
+        maximumGradientSteps = copy(self._regions[self.currentRectangleIndex].width())
+        maximumGradientSteps = int(maximumGradientSteps)
+        numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
         if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
-            begin = self._regions[self.currentRectangleIndex].topLeft()
-            end = self._regions[self.currentRectangleIndex].bottomLeft()
-            painter.setPen(QPen(highlightColor, 4, Qt.SolidLine))
+            begin = copy(self._regions[self.currentRectangleIndex].topLeft())
+            end = copy(self._regions[self.currentRectangleIndex].bottomLeft())
+
+            x_coordinate = begin.x()
+            begin.setX(x_coordinate + self.regionOutlineWidth)
+            end.setX(x_coordinate + self.regionOutlineWidth)
+            step = int(glowAlpha / numberGradientSteps)
+            for index_step in range(numberGradientSteps):
+                begin.setX(x_coordinate + index_step)
+                end.setX(x_coordinate + index_step)
+                glowColor.setAlpha(glowAlpha - step * index_step)
+                painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
+                painter.drawLine(begin, end)
+
+            begin = copy(self._regions[self.currentRectangleIndex].topLeft())
+            end = copy(self._regions[self.currentRectangleIndex].bottomLeft())
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
+
         elif self.free_cursor_on_side == CursorStates.CURSOR_ON_END_SIDE:
             begin = self._regions[self.currentRectangleIndex].topRight()
             end = self._regions[self.currentRectangleIndex].bottomRight()
-            painter.setPen(QPen(highlightColor, 4, Qt.SolidLine))
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_IS_INSIDE:
-            painter.setPen(QPen(highlightColor, 4, Qt.SolidLine))
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             brushcolor = QColor(237, 242, 255, 150)
             painter.setBrush(brushcolor)
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
