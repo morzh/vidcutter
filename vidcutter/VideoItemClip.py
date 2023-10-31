@@ -8,52 +8,61 @@ class BoundingBox:
     Image bounding box in normalized coordinates
     """
     def __init__(self):
-        self.x = 0.0
-        self.y = 0.0
-        self.width = 1.0
-        self.height = 1.0
-        self.confidence = 1.0
-    '''
+        self._x = 0.0
+        self._y = 0.0
+        self._width = 1.0
+        self._height = 1.0
+        self._confidence = 1.0
+
+    @staticmethod
+    def clamp_(self, value, minimum, maximum):
+        if value < minimum:
+            return minimum
+        elif value > maximum:
+            return maximum
+        else:
+            return value
+
     @property
     def x(self) -> float:
-        return self.x
+        return self._x
 
     @x.setter
     def x(self, value) -> None:
-        self.x = np.clip(value, 0, 1)
+        self._x = self.clamp_(value, 0, 1)
 
     @property
     def y(self) -> float:
-        return self.y
+        return self._y
 
     @y.setter
     def y(self, value) -> None:
-        self.y = np.clip(value, 0, 1)
+        self._y = self.clamp_(value, 0, 1)
 
     @property
     def width(self) -> float:
-        return self.width
+        return self._width
 
     @width.setter
     def width(self, value) -> None:
-        self.width = np.clip(value, 0, 1)
+        self._width = self.clamp_(value, 0, 1)
 
     @property
     def height(self) -> float:
-        return self.height
+        return self._height
 
     @height.setter
     def height(self, value) -> None:
-        self.height = np.clip(value, 0, 1)
+        self._height = self.clamp_(value, 0, 1)
 
     @property
     def confidence(self) -> float:
-        return self.confidence
+        return self._confidence
 
     @confidence.setter
     def confidence(self, value) -> None:
-        self.confidence = np.clip(value, 0, 1)
-    '''
+        self._confidence = self.clamp_(value, 0, 1)
+
 
 class VideoItemClip:
     def __init__(self, *args):

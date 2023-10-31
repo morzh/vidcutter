@@ -246,19 +246,20 @@ class VideoSlider(QSlider):
         if not self.free_cursor_on_side:
             return
 
+        highlightColor = QColor(190, 85, 200, 255)
         # print('painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))')
         if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
             begin = self._regions[self.currentRectangleIndex].topLeft()
             end = self._regions[self.currentRectangleIndex].bottomLeft()
-            painter.setPen(QPen(QColor(200, 50, 50, 255), 3, Qt.SolidLine))
+            painter.setPen(QPen(highlightColor, 4, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_ON_END_SIDE:
             begin = self._regions[self.currentRectangleIndex].topRight()
             end = self._regions[self.currentRectangleIndex].bottomRight()
-            painter.setPen(QPen(QColor(50, 200, 50, 255), 3, Qt.SolidLine))
+            painter.setPen(QPen(highlightColor, 4, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.free_cursor_on_side == CursorStates.CURSOR_IS_INSIDE:
-            painter.setPen(QPen(QColor(50, 60, 200, 255), 3, Qt.SolidLine))
+            painter.setPen(QPen(highlightColor, 4, Qt.SolidLine))
             brushcolor = QColor(237, 242, 255, 150)
             painter.setBrush(brushcolor)
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
