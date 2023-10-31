@@ -132,7 +132,7 @@ class VideoCutter(QWidget):
 
         self.videoClipsList = VideoClipsListWidget(parent=self)
         self.videoClipsList.clicked.connect(self.videoListSingleClick)
-        # self.videoClipsList.doubleClicked.connect(self.videoListDoubleClick)
+        self.videoClipsList.doubleClicked.connect(self.videoListDoubleClick)
         self.videoClipsList.customContextMenuRequested.connect(self.itemMenu)
         self.videoClipsList.itemChanged.connect(self.videosVisibility)
         self.videoClipsList.model().rowsInserted.connect(self.setProjectDirty)
@@ -596,14 +596,6 @@ class VideoCutter(QWidget):
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self.setPosition(self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeEnd.msecsSinceStartOfDay())
-        else:
-            name = self.videoList.videos[self.videoList.currentVideoIndex].clips[index].name
-            timeStart = self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeStart
-            timeEnd = self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeEnd
-
-            dialog = VCChapterInputDialog(self, name, timeStart, timeEnd)
-            dialog.accepted.connect(lambda: self.on_editChapter(index, dialog.start.time(), dialog.end.time(), dialog.input.text()))
-            dialog.exec_()
 
     def on_editChapter(self, index: int, timeStart: QTime, timeEnd: QTime, clipName: str) -> None:
         if timeEnd < timeStart:
@@ -867,7 +859,7 @@ class VideoCutter(QWidget):
             self.frameCounter.setFrame(frame)
             if self.videoSlider.maximum() > 0:
                 self.taskbar.setProgress(float(progress / self.videoSlider.maximum()), True)
-            elif self.clipIsPlayingIndex >= 0:
+            if self.clipIsPlayingIndex >= 0:
                 current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
                 if progress > current_clip_end:
                     self.playMedia()
