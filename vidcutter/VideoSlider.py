@@ -456,6 +456,12 @@ class VideoSlider(QSlider):
 
         return super(VideoSlider, self).eventFilter(obj, event)
 
+    def mousePressEvent(self, event):
+        # super(VideoSlider, self).mousePressEvent(event)
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
+            return
+
 
 class SliderProgress(QProgressBar):
     def __init__(self, steps: int, geometry: QRect, parent=None):
