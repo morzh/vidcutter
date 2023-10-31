@@ -7,6 +7,7 @@ from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
 from sortedcontainers import SortedList
 
+
 class VideoItem:
     def __init__(self):
         self._thumbnail = QPixmap()
@@ -19,13 +20,11 @@ class VideoItem:
         self.clips: SortedList[VideoItemClip] = SortedList()
 
     def __str__(self):
-        print('filename:', self._filename)
-        print('description:', self.description)
-        print('youtube id:', self.youtubeId)
-        print('issues classes:', self.issues)
-        print('clips:')
+        return_string = f'filename:  {self._filename} \n  description: {self.description} \n youtube id: {self.youtubeId} \n issues classes: {self.issues} \n clips:\n'
         for clip in self.clips:
-            print(clip)
+            return_string += str(clip)
+
+        return return_string
 
     def __getitem__(self, item):
         if len(self.clips):

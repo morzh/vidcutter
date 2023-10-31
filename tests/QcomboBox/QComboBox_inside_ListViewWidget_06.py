@@ -33,7 +33,7 @@ class ClipsListWidgetItem(QtWidgets.QWidget):
         self.layoutTime.addWidget(self.endTimeLabel)
         self.layoutTime.addWidget(self.timeEnd)
 
-        self.pixmap = QPixmap('checker.png')
+        self.pixmap = QPixmap('../checker.png')
         self.pixmap = self.pixmap.scaled(QSize(95, 95), Qt.KeepAspectRatio)
         self.image_label = QLabel()
         self.image_label.setPixmap(self.pixmap)
@@ -109,7 +109,7 @@ for index in range(number_items):
     timeStart = QTime(index, 20)
     timeEnd = QTime(index + 10, 30)
     isChecked = bool(index % 2)
-    pixmap = QPixmap('checker.png')
+    pixmap = QPixmap('../checker.png')
     listItem = ClipsListWidgetItem()
     listItem.setComboBoxItems(workout_list)
     listItem.setVisibility(isChecked)

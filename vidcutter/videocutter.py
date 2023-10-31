@@ -713,6 +713,10 @@ class VideoCutter(QWidget):
         self.mediaAvailable = False
         self.initMediaControls(False)
 
+        if self._dataFolder is not None:
+            self.lastFolder = QFileInfo(self._dataFolder).absolutePath()
+            print('lastFolder', self.lastFolder)
+
     def loadMedia(self, item) -> None:
         from sortedcontainers import SortedList
         item_index = self.videoListWidget.row(item)
@@ -732,6 +736,7 @@ class VideoCutter(QWidget):
         self.projectDirty, self.projectSaved = False, False
         self.initMediaControls(True)
         self.totalRuntime = 0
+        # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
         self.taskbar.init()
         self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
 
@@ -758,6 +763,8 @@ class VideoCutter(QWidget):
                                  'report it as a bug. Use the link in the About VidCutter menu option for details '
                                  'and make sure to include your operating system, video card, the invalid media file '
                                  'and the version of VidCutter you are currently using.</p>')
+
+        # self.mpvWidget.mpv.playbackSpeed(4.0)
 
     def saveProject(self, reboot: bool = False) -> None:
         if self.projectSaved:
@@ -796,13 +803,15 @@ class VideoCutter(QWidget):
         self.saveProjectAction.setEnabled(True)
         self.toolbarSave.setEnabled(True)
 
-    def setPlayButton(self, playing: bool=False) -> None:
+    def setPlayButton(self, playing: bool = False) -> None:
         self.toolbarPlay.setup('{} Media'.format('Pause' if playing else 'Play'), 'Pause currently playing media' if playing else 'Play currently loaded media', True)
 
     def playMedia(self) -> None:
-        playstate = self.mpvWidget.property('pause')
-        self.setPlayButton(playstate)
-        self.taskbar.setState(playstate)
+        playState = self.mpvWidget.property('pause')
+        # print(self.mpvWidget.property('speed'))
+        print(playState)
+        self.setPlayButton(playState)
+        self.taskbar.setState(playState)
         self.timeCounter.clearFocus()
         self.frameCounter.clearFocus()
         self.mpvWidget.pause()
@@ -850,6 +859,7 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
+        # print(self.videoSlider.restrictValue, progress)
         progress *= 1000
         if self.videoSlider.restrictValue < progress or progress == 0:
             self.videoSlider.setValue(int(progress))
@@ -857,7 +867,7 @@ class VideoCutter(QWidget):
             self.frameCounter.setFrame(frame)
             if self.videoSlider.maximum() > 0:
                 self.taskbar.setProgress(float(progress / self.videoSlider.maximum()), True)
-            if self.clipIsPlayingIndex >= 0:
+            elif self.clipIsPlayingIndex >= 0:
                 current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
                 if progress > current_clip_end:
                     self.playMedia()

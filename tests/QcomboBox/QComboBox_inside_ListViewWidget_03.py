@@ -62,7 +62,7 @@ class QBDelegate(QItemDelegate):
         painter.drawRect(rectangle)
 
         title = 'Just title'  # index.data(TitleRole)
-        icon = QIcon('checker.png')  # index.data(IconRole)
+        icon = QIcon('../checker.png')  # index.data(IconRole)
 
         # value, _ = index.model().data(index).toStr()
         optionComboBox = QStyleOptionComboBox()

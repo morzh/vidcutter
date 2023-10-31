@@ -13,7 +13,7 @@ class BoundingBox:
         self.width = 1.0
         self.height = 1.0
         self.confidence = 1.0
-
+    '''
     @property
     def x(self) -> float:
         return self.x
@@ -53,7 +53,7 @@ class BoundingBox:
     @confidence.setter
     def confidence(self, value) -> None:
         self.confidence = np.clip(value, 0, 1)
-
+    '''
 
 class VideoItemClip:
     def __init__(self, *args):
@@ -74,8 +74,7 @@ class VideoItemClip:
         self.boundingBox = BoundingBox()
 
     def __str__(self):
-        print('\t',  'name:',  self._name, 'start time', self._timeStart, ' time end:',
-              self._timeEnd, ' visibility:',  self._visibility, ' description:',  self._description)
+        return f'name:  {self._name}, start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
 
     def __lt__(self, other):
         return self.timeStart < other.timeStart

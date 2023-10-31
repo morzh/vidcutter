@@ -221,6 +221,11 @@ class mpvWidget(QOpenGLWidget):
         if os.path.isfile(filepath):
             self.mpv.command('loadfile', filepath, 'replace')
 
+    '''
+    def playbackSpeed(self, speed=1.0) -> None:
+        self.mpv.command('speed', speed)
+    '''
+
     def frameStep(self) -> None:
         self.mpv.command('frame-step')
 
