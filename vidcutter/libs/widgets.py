@@ -29,11 +29,12 @@ from typing import Union
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, Qt, QSize,
                           QTime, QTimer)
 from PyQt5.QtGui import QFocusEvent, QMouseEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (qApp, QDialog, QDialogButtonBox, QDoubleSpinBox, QGraphicsOpacityEffect, QGridLayout,
+from PyQt5.QtWidgets import (qApp, QDialog, QDialogButtonBox, QDoubleSpinBox, QGraphicsOpacityEffect, QGridLayout, QComboBox,
                              QHBoxLayout, QLabel, QLineEdit, QMenu, QMessageBox, QProgressBar, QPushButton, QSlider,
                              QSpinBox, QStyle, QStyleFactory, QStyleOptionSlider, QTimeEdit, QToolBox, QToolTip,
                              QVBoxLayout, QWidget, QWidgetAction)
 
+class VCToolBarComboBox(QComboBox):
 
 class VCToolBarButton(QWidget):
     clicked = pyqtSignal(bool)

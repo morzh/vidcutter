@@ -48,10 +48,7 @@ class ClipsListWidgetItem(QWidget):
         self.layoutTime.addWidget(self.endTimeLabel, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeEnd, 0, Qt.AlignLeft)
 
-        # self.pixmap = QPixmap()
         self.image_label = QLabel()
-        # self.image_label.setPixmap(self.pixmap)
-        # self.image_label.setPixmap(self.roundedPixmap(self.pixmap, 25))
         self.image_label.setScaledContents(True)
         # self.image_label.setStyleSheet("""border-radius: 10px; background-color: transparent;""")
 
@@ -144,7 +141,6 @@ class VideoClipsListWidget(QListWidget):
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
         actionClasses = copy.deepcopy(self.parent.videoList.actionClassesLabels)
         actionClasses.append(self.parent.videoList.actionClassUnknownLabel)
-        otherIndex = len(actionClasses) - 1
         videoIndex = self.parent.videoList.currentVideoIndex
         self.clipsHasRendered = False
         self.clear()

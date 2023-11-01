@@ -13,7 +13,7 @@ from typing import Callable, List, Optional, Union
 import sip
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
+from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QComboBox,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
                              QVBoxLayout, QWidget, QScrollArea, QGraphicsScene, QGraphicsView)
 
@@ -139,11 +139,7 @@ class VideoCutter(QWidget):
         self.videoClipsList.model().rowsRemoved.connect(self.setProjectDirty)
         self.videoClipsList.model().rowsMoved.connect(self.setProjectDirty)
         self.videoClipsList.model().rowsMoved.connect(self.syncClipList)
-        '''
-        self.clipIndexLayout = QVBoxLayout()
-        self.clipIndexLayout.setContentsMargins(0, 0, 0, 0)
-        self.clipIndexLayout.addWidget(self.videoClipsList)
-        '''
+
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
         self.videoLayout.addWidget(self.videoListWidget)
@@ -218,9 +214,16 @@ class VideoCutter(QWidget):
 
         self.toolbarOpen = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
         self.toolbarOpen.clicked.connect(self.openFolder)
+
         self.toolbarPlay = VCToolBarButton('Play', 'Play currently loaded media file', parent=self)
         self.toolbarPlay.setEnabled(False)
         self.toolbarPlay.clicked.connect(self.playMedia)
+
+        self.playbackSpeedDict = {'0.5x': 0.5, '1x': 1.0, '2x': 2.0, '4x': 4.0, '6x': 6.0, '8x': 8.0}
+        self.toolbarPlaybackSpeed = QComboBox()
+        self.toolbarPlaybackSpeed.addItems(self.playbackSpeedDict.keys())
+        self.toolbarPlaybackSpeed.setCurrentIndex(1)
+        self.toolbarPlaybackSpeed.currentIndexChanged.connect(self.changePlaybackSpeed)
 
         self.toolbarStart = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
         self.toolbarStart.setEnabled(False)
@@ -240,6 +243,8 @@ class VideoCutter(QWidget):
         toolbarLayout.addWidget(self.toolbarOpen)
         toolbarLayout.addStretch(1)
         toolbarLayout.addWidget(self.toolbarPlay)
+        toolbarLayout.addStretch(1)
+        toolbarLayout.addWidget(self.toolbarPlaybackSpeed)
         toolbarLayout.addStretch(1)
         toolbarLayout.addWidget(self.toolbarStart)
         toolbarLayout.addStretch(1)
@@ -807,6 +812,10 @@ class VideoCutter(QWidget):
         self.timeCounter.clearFocus()
         self.frameCounter.clearFocus()
         self.mpvWidget.pause()
+
+    def changePlaybackSpeed(self, index) -> None:
+        speedValue = list(self.playbackSpeedDict.values())[index]
+        self.mpvWidget.option('speed', speedValue)
 
     def playMediaTimeClip(self, index) -> None:
         if not len(self.videoList.videos[self.videoList.currentVideoIndex]):
