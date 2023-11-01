@@ -222,8 +222,8 @@ class VideoCutter(QWidget):
         self.playbackSpeedDict = {'0.5x': 0.5, '1x': 1.0, '2x': 2.0, '4x': 4.0, '6x': 6.0, '8x': 8.0}
         self.toolbarPlaybackSpeed = VCToolBarComboBox('Speed', 'Set playback speed', parent=self)  # QComboBox()
         self.toolbarPlaybackSpeed.addItems(self.playbackSpeedDict.keys())
-        # self.toolbarPlaybackSpeed.setCurrentIndex(1)
-        # self.toolbarPlaybackSpeed.currentIndexChanged.connect(self.changePlaybackSpeed)
+        self.toolbarPlaybackSpeed.setCurrentIndex(1)
+        self.toolbarPlaybackSpeed.currentIndexChanged(self.changePlaybackSpeed)
 
         self.toolbarStart = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
         self.toolbarStart.setEnabled(False)

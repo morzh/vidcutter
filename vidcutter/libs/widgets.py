@@ -79,7 +79,7 @@ class VCToolBarComboBox(QWidget):
             self.label2.setVisible(False)
 
     def currentIndexChanged(self, f):
-        self.comboBox.currentIndexChanged(f)
+        self.comboBox.currentIndexChanged.connect(f)
 
     def addItems(self, items):
         self.comboBox.addItems(items)
