@@ -7,7 +7,7 @@ import sys
 import copy
 
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
-from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QPixmap, QContextMenuEvent
+from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QPixmap, QContextMenuEvent, QBrush, QPainterPath
 from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QComboBox, QProgressBar, QSizePolicy, QStyle, QWidget, QComboBox, QListWidgetItem, QHBoxLayout, QVBoxLayout, QTimeEdit, QAbstractSpinBox,
                              QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QStyleOptionComboBox, QStyleOptionMenuItem, QLabel, QLayout)
 
@@ -48,9 +48,13 @@ class ClipsListWidgetItem(QWidget):
         self.layoutTime.addWidget(self.endTimeLabel, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeEnd, 0, Qt.AlignLeft)
 
-        self.pixmap = QPixmap()
+        # self.pixmap = QPixmap()
         self.image_label = QLabel()
-        self.image_label.setPixmap(self.pixmap)
+        # self.image_label.setPixmap(self.pixmap)
+        # self.image_label.setPixmap(self.roundedPixmap(self.pixmap, 25))
+        self.image_label.setScaledContents(True)
+        # self.image_label.setStyleSheet("""border-radius: 10px; background-color: transparent;""")
+
         self.layout2 = QHBoxLayout()
         self.layout2.addWidget(self.image_label)
         self.layout2.addLayout(self.layoutTime)
@@ -62,8 +66,24 @@ class ClipsListWidgetItem(QWidget):
         self.layoutGlobal.setSizeConstraint(QLayout.SetFixedSize)
         self.widget.setLayout(self.layoutGlobal)
 
-    def on_checkBoxClicked(self):
-        print('!!!')
+    def roundedPixmap(self, pixmap, radius=20):
+        target = QPixmap(pixmap.size())
+        target.fill(Qt.transparent)
+        painter = QPainter(target)
+
+        # pixmap = pixmap.scaled(90, 90, Qt.KeepAspectRatio)
+
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+
+        path = QPainterPath()
+        path.addRoundedRect(0, 0, pixmap.width(), pixmap.height(), radius, radius)
+
+        painter.setClipPath(path)
+        painter.drawPixmap(0, 0, pixmap)
+
+        return target
 
     def setComboBoxItems(self, items: list[str]) -> None:
         self.comboBox.addItems(items)
@@ -72,8 +92,8 @@ class ClipsListWidgetItem(QWidget):
         self.checkBox.setChecked(checked)
 
     def setThumbnail(self, pixmap: QPixmap):
-        self.pixmap = pixmap.scaled(QSize(100, 100), Qt.KeepAspectRatio)
-        self.image_label.setPixmap(self.pixmap)
+        pixmap = pixmap.scaled(QSize(100, 100), Qt.KeepAspectRatio)
+        self.image_label.setPixmap(self.roundedPixmap(pixmap, 10))
 
     def setTimeStart(self, timeStart: QTime):
         self.timeStart.setTime(timeStart)

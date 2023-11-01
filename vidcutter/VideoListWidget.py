@@ -4,7 +4,7 @@ import copy
 from typing import List
 
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint, QTime
-from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent, QPixmap
+from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent, QPixmap, QPainterPath
 from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QWidget, QSizePolicy, QStyle, QComboBox, QHBoxLayout, QVBoxLayout, QTimeEdit, QCheckBox,
                              QLabel, QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QLayout)
 
@@ -65,6 +65,23 @@ class VideoListItemStyle(QStyledItemDelegate):
         self.parent = parent
         self.theme = self.parent.theme
 
+    def roundedPixmap(self, pixmap, radius=20):
+        target = QPixmap(pixmap.size())
+        target.fill(Qt.transparent)
+        painter = QPainter(target)
+
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+
+        path = QPainterPath()
+        path.addRoundedRect(0, 0, pixmap.width(), pixmap.height(), radius, radius)
+
+        painter.setClipPath(path)
+        painter.drawPixmap(0, 0, pixmap)
+
+        return target
+
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
         r = option.rect
         pencolor = Qt.white if self.theme == 'dark' else Qt.black
@@ -81,6 +98,8 @@ class VideoListItemStyle(QStyledItemDelegate):
         painter.drawRect(r)
 
         pixmap = index.data(Qt.DecorationRole + 1)
+        pixmap = pixmap.scaled(64, 64, Qt.KeepAspectRatio)
+        pixmap = self.roundedPixmap(pixmap, 12)
         thumbnail_icon = QIcon(pixmap)
         video_index = str(index.data(Qt.UserRole + 1))
 
