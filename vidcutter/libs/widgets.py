@@ -34,7 +34,59 @@ from PyQt5.QtWidgets import (qApp, QDialog, QDialogButtonBox, QDoubleSpinBox, QG
                              QSpinBox, QStyle, QStyleFactory, QStyleOptionSlider, QTimeEdit, QToolBox, QToolTip,
                              QVBoxLayout, QWidget, QWidgetAction)
 
-class VCToolBarComboBox(QComboBox):
+
+class VCToolBarComboBox(QWidget):
+    def __init__(self, label: str, statustip: str, labelstyle: str='beside', parent=None, has_label: bool = True):
+        super().__init__(parent)
+        self.comboBox = QComboBox(self)
+        self.comboBox.setFixedHeight(50)
+        self.comboBox.setFixedWidth(60)
+        self.comboBox.view().window().setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.comboBox.view().window().setAttribute(Qt.WA_TranslucentBackground)
+
+        self.setup(label, statustip)
+        self.label1 = QLabel(label.replace(' ', '<br/>'), self)
+        self.label2 = QLabel(label, self)
+        self.label2.setAlignment(Qt.AlignHCenter)
+        # layout = QHBoxLayout()
+        layout = QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(5)
+        layout.addWidget(self.comboBox, 0, 0, Qt.AlignHCenter)
+        layout.addWidget(self.label1, 0, 1)
+        layout.addWidget(self.label2, 1, 1)
+        self.setLayout(layout)
+        self.setLabelStyle(labelstyle, has_label)
+
+    def setup(self, label: str, statustip: str, reset: bool=False) -> None:
+        self.comboBox.setToolTip(label)
+        self.comboBox.setStatusTip(statustip)
+        self.comboBox.setObjectName('toolbar-{}'.format(label.split()[0].lower()))
+        if reset:
+            self.label1.setText(label.replace(' ', '<br/>'))
+            self.label2.setText(label)
+            self.button.setStyleSheet('')
+
+    def setLabelStyle(self, labelstyle: str, has_label: bool = True) -> None:
+        if labelstyle == 'under':
+            self.label1.setVisible(False)
+            self.label2.setVisible(True)
+        elif labelstyle == 'none' or not has_label:
+            self.label1.setVisible(False)
+            self.label2.setVisible(False)
+        else:
+            self.label1.setVisible(True)
+            self.label2.setVisible(False)
+
+    def currentIndexChanged(self, f):
+        self.comboBox.currentIndexChanged(f)
+
+    def addItems(self, items):
+        self.comboBox.addItems(items)
+
+    def setCurrentIndex(self, index):
+        self.comboBox.setCurrentIndex(index)
+        
 
 class VCToolBarButton(QWidget):
     clicked = pyqtSignal(bool)

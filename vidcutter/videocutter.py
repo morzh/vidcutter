@@ -37,7 +37,7 @@ from vidcutter.libs.notifications import JobCompleteNotification
 from vidcutter.libs.taskbarprogress import TaskbarProgress
 from vidcutter.libs.videoservice import VideoService
 from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCChapterInputDialog, VCMessageBox,
-                                    VCProgressDialog, VCTimeCounter, VCToolBarButton, VCVolumeSlider, VCConfirmDialog)
+                                    VCProgressDialog, VCTimeCounter, VCToolBarButton, VCToolBarComboBox, VCVolumeSlider, VCConfirmDialog)
 
 from vidcutter.VideoItemClip import VideoItemClip
 
@@ -220,10 +220,10 @@ class VideoCutter(QWidget):
         self.toolbarPlay.clicked.connect(self.playMedia)
 
         self.playbackSpeedDict = {'0.5x': 0.5, '1x': 1.0, '2x': 2.0, '4x': 4.0, '6x': 6.0, '8x': 8.0}
-        self.toolbarPlaybackSpeed = QComboBox()
+        self.toolbarPlaybackSpeed = VCToolBarComboBox('Speed', 'Set playback speed', parent=self)  # QComboBox()
         self.toolbarPlaybackSpeed.addItems(self.playbackSpeedDict.keys())
-        self.toolbarPlaybackSpeed.setCurrentIndex(1)
-        self.toolbarPlaybackSpeed.currentIndexChanged.connect(self.changePlaybackSpeed)
+        # self.toolbarPlaybackSpeed.setCurrentIndex(1)
+        # self.toolbarPlaybackSpeed.currentIndexChanged.connect(self.changePlaybackSpeed)
 
         self.toolbarStart = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
         self.toolbarStart.setEnabled(False)
