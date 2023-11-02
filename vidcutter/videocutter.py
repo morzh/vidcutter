@@ -179,13 +179,13 @@ class VideoCutter(QWidget):
         self.videoplayerLayout.addWidget(self.mpvWidget)
         self.videoplayerLayout.addWidget(countersWidget)
 
-        self.videoplayerWidget = QFrame(self)
-        self.videoplayerWidget.setObjectName('videoplayer')
-        self.videoplayerWidget.setFrameStyle(QFrame.Box | QFrame.Sunken)
-        self.videoplayerWidget.setLineWidth(0)
-        self.videoplayerWidget.setMidLineWidth(0)
-        self.videoplayerWidget.setVisible(False)
-        self.videoplayerWidget.setLayout(self.videoplayerLayout)
+        self.videoPlayerWidget = QFrame(self)
+        self.videoPlayerWidget.setObjectName('videoplayer')
+        self.videoPlayerWidget.setFrameStyle(QFrame.Box | QFrame.Sunken)
+        self.videoPlayerWidget.setLineWidth(0)
+        self.videoPlayerWidget.setMidLineWidth(0)
+        self.videoPlayerWidget.setVisible(False)
+        self.videoPlayerWidget.setLayout(self.videoplayerLayout)
 
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
@@ -715,10 +715,10 @@ class VideoCutter(QWidget):
         # self.sliderWidget.hideThumbs()
         self.sliderWidget.setEnabled(False)
 
-        self.videoLayout.replaceWidget(self.videoplayerWidget, self.novideoWidget)
+        self.videoLayout.replaceWidget(self.videoPlayerWidget, self.novideoWidget)
         self.frameCounter.hide()
         self.timeCounter.hide()
-        self.videoplayerWidget.hide()
+        self.videoPlayerWidget.hide()
         self.novideoWidget.show()
         self.mpvWidget.setEnabled(False)
         self.mediaAvailable = False
@@ -733,10 +733,10 @@ class VideoCutter(QWidget):
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
         if not self.folderOpened:
-            self.videoLayout.replaceWidget(self.novideoWidget, self.videoplayerWidget)
+            self.videoLayout.replaceWidget(self.novideoWidget, self.videoPlayerWidget)
             self.frameCounter.show()
             self.timeCounter.show()
-            self.videoplayerWidget.show()
+            self.videoPlayerWidget.show()
             self.novideoWidget.hide()
             self.folderOpened = True
 
@@ -765,6 +765,8 @@ class VideoCutter(QWidget):
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
+            self.setPosition(self.videoSlider.minimum())
+            self.toolbarPlay.setFocus()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)

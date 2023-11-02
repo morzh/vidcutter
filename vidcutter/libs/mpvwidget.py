@@ -165,6 +165,9 @@ class mpvWidget(QOpenGLWidget):
             self.opengl.render({'fbo':self.defaultFramebufferObject(), 'w':self.width(), 'h':self.height()}, True)
             # self.opengl.draw(self.defaultFramebufferObject(), self.width(), -self.height())
 
+    def sharedPainter(self):
+        pass
+
     # @pyqtSlot()
     # def swapped(self):
     #     if self.opengl:
