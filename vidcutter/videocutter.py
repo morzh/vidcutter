@@ -766,7 +766,6 @@ class VideoCutter(QWidget):
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
             self.setPosition(self.videoSlider.minimum())
-            self.toolbarPlay.setFocus()
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
@@ -1366,17 +1365,21 @@ class VideoCutter(QWidget):
                     self.clipEnd()
                 return
 
-            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  #  and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 self.toolbarPlus()
+                return
 
-            if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.ControlModifier and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+            if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  # and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 self.toolbarMinus()
+                return
 
             if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
                 self.speedUp()
+                return
 
             if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
                 self.speedDown()
+                return
 
         super(VideoCutter, self).keyPressEvent(event)
 
