@@ -341,6 +341,18 @@ class VideoCutter(QWidget):
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
 
+    def speedUp(self):
+        index = self.toolbarPlaybackSpeed.comboBox.currentIndex()
+        index += 1
+        index = self.clip(index, 0, len(self.playbackSpeedDict) - 1)
+        self.toolbarPlaybackSpeed.comboBox.setCurrentIndex(index)
+
+    def speedDown(self):
+        index = self.toolbarPlaybackSpeed.comboBox.currentIndex()
+        index -= 1
+        index = self.clip(index, 0, len(self.playbackSpeedDict) - 1)
+        self.toolbarPlaybackSpeed.comboBox.setCurrentIndex(index)
+
     @pyqtSlot()
     def toolbarPlus(self):
         if self.factor == 1:
@@ -1299,7 +1311,6 @@ class VideoCutter(QWidget):
             return
 
         if self.mediaAvailable:
-
             if event.key() == Qt.Key_Space:
                 self.playMedia()
                 return
@@ -1352,6 +1363,18 @@ class VideoCutter(QWidget):
                 elif self.toolbarEnd.isEnabled():
                     self.clipEnd()
                 return
+
+            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+                self.toolbarPlus()
+
+            if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.ControlModifier and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+                self.toolbarMinus()
+
+            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
+                self.speedUp()
+
+            if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
+                self.speedDown()
 
         super(VideoCutter, self).keyPressEvent(event)
 
