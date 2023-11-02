@@ -4,6 +4,7 @@ import time
 from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets
 import tobii_research as tr
 import numpy as np
+from PyQt5.QtCore import QPoint
 
 
 class EyeTracker(QtCore.QObject):
@@ -18,9 +19,11 @@ class EyeTracker(QtCore.QObject):
         return self._tracker
 
     def start(self):
+        '''
         self.tracker.subscribe_to(
             tr.EYETRACKER_GAZE_DATA, self._callback, as_dictionary=True
         )
+        '''
 
     def _callback(self, gaze_data_):
         self.positionChanged.emit(
@@ -47,7 +50,7 @@ class Widget(QtWidgets.QWidget):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._gv = QtWidgets.QGraphicsView(self._scene)
         # construct a videoitem for showing the video
-        self._videoitem = self.mpvWidget.QtMultimediaWidgets.QGraphicsVideoItem()
+        self._videoitem = QtMultimediaWidgets.QGraphicsVideoItem()
         # add it into the scene
         self._scene.addItem(self._videoitem)
 
@@ -64,21 +67,19 @@ class Widget(QtWidgets.QWidget):
             self, QtMultimedia.QMediaPlayer.VideoSurface
         )
         self._player.setVideoOutput(self._videoitem)
-        file = os.path.join(
-            os.path.dirname(__file__), "video.mp4"
-        )  # video.mp4 is under the same dirctory
-        self._player.setMedia(
-            QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(file))
-        )
+        file = os.path.join(os.path.dirname(__file__), "file_example_MP4_640_3MG.mp4")  # video.mp4 is under the same dirctory
+        print(file)
+        self._player.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(file)))
         print(f"self._videoitem::{self._videoitem.size()}")
 
         # get eye tracker
         eyetrackers = tr.find_all_eyetrackers()
-        self.tracker = EyeTracker(eyetrackers[0])
-        self.tracker.positionChanged.connect(self._ellipse_item.setPos)
+        # self.tracker = EyeTracker(eyetrackers[0])
+        # self.tracker.positionChanged.connect(self._ellipse_item.setPos)
 
+        self._ellipse_item.setPos(QPoint(20, 20))
     def Play_video(self):
-        self.tracker.start()
+        # self.tracker.start()
         # size = QtCore.QSizeF(1920.0, 1080.0)#I hope it can fullscreen the video
         # self._videoitem.setSize(size)
         # self._gv.showFullScreen()

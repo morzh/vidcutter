@@ -40,9 +40,38 @@ class VCToolBarComboBox(QWidget):
         super().__init__(parent)
         self.comboBox = QComboBox(self)
         self.comboBox.setFixedHeight(50)
-        self.comboBox.setFixedWidth(60)
+        self.comboBox.setFixedWidth(62)
         self.comboBox.view().window().setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
         self.comboBox.view().window().setAttribute(Qt.WA_TranslucentBackground)
+        self.comboBox.setEnabled(False)
+        self.comboBox.setStyleSheet("""
+        QComboBox {
+            border-radius: 13px;
+            font-size: 13pt;
+            font-weight: normal;
+            color: grey;
+        }
+        QComboBox:on {
+            border-radius: 13px;
+        }
+        QComboBox QAbstractItemView {
+            border-radius: 13px;
+            border: 1px solid gray;
+            padding: 4px 4px 4px 4px
+}
+        QComboBox::drop-down {
+            border-radius: 13px; 
+            border-color: transparent;
+            font-size: 10pt;
+            font-weight: normal ;
+        }
+        QComboBox::down-arrow {
+	        image: none;
+        }
+        QComboBox::down-arrow:on {
+	        image: none;
+        }
+        """)
 
         self.setup(label, statustip)
         self.label1 = QLabel(label.replace(' ', '<br/>'), self)
@@ -51,7 +80,7 @@ class VCToolBarComboBox(QWidget):
         # layout = QHBoxLayout()
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(5)
+        layout.setSpacing(0)
         layout.addWidget(self.comboBox, 0, 0, Qt.AlignHCenter)
         layout.addWidget(self.label1, 0, 1)
         layout.addWidget(self.label2, 1, 1)
@@ -65,7 +94,7 @@ class VCToolBarComboBox(QWidget):
         if reset:
             self.label1.setText(label.replace(' ', '<br/>'))
             self.label2.setText(label)
-            self.button.setStyleSheet('')
+            self.comboBox.setStyleSheet('')
 
     def setLabelStyle(self, labelstyle: str, has_label: bool = True) -> None:
         if labelstyle == 'under':
@@ -86,7 +115,44 @@ class VCToolBarComboBox(QWidget):
 
     def setCurrentIndex(self, index):
         self.comboBox.setCurrentIndex(index)
-        
+
+    def setEnabled(self, flag: bool) -> None:
+        comboBoxfontColor = '#b2b2b2' if flag else '#45494a'
+        labelsfontColor = '#c6c0c0' if flag else '#45494a'
+        self.label1.setEnabled(flag)
+        self.label2.setEnabled(flag)
+        self.label1.setStyleSheet("""color: %s""" % labelsfontColor)
+        self.label2.setStyleSheet("""color: %s""" % labelsfontColor)
+        self.comboBox.setEnabled(flag)
+        self.comboBox.setStyleSheet("""
+        QComboBox {
+            border-radius: 13px;
+            font-size: 13pt;
+            font-weight: bold;
+            color: %s;
+        }
+        QComboBox:on {
+            border-radius: 13px;
+        }
+        QComboBox QAbstractItemView {
+            border-radius: 13px;
+            border: 1px solid gray;
+            padding: 4px 4px 4px 4px
+        }
+        QComboBox::drop-down {
+            border-radius: 13px; 
+            border-color: transparent;
+            font-size: 10pt;
+            font-weight: normal ;
+        }
+        QComboBox::down-arrow {
+	        image: none;
+        }
+        QComboBox::down-arrow:on {
+	        image: none;
+        }
+        """ % comboBoxfontColor)
+
 
 class VCToolBarButton(QWidget):
     clicked = pyqtSignal(bool)

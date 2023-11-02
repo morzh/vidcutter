@@ -224,6 +224,8 @@ class VideoCutter(QWidget):
         self.toolbarPlaybackSpeed.addItems(self.playbackSpeedDict.keys())
         self.toolbarPlaybackSpeed.setCurrentIndex(1)
         self.toolbarPlaybackSpeed.currentIndexChanged(self.changePlaybackSpeed)
+        self.toolbarPlaybackSpeed.setEnabled(False)
+
 
         self.toolbarStart = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
         self.toolbarStart.setEnabled(False)
@@ -750,6 +752,7 @@ class VideoCutter(QWidget):
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelinePlusButton.button.setEnabled(True)
+            self.toolbarPlaybackSpeed.setEnabled(True)
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
