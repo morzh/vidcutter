@@ -511,6 +511,8 @@ class VideoSlider(QSlider):
             return
         if (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
             index = self.mouseCursorRegionIndex(event)
+            clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[index]
+            self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())
             self.parent.playMediaTimeClip(index)
 
 
