@@ -203,6 +203,7 @@ class mpvWidget(QOpenGLWidget):
                     event_prop = event.data
                     if event_prop.name == 'eof-reached' and event_prop.data:
                         self.parent.setPlayButton(False)
+                        self.pause()
                         self.parent.setPosition(0)
                     elif event_prop.name == 'time-pos':
                         # if os.getenv('DEBUG', False) or getattr(self.parent, 'verboseLogs', False):

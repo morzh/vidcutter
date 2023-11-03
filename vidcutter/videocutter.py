@@ -821,12 +821,10 @@ class VideoCutter(QWidget):
 
     def setPlayButton(self, playing: bool = False) -> None:
         self.toolbarPlay.setup('{} Media'.format('Pause' if playing else 'Play'), 'Pause currently playing media' if playing else 'Play currently loaded media', True)
+        pass
 
     def playMedia(self) -> None:
         playState = self.mpvWidget.property('pause')
-        self.mpvWidget.setProperty('ab-loop-a', 'no')
-        self.mpvWidget.setProperty('ab-loop-b', 'no')
-        print(playState)
         self.setPlayButton(playState)
         self.taskbar.setState(playState)
         self.timeCounter.clearFocus()

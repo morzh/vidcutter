@@ -58,7 +58,7 @@ class VCToolBarComboBox(QWidget):
             border-radius: 13px;
             border: 1px solid gray;
             padding: 4px 4px 4px 4px
-}
+        }
         QComboBox::drop-down {
             border-radius: 13px; 
             border-color: transparent;
