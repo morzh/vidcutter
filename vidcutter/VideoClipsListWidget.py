@@ -157,7 +157,8 @@ class VideoClipsListWidget(QListWidget):
             listItem.setTimeEnd(videoClip.timeEnd)
 
             currentClassIndex = self.parent.videoList[videoIndex].clips[itemIndex].actionClassIndex
-            currentClassIndex = (len(actionClasses) + currentClassIndex) %  len(actionClasses)
+            currentClassIndex = (len(actionClasses) + currentClassIndex) % len(actionClasses)
+            print('currentClassIndex', currentClassIndex)
             listItem.comboBox.setCurrentIndex(currentClassIndex)
             listItem.comboBox.currentIndexChanged.connect(lambda value, index=itemIndex: self.comboBoxIndexChanged(value, index))
             listItem.checkBox.stateChanged.connect(lambda state, index=itemIndex: self.checkBoxStateChanged(state, index))
@@ -170,11 +171,12 @@ class VideoClipsListWidget(QListWidget):
 
     def comboBoxIndexChanged(self, value, clipIndex):
         videoIndex = self.parent.videoList.currentVideoIndex
-        if len(self.parent.videoList.actionClassesLabels) == clipIndex:
+        if len(self.parent.videoList.actionClassesLabels) == value:
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = -1
         else:
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = value
         self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
+        print(self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex)
 
     def checkBoxStateChanged(self, state, clipIndex: int):
         indexVideo = self.parent.videoList.currentVideoIndex
