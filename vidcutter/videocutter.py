@@ -932,7 +932,6 @@ class VideoCutter(QWidget):
             modifierPressed = QApplication.keyboardModifiers()
             row = self.videoClipsList.currentRow()
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-                # self.setPosition(self.clipTimes[row][0].msecsSinceStartOfDay())
                 self.setPosition(self.videoList.videos[self.videoList.currentVideoIndex].clips[row].timeStart.msecsSinceStartOfDay())
             elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
                 self.playMediaTimeClip(row)

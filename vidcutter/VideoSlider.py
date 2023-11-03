@@ -304,7 +304,7 @@ class VideoSlider(QSlider):
             self._regionsVisibility[index] = state
             self.update()
 
-    def cursorOnSide(self, e_pos) -> int:
+    def mouseCursorState(self, e_pos) -> int:
         if len(self._regions) > 0:
             for region_idx in range(len(self._regions)):
                 if self._regionsVisibility[region_idx]:
@@ -320,6 +320,16 @@ class VideoSlider(QSlider):
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return CursorStates.CURSOR_IS_INSIDE
         return 0
+
+    def mouseCursorRegionIndex(self, e_pos):
+        if len(self._regions) > 0:
+            for region_idx in range(len(self._regions)):
+                self.begin = self._regions[region_idx].topLeft()
+                self.end = self._regions[region_idx].bottomRight()
+                y1, y2 = sorted([self.begin.y(), self.end.y()])
+                if y1 <= e_pos.y() <= y2 and self.begin.x() < e_pos.x() < self.end.x():
+                    return region_idx
+
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
         x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
@@ -460,7 +470,7 @@ class VideoSlider(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.dragPosition = event.pos()
                 self.dragRectPosition = self._regions[self.currentRectangleIndex].topLeft()
-                side = self.cursorOnSide(event.pos())
+                side = self.mouseCursorState(event.pos())
                 if side == CursorStates.CURSOR_ON_BEGIN_SIDE:
                     self.state = RectangleEditState.BEGIN_SIDE_EDIT
                 elif side == CursorStates.CURSOR_ON_END_SIDE:
@@ -476,7 +486,7 @@ class VideoSlider(QSlider):
         elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress:
             if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
                 if self.state == RectangleEditState.FREE_STATE:
-                    self.free_cursor_on_side = self.cursorOnSide(event.pos())
+                    self.free_cursor_on_side = self.mouseCursorState(event.pos())
                     if self.free_cursor_on_side:
                         self.setCursor(Qt.SizeHorCursor)
                     else:
@@ -489,6 +499,9 @@ class VideoSlider(QSlider):
                 self.unsetCursor()
             self.repaint()
 
+        elif  event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+            self.mouseCursorRegionIndex(event)
+
         return super(VideoSlider, self).eventFilter(obj, event)
 
     def mousePressEvent(self, event):
@@ -496,6 +509,9 @@ class VideoSlider(QSlider):
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
             return
+        if (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
+            index = self.mouseCursorRegionIndex(event)
+            self.parent.playMediaTimeClip(index)
 
 
 class SliderProgress(QProgressBar):
