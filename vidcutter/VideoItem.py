@@ -6,11 +6,12 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
 from vidcutter.VideoItemClip import VideoItemClip
 from sortedcontainers import SortedList
+from vidcutter.QPixmapPickle import QPixmapPickle
 
 
 class VideoItem:
     def __init__(self):
-        self._thumbnail = QPixmap()
+        self._thumbnail = QPixmapPickle()
         self._duration = QTime()
         self._currentCLipIndex = 0
         self._filename = ''

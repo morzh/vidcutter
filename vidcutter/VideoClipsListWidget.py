@@ -138,6 +138,14 @@ class VideoClipsListWidget(QListWidget):
         self._mouseButton = event.button()
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
+    def renderSliderVideoCLips(self, videoClipItems: list[VideoItemClip]) -> None:
+        self.clipsHasRendered = False
+        self.parent.videoSlider.clearRegions()
+
+        for itemIndex, videoClip in enumerate(videoClipItems):
+            self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+        self.clipsHasRendered = True
+
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
         actionClasses = copy.deepcopy(self.parent.videoList.actionClassesLabels)
         actionClasses.append(self.parent.videoList.actionClassUnknownLabel)
@@ -158,7 +166,6 @@ class VideoClipsListWidget(QListWidget):
 
             currentClassIndex = self.parent.videoList[videoIndex].clips[itemIndex].actionClassIndex
             currentClassIndex = (len(actionClasses) + currentClassIndex) % len(actionClasses)
-            print('currentClassIndex', currentClassIndex)
             listItem.comboBox.setCurrentIndex(currentClassIndex)
             listItem.comboBox.currentIndexChanged.connect(lambda value, index=itemIndex: self.comboBoxIndexChanged(value, index))
             listItem.checkBox.stateChanged.connect(lambda state, index=itemIndex: self.checkBoxStateChanged(state, index))
@@ -176,7 +183,7 @@ class VideoClipsListWidget(QListWidget):
         else:
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = value
         self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
-        print(self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex)
+        # print(self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex)
 
     def checkBoxStateChanged(self, state, clipIndex: int):
         indexVideo = self.parent.videoList.currentVideoIndex

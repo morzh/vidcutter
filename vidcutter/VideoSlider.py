@@ -37,9 +37,9 @@ class RectangleEditState(Enum):
 class VideoSlider(QSlider):
     def __init__(self, parent=None):
         super(VideoSlider, self).__init__(parent)
+        self.parent = parent
         self.dragRectPosition = QPoint()
         self.dragPosition = QPoint()
-        self.parent = parent
         self.logger = logging.getLogger(__name__)
         self.theme = self.parent.theme
         self._styles = '''
@@ -78,7 +78,7 @@ class VideoSlider(QSlider):
         self._cutStarted = False
         self.showThumbs = True
         self.thumbnailsOn = False
-        self.offset = 6
+        self.offset = 0  # 6
         self.setOrientation(Qt.Horizontal)
         self.setObjectName('videoslider')
         self.setStatusTip('Set clip start and end points')
@@ -112,6 +112,7 @@ class VideoSlider(QSlider):
         self.setTracking(True)
         self.setMouseTracking(True)
         self.setUpdatesEnabled(False)
+        # self.setMaximum(self.parent.parent.size().width() - 20)
 
     def initSliderParameters(self) -> None:
         self.widgetWidth = self.parent.sliderWidget.width()
@@ -164,6 +165,9 @@ class VideoSlider(QSlider):
             handleHeight=handle_height,
             timelineBackground=timeline))
 
+    # def maximum(self):
+    #     return self.parent.factor * super().maximum()
+
     def setRestrictValue(self, value: int = 0, force: bool = False) -> None:
         self.restrictValue = value
         if value > 0 or force:
@@ -176,7 +180,6 @@ class VideoSlider(QSlider):
 
     def renderVideoSegments(self, clips: list[VideoItemClip]):
         self.clearRegions()
-        # print(clips)
         for videoClip in clips:
             self.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
         self.update()
@@ -330,13 +333,15 @@ class VideoSlider(QSlider):
                 if y1 <= e_pos.y() <= y2 and self.begin.x() < e_pos.x() < self.end.x():
                     return region_idx
 
-
     def addRegion(self, start: int, end: int, visibility=2) -> None:
-        x = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        # region_start = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        # region_end = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
+        region_start = int(start / (1e3 * self.parent.duration) * self.width())
+        region_end = int(end / (1e3 * self.parent.duration) * self.width())
+        width = region_end - region_start
         y = int((self.height() - self._regionHeight) / 2)
-        width = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2)) - x
         height = self._regionHeight
-        self._regions.append(QRect(x + self.offset, y - 8, width, height))
+        self._regions.append(QRect(region_start + self.offset, y - 8, width, height))
         self._regionsVisibility.append(visibility)
         self.update()
 

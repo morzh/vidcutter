@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
-import numpy as np
+from vidcutter.QPixmapPickle import QPixmapPickle
 
 
 class BoundingBox:
@@ -69,7 +69,7 @@ class VideoItemClip:
         if not len(args):
             self._timeStart = QTime()
             self._timeEnd = QTime()
-            self._thumbnail = QPixmap()
+            self._thumbnail = QPixmapPickle()
             self._visibility = 2
         elif len(args) == 5:
             self._timeStart = args[0]
@@ -106,7 +106,7 @@ class VideoItemClip:
         return self._timeEnd
 
     @property
-    def thumbnail(self) -> QPixmap:
+    def thumbnail(self) -> QPixmapPickle:
         return self._thumbnail
 
     @property

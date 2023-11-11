@@ -70,6 +70,9 @@ class VideoCutter(QWidget):
         self.previewPostfix = '.preview.mp4'
         self.folderOpened = False
         self.factor = 1
+        self.factor_minimum = 1
+        self.factor_maximum = 18
+        self.duration = 0
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -332,11 +335,13 @@ class VideoCutter(QWidget):
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
         self.sliderWidgetScroll.setFixedHeight(126)
         self.sliderWidget.setFixedHeight(110)
-        self.sliderWidget.setFixedWidth(self.factor*windowSize.width() - 20)
+        self.sliderWidget.setFixedWidth(self.factor * windowSize.width() - 20)
 
         self.videoSlider.setFixedHeight(108)
-        self.videoSlider.setFixedWidth(self.factor*windowSize.width() - 20)
-        self.renderVideoClips()
+        self.videoSlider.setFixedWidth(self.factor * windowSize.width() - 20)
+        # self.videoSlider.setMaximum(self.factor * windowSize.width() - 20)
+        # print(self.videoSlider.maximum())
+        # self.renderVideoClips()
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -359,11 +364,13 @@ class VideoCutter(QWidget):
             self.factor += 1
         else:
             self.factor += 2
-        self.factor = self.clip(self.factor, 1, 18)
+        self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
-            self.renderVideoClips()
+            self.renderSliderVideoClips()
+
+        print(self.videoSlider.maximum())
 
     @pyqtSlot()
     def toolbarMinus(self):
@@ -371,11 +378,11 @@ class VideoCutter(QWidget):
             self.factor -= 1
         else:
             self.factor -= 2
-        self.factor = self.clip(self.factor, 1, 18)
+        self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
-            self.renderVideoClips()
+            self.renderSliderVideoClips()
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
@@ -749,15 +756,13 @@ class VideoCutter(QWidget):
         self.totalRuntime = 0
         # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
         self.taskbar.init()
-        self.parent.setWindowTitle('{0} - {1}'.format(qApp.applicationName(), os.path.basename(self.currentMedia)))
+        self.parent.setWindowTitle(f'video #{item_index + 1}  ::  {os.path.basename(self.currentMedia)}')
+        # self.parent.setWindowTitle('{0} - {1}'.format(str(item_index), os.path.basename(self.currentMedia)))
 
         try:
             self.videoList.videos[self.videoList.currentVideoIndex].clips = SortedList(self.videoList.videos[self.videoList.currentVideoIndex].clips)
             self.mpvWidget.setEnabled(True)
             self.mpvWidget.play(self.currentMedia)
-            # self.mpvWidget.setProperty('ab-loop-a', False)
-            # self.mpvWidget.setProperty('ab-loop-b', False)
-
             self.videoService.setMedia(self.currentMedia)
             self.videoSlider.setEnabled(True)
             self.videoSlider.setFocus()
@@ -903,8 +908,10 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
+        self.duration = duration
         duration *= 1000
         self.videoSlider.setRange(0, int(duration))
+        # self.videoSlider.setMaximum(10 * int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
         self.renderVideoClips()
@@ -1088,6 +1095,14 @@ class VideoCutter(QWidget):
         if not len(clip.visibility): #????? was clip[3]
             self.videoSlider.switchRegions(start, index)
         self.renderVideoClips()
+
+    def renderSliderVideoClips(self) -> None:
+        if not self.mediaAvailable:
+            return
+        self.videoSlider.clearRegions()
+        self.totalRuntime = 0
+        # force to update sorted list
+        self.videoClipsList.renderSliderVideoCLips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
 
     def renderVideoClips(self) -> None:
         if not self.mediaAvailable:
