@@ -9,6 +9,7 @@ import shutil
 from datetime import timedelta
 from functools import partial
 from typing import Callable, List, Optional, Union
+from sortedcontainers import SortedList
 
 import sip
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
@@ -736,7 +737,6 @@ class VideoCutter(QWidget):
             print('lastFolder', self.lastFolder)
 
     def loadMedia(self, item) -> None:
-        from sortedcontainers import SortedList
         item_index = self.videoListWidget.row(item)
         self.videoList.setCurrentVideoIndex(item_index)
         if not self.folderOpened:
@@ -773,6 +773,7 @@ class VideoCutter(QWidget):
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
+            print('self.videoSlider.minimum()', self.videoSlider.minimum())
             self.setPosition(self.videoSlider.minimum())
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -880,31 +881,24 @@ class VideoCutter(QWidget):
     @pyqtSlot(int)
     def setPosition(self, position: int) -> None:
         if position >= self.videoSlider.restrictValue:
-            self.mpvWidget.seek(position / 1000)
+            self.mpvWidget.seek(position / 1e3)
         # self.update()
         # self.repaint()
 
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
-        # print(self.videoSlider.restrictValue, progress)
         progress *= 1000
-        # print(self.videoSlider.restrictValue)
-        # print(progress, self.videoSlider.maximum())
         if self.videoSlider.restrictValue < progress or progress == 0:
+            # print('progress:', progress)
             self.videoSlider.setValue(int(progress))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
-            # if self.videoSlider.maximum() > 0:
-            #     self.taskbar.setProgress(float(progress / self.videoSlider.maximum()), True)
             if self.clipIsPlayingIndex >= 0:
                 current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
                 if progress > current_clip_end:
                     self.playMedia()
                     self.clipIsPlaying = False
                     self.clipIsPlayingIndex = -1
-            # if index_loop > 0:
-            #     self.setPosition(self.videoSlider.minimum())
-            #     self.playMedia()
 
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:

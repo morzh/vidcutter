@@ -402,6 +402,7 @@ class VideoSlider(QSlider):
 
     @pyqtSlot(int)
     def on_valueChanged(self, value: int) -> None:
+        # print('on_valueChanged::value:', value, 'on_valueChanged::self.restrictValue', self.restrictValue)
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
 
@@ -458,6 +459,7 @@ class VideoSlider(QSlider):
             if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
                 return False
 
+            # print('self.currentRectangleIndex', self.currentRectangleIndex)
             thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
             self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
 
@@ -483,7 +485,11 @@ class VideoSlider(QSlider):
                 elif side == CursorStates.CURSOR_IS_INSIDE:
                     self.state = RectangleEditState.RECTANGLE_MOVE
             elif self.parent.mediaAvailable and self.isEnabled():
-                new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
+                # new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
+                new_position = int(event.x() / self.width() * (self.maximum() - self.minimum()))
+                # print('event.x()', event.x(), 'new_position', new_position, 'new_position__', new_position__)
+                print('event.x()', event.x(), 'new_position', new_position, 'self.width()', self.width())
+
                 self.setValue(new_position)
                 self.parent.setPosition(new_position)
                 self.parent.parent.mousePressEvent(event)
@@ -504,13 +510,13 @@ class VideoSlider(QSlider):
                 self.unsetCursor()
             self.repaint()
 
-        elif  event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+        elif event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
             self.mouseCursorRegionIndex(event)
 
         return super(VideoSlider, self).eventFilter(obj, event)
 
     def mousePressEvent(self, event):
-        # super(VideoSlider, self).mousePressEvent(event)
+        # super().mousePressEvent(event)
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
             return
@@ -519,6 +525,8 @@ class VideoSlider(QSlider):
             clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[index]
             self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())
             self.parent.playMediaTimeClip(index)
+            return
+
 
 
 class SliderProgress(QProgressBar):
