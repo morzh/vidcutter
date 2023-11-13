@@ -104,6 +104,7 @@ class VideoSlider(QSlider):
         self.frameCounterMaximum = -1
         self.numberGradientSteps = 50
         self.regionOutlineWidth = 4
+        self.baseMaximum = 0
 
         # self.thumbsize = QSize()
 
@@ -405,6 +406,8 @@ class VideoSlider(QSlider):
         # print('on_valueChanged::value:', value, 'on_valueChanged::self.restrictValue', self.restrictValue)
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
+        # else:
+        #     self.setSliderPosition(value)
 
     @pyqtSlot()
     def on_rangeChanged(self) -> None:
@@ -487,11 +490,11 @@ class VideoSlider(QSlider):
             elif self.parent.mediaAvailable and self.isEnabled():
                 # new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 new_position = int(event.x() / self.width() * (self.maximum() - self.minimum()))
+                # print('new_position', new_position)
                 # print('event.x()', event.x(), 'new_position', new_position, 'new_position__', new_position__)
-                print('event.x()', event.x(), 'new_position', new_position, 'self.width()', self.width())
-
+                # print('event.x()', event.x(), 'new_position', new_position, 'self.width()', self.width())
                 self.setValue(new_position)
-                self.parent.setPosition(new_position)
+                # self.parent.setPosition(new_position)
                 self.parent.parent.mousePressEvent(event)
 
         elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress:
@@ -520,7 +523,7 @@ class VideoSlider(QSlider):
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
             return
-        if (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
+        elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
             index = self.mouseCursorRegionIndex(event)
             clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[index]
             self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())

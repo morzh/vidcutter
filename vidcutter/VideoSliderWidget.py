@@ -57,7 +57,6 @@ class VideoSliderWidget(QStackedWidget):
         self.setLoader(True)
         self.setMouseTracking(False)
 
-
     def setLoader(self, enabled: bool=True) -> None:
         if hasattr(self.parent, 'toolbar') and self.parent.mediaAvailable:
             self.parent.toolbar.setEnabled(not enabled)
@@ -66,9 +65,9 @@ class VideoSliderWidget(QStackedWidget):
         if self.parent.mediaAvailable:
             self.genlabel.setVisible(enabled)
 
-    def hideThumbs(self) -> None:
-        if self.count() == 3:
-            self.widget(2).hide()
-            self.widget(1).hide()
-            self.slider.thumbnailsOn = False
-            self.slider.initStyle()
+    # def hideThumbs(self) -> None:
+    #     if self.count() == 3:
+    #         self.widget(2).hide()
+    #         self.widget(1).hide()
+    #         self.slider.thumbnailsOn = False
+    #         self.slider.initStyle()

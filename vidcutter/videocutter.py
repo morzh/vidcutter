@@ -203,18 +203,18 @@ class VideoCutter(QWidget):
         self.volSlider = VCVolumeSlider(orientation=Qt.Horizontal, toolTip='Volume', statusTip='Adjust volume level', cursor=Qt.PointingHandCursor, value=self.parent.startupvol, minimum=0,
                                         maximum=130, minimumHeight=22, sliderMoved=self.setVolume)
         # noinspection PyArgumentList
-        self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True, toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
-                                            iconSize=QSize(14, 14), clicked=self.toggleFullscreen, cursor=Qt.PointingHandCursor, enabled=False)
+        # self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True, toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
+        #                                     iconSize=QSize(14, 14), clicked=self.toggleFullscreen, cursor=Qt.PointingHandCursor, enabled=False)
         self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True, objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
         self.menuButton.setFixedSize(QSize(33, 32))
 
         audioLayout = QHBoxLayout()
         audioLayout.setContentsMargins(0, 0, 0, 0)
         audioLayout.addWidget(self.muteButton)
-        audioLayout.addSpacing(5)
+        audioLayout.addSpacing(0)
         audioLayout.addWidget(self.volSlider)
-        audioLayout.addSpacing(5)
-        audioLayout.addWidget(self.fullscreenButton)
+        # audioLayout.addSpacing(5)
+        # audioLayout.addWidget(self.fullscreenButton)
 
         self.toolbarOpen = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
         self.toolbarOpen.clicked.connect(self.openFolder)
@@ -229,7 +229,6 @@ class VideoCutter(QWidget):
         self.toolbarPlaybackSpeed.setCurrentIndex(1)
         self.toolbarPlaybackSpeed.currentIndexChanged(self.changePlaybackSpeed)
         self.toolbarPlaybackSpeed.setEnabled(False)
-
 
         self.toolbarStart = VCToolBarButton('Start Clip', 'Start a new clip from the current timeline position', parent=self)
         self.toolbarStart.setEnabled(False)
@@ -366,6 +365,7 @@ class VideoCutter(QWidget):
         else:
             self.factor += 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
+        self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
@@ -380,6 +380,7 @@ class VideoCutter(QWidget):
         else:
             self.factor -= 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
+        self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum / self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
@@ -866,7 +867,7 @@ class VideoCutter(QWidget):
         self.toolbarStart.setEnabled(flag)
         self.toolbarEnd.setEnabled(False)
         self.toolbarSave.setEnabled(flag)
-        self.fullscreenButton.setEnabled(flag)
+        # self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
         self.videoSlider.clearRegions()
         if flag:
@@ -888,6 +889,7 @@ class VideoCutter(QWidget):
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
         progress *= 1000
+        print('progress', progress, 'self.videoSlider.maximum():', self.videoSlider.maximum())
         if self.videoSlider.restrictValue < progress or progress == 0:
             # print('progress:', progress)
             self.videoSlider.setValue(int(progress))
@@ -905,6 +907,7 @@ class VideoCutter(QWidget):
         self.duration = duration
         duration *= 1000
         self.videoSlider.setRange(0, int(duration))
+        self.videoSlider.baseMaximum = int(duration)
         # self.videoSlider.setMaximum(10 * int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
