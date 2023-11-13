@@ -371,7 +371,7 @@ class VideoCutter(QWidget):
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
 
-        print(self.videoSlider.maximum())
+        # print(self.videoSlider.maximum())
 
     @pyqtSlot()
     def toolbarMinus(self):
@@ -846,7 +846,6 @@ class VideoCutter(QWidget):
     def playMediaTimeClip(self, index) -> None:
         if not len(self.videoList.videos[self.videoList.currentVideoIndex]):
             return
-
         playstate = self.mpvWidget.property('pause')
         self.clipIsPlaying = True
         self.clipIsPlayingIndex = index
@@ -889,14 +888,13 @@ class VideoCutter(QWidget):
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
         progress *= 1000
-        print('progress', progress, 'self.videoSlider.maximum():', self.videoSlider.maximum())
         if self.videoSlider.restrictValue < progress or progress == 0:
             # print('progress:', progress)
             self.videoSlider.setValue(int(progress))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
             if self.clipIsPlayingIndex >= 0:
-                current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
+                current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd) * self.factor
                 if progress > current_clip_end:
                     self.playMedia()
                     self.clipIsPlaying = False

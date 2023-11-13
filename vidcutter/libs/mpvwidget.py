@@ -208,7 +208,10 @@ class mpvWidget(QOpenGLWidget):
                     elif event_prop.name == 'time-pos':
                         # if os.getenv('DEBUG', False) or getattr(self.parent, 'verboseLogs', False):
                         #     self.logger.info('time-pos property event')
-                        self.positionChanged.emit(event_prop.data, self.property('estimated-frame-number'))
+                        if event_prop.data is not None:
+                            # print('event_prop.data', event_prop.data / self.parent.factor)
+                        # print(self.parent.factor, 'self.parent.factor')
+                            self.positionChanged.emit(event_prop.data * self.parent.factor, self.property('estimated-frame-number'))
                     elif event_prop.name == 'duration':
                         # if os.getenv('DEBUG', False) or getattr(self.parent, 'verboseLogs', False):
                         #     self.logger.info('duration property event')

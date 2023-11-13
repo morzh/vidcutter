@@ -406,8 +406,6 @@ class VideoSlider(QSlider):
         # print('on_valueChanged::value:', value, 'on_valueChanged::self.restrictValue', self.restrictValue)
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
-        # else:
-        #     self.setSliderPosition(value)
 
     @pyqtSlot()
     def on_rangeChanged(self) -> None:
@@ -490,11 +488,8 @@ class VideoSlider(QSlider):
             elif self.parent.mediaAvailable and self.isEnabled():
                 # new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 new_position = int(event.x() / self.width() * (self.maximum() - self.minimum()))
-                # print('new_position', new_position)
-                # print('event.x()', event.x(), 'new_position', new_position, 'new_position__', new_position__)
-                # print('event.x()', event.x(), 'new_position', new_position, 'self.width()', self.width())
                 self.setValue(new_position)
-                # self.parent.setPosition(new_position)
+                self.parent.setPosition(int(new_position / self.parent.factor))
                 self.parent.parent.mousePressEvent(event)
 
         elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress:

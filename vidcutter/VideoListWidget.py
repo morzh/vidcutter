@@ -111,14 +111,6 @@ class VideoListItemStyle(QStyledItemDelegate):
         painter.setFont(QFont('Arial', 13 if sys.platform == 'darwin' else 11, QFont.Bold))
         painter.drawText(r, Qt.AlignLeft | Qt.AlignVCenter, video_index)
 
-        '''
-        if len(filename):
-            r = option.rect.adjusted(5, 85, 0, 0)
-            cfont = QFont('Futura LT', -1, QFont.Medium)
-            cfont.setPointSizeF(11 if sys.platform == 'darwin' else 10)
-            painter.setFont(cfont)
-            painter.drawText(r, Qt.AlignLeft, self.clipText(filename, painter, True))
-        '''
 
     def clipText(self, text: str, painter: QPainter, chapter: bool=False) -> str:
         metrics = painter.fontMetrics()
