@@ -368,6 +368,8 @@ class VideoCutter(QWidget):
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
+        newSliderPosition = int(self.videoSlider.value() * self.factor)
+        self.setPosition(newSliderPosition)
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
 
@@ -383,8 +385,11 @@ class VideoCutter(QWidget):
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum / self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
+        newSliderPosition = (self.videoSlider.value() * self.factor)
+        self.setPosition(newSliderPosition)
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
+
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
@@ -774,7 +779,6 @@ class VideoCutter(QWidget):
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
-            print('self.videoSlider.minimum()', self.videoSlider.minimum())
             self.setPosition(self.videoSlider.minimum())
         except InvalidMediaException:
             qApp.restoreOverrideCursor()

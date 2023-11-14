@@ -20,7 +20,7 @@ from vidcutter.VideoItemClip import VideoItemClip
 
 
 class CursorStates(Enum):
-    CURSOR_ON_BEGIN_SIDE = 1
+    CursorOnBeginSide = 1
     CURSOR_ON_END_SIDE = 2
     CURSOR_IS_INSIDE = 3
     CURSOR_OFF = 4
@@ -212,7 +212,7 @@ class VideoSlider(QSlider):
                     painter.drawLine(x, y, x, y - h)
                     if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
                         painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                        timecode = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset, self.width() - (self.offset * 2))
+                        timecode = QStyle.sliderValueFromPosition(self.minimum(), int(self.maximum() / self.parent.factor), x - self.offset, self.width() - (self.offset * 2))
                         timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
                         painter.drawText(x + 4, y + 6, timecode)
                 if x + 30 > self.width():
@@ -259,7 +259,7 @@ class VideoSlider(QSlider):
         maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
-        if self.free_cursor_on_side == CursorStates.CURSOR_ON_BEGIN_SIDE:
+        if self.free_cursor_on_side == CursorStates.CursorOnBeginSide:
             begin = copy(self._regions[self.currentRectangleIndex].topLeft())
             end = copy(self._regions[self.currentRectangleIndex].bottomLeft())
             x_coordinate = begin.x()
@@ -318,7 +318,7 @@ class VideoSlider(QSlider):
                     if y1 <= e_pos.y() <= y2:
                         self.currentRectangleIndex = region_idx
                         if abs(self.begin.x() - e_pos.x()) <= 5:
-                            return CursorStates.CURSOR_ON_BEGIN_SIDE
+                            return CursorStates.CursorOnBeginSide
                         elif abs(self.end.x() - e_pos.x()) <= 5:
                             return CursorStates.CURSOR_ON_END_SIDE
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
@@ -479,7 +479,7 @@ class VideoSlider(QSlider):
                 self.dragPosition = event.pos()
                 self.dragRectPosition = self._regions[self.currentRectangleIndex].topLeft()
                 side = self.mouseCursorState(event.pos())
-                if side == CursorStates.CURSOR_ON_BEGIN_SIDE:
+                if side == CursorStates.CursorOnBeginSide:
                     self.state = RectangleEditState.BEGIN_SIDE_EDIT
                 elif side == CursorStates.CURSOR_ON_END_SIDE:
                     self.state = RectangleEditState.END_SIDE_EDIT
