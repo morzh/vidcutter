@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import copy
 import logging
 import os
 import sys
@@ -365,15 +365,14 @@ class VideoCutter(QWidget):
         else:
             self.factor += 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
+        # normalizedSliderPosition = copy.copy(self.videoSlider.value())
+        # normalizedSliderPosition = float(self.videoSlider.value()) / self.videoSlider.maximum()
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
-        newSliderPosition = int(self.videoSlider.value() * self.factor)
-        self.setPosition(newSliderPosition)
+        # self.setPosition(int(normalizedSliderPosition * self.factor))
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
-
-        # print(self.videoSlider.maximum())
 
     @pyqtSlot()
     def toolbarMinus(self):
@@ -382,13 +381,13 @@ class VideoCutter(QWidget):
         else:
             self.factor -= 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
+        # newSliderPosition = (self.videoSlider.value() / self.factor)
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum / self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()
-        newSliderPosition = (self.videoSlider.value() * self.factor)
-        self.setPosition(newSliderPosition)
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
+        # self.setPosition(newSliderPosition)
 
 
     @pyqtSlot()
