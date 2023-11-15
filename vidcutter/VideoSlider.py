@@ -23,7 +23,6 @@ class CursorStates(Enum):
     CursorOnBeginSide = 1
     CURSOR_ON_END_SIDE = 2
     CURSOR_IS_INSIDE = 3
-    CURSOR_OFF = 4
 
 
 class RectangleEditState(Enum):
@@ -200,8 +199,8 @@ class VideoSlider(QSlider):
                     h, w, z = 16, 1, 13
                 else:
                     h, w, z = 8, 1, 23
-                tickcolor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
-                pen = QPen(tickcolor)  # , Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+                tickColor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
+                pen = QPen(tickColor)  # , Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
                 pen.setWidthF(w)
                 painter.setPen(pen)
                 if self.tickPosition() in (QSlider.TicksBothSides, QSlider.TicksAbove):
@@ -212,7 +211,9 @@ class VideoSlider(QSlider):
                     painter.drawLine(x, y, x, y - h)
                     if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
                         painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                        timecode = QStyle.sliderValueFromPosition(self.minimum(), int(self.maximum() / self.parent.factor), x - self.offset, self.width() - (self.offset * 2))
+                        # timecode = QStyle.sliderValueFromPosition(self.minimum(), int(self.maximum()), x - self.offset, self.width() - (self.offset * 2))
+                        # timecode = int(x / (self.maximum() - self.minimum()) * self.width())
+                        timecode = x / (self.width()) * self.parent.duration
                         timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
                         painter.drawText(x + 4, y + 6, timecode)
                 if x + 30 > self.width():

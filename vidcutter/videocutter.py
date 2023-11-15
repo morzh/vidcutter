@@ -330,7 +330,7 @@ class VideoCutter(QWidget):
         self.setTimelineSize()
 
 
-    def setTimelineSize(self):
+    def setTimelineSize(self, factor=1.0):
         windowSize = self.parent.size()
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
         self.sliderWidgetScroll.setFixedHeight(126)
@@ -339,9 +339,7 @@ class VideoCutter(QWidget):
 
         self.videoSlider.setFixedHeight(108)
         self.videoSlider.setFixedWidth(self.factor * windowSize.width() - 20)
-        # self.videoSlider.setMaximum(self.factor * windowSize.width() - 20)
-        # print(self.videoSlider.maximum())
-        # self.renderVideoClips()
+        self.videoSlider.setValue(int(factor * self.videoSlider.value()))
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -360,34 +358,32 @@ class VideoCutter(QWidget):
 
     @pyqtSlot()
     def toolbarPlus(self):
+        factor_ = copy.copy(self.factor)
         if self.factor == 1:
             self.factor += 1
         else:
             self.factor += 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
-        # normalizedSliderPosition = copy.copy(self.videoSlider.value())
-        # normalizedSliderPosition = float(self.videoSlider.value()) / self.videoSlider.maximum()
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
-        self.setTimelineSize()
+        self.setTimelineSize(factor=self.factor / factor_)
         # self.setPosition(int(normalizedSliderPosition * self.factor))
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
 
     @pyqtSlot()
     def toolbarMinus(self):
+        factor_ = copy.copy(self.factor)
         if self.factor == 2:
             self.factor -= 1
         else:
             self.factor -= 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
-        # newSliderPosition = (self.videoSlider.value() / self.factor)
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum / self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
-        self.setTimelineSize()
+        self.setTimelineSize(factor=float(self.factor) / float(factor_))
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
-        # self.setPosition(newSliderPosition)
 
 
     @pyqtSlot()
