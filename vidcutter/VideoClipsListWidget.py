@@ -30,23 +30,26 @@ class ClipsListWidgetItem(QWidget):
         self.layout1.setSpacing(10)
         self.layout1.addWidget(self.checkBox)
 
-        self.startTimeLabel = QLabel("Start time")
+        # self.startTimeLabel = QLabel("Start time")
         self.timeStart = QTimeEdit(self)
         self.timeStart.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.timeStart.setDisplayFormat('hh:mm:ss.zzz')
         self.timeStart.setFixedWidth(95)
 
-        self.endTimeLabel = QLabel("End time")
+        # self.endTimeLabel = QLabel("End time")
         self.timeEnd = QTimeEdit(self)
         self.timeEnd.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.timeEnd.setDisplayFormat('hh:mm:ss.zzz')
         self.timeEnd.setFixedWidth(95)
 
+        self.clipNumber = QLabel()
+
         self.layoutTime = QVBoxLayout()
-        self.layoutTime.addWidget(self.startTimeLabel, 0, Qt.AlignLeft)
+        # self.layoutTime.addWidget(self.startTimeLabel, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeStart, 0, Qt.AlignLeft)
-        self.layoutTime.addWidget(self.endTimeLabel, 0, Qt.AlignLeft)
+        # self.layoutTime.addWidget(self.endTimeLabel, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeEnd, 0, Qt.AlignLeft)
+        self.layoutTime.addWidget(self.clipNumber, 0, Qt.AlignLeft)
 
         self.image_label = QLabel()
         self.image_label.setScaledContents(True)
@@ -97,6 +100,11 @@ class ClipsListWidgetItem(QWidget):
 
     def setTimeEnd(self, timeEnd: QTime):
         self.timeEnd.setTime(timeEnd)
+
+    def setNumber(self, number: int):
+        self.clipNumber.setText('clip # ' + str(number))
+        currentFont = QFont("Arial", 11, QFont.Bold)
+        self.clipNumber.setFont(currentFont)
 
 
 class VideoClipsListWidget(QListWidget):
@@ -163,6 +171,7 @@ class VideoClipsListWidget(QListWidget):
             listItem.setThumbnail(videoClip.thumbnail)
             listItem.setTimeStart(videoClip.timeStart)
             listItem.setTimeEnd(videoClip.timeEnd)
+            listItem.setNumber(itemIndex + 1)
 
             currentClassIndex = self.parent.videoList[videoIndex].clips[itemIndex].actionClassIndex
             currentClassIndex = (len(actionClasses) + currentClassIndex) % len(actionClasses)

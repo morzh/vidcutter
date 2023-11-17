@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
         try:
             if self.isEnabled() and self.cutter.mediaAvailable and False:
                 if self.cutter.videoSlider.thumbnailsOn:
-                    self.cutter.sliderWidget.setLoader(True)
+                    self.cutter.videoSliderWidget.setLoader(True)
                 if self.resizeTimer:
                     self.killTimer(self.resizeTimer)
                 self.resizeTimer = self.startTimer(500)

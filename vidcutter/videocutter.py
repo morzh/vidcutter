@@ -14,7 +14,7 @@ from sortedcontainers import SortedList
 import sip
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QComboBox,
+from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QStyle,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
                              QVBoxLayout, QWidget, QScrollArea, QGraphicsScene, QGraphicsView)
 
@@ -82,13 +82,13 @@ class VideoCutter(QWidget):
         self.videoSlider.init_attributes()
         self.videoSlider.sliderMoved.connect(self.setPosition)
 
-        self.sliderWidget = VideoSliderWidget(self, self.videoSlider)
-        self.sliderWidget.init_attributes()
+        self.videoSliderWidget = VideoSliderWidget(self, self.videoSlider)
+        self.videoSliderWidget.init_attributes()
 
         self.sliderWidgetScroll = QScrollArea()
         self.sliderWidgetScroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.sliderWidgetScroll.setFixedHeight(62)
-        self.sliderWidgetScroll.setWidget(self.sliderWidget)
+        self.sliderWidgetScroll.setWidget(self.videoSliderWidget)
         self.sliderWidgetScroll.setAlignment(Qt.AlignCenter)
         self.sliderWidgetScroll.setContentsMargins(0, 0, 0, 0)
         self.sliderWidgetScroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -330,16 +330,15 @@ class VideoCutter(QWidget):
         self.setTimelineSize()
 
 
-    def setTimelineSize(self, factor=1.0):
+    def setTimelineSize(self):
         windowSize = self.parent.size()
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
         self.sliderWidgetScroll.setFixedHeight(126)
-        self.sliderWidget.setFixedHeight(110)
-        self.sliderWidget.setFixedWidth(self.factor * windowSize.width() - 20)
+        self.videoSliderWidget.setFixedHeight(110)
+        self.videoSliderWidget.setFixedWidth(self.factor * windowSize.width() - 20)
 
         self.videoSlider.setFixedHeight(108)
         self.videoSlider.setFixedWidth(self.factor * windowSize.width() - 20)
-        self.videoSlider.setValue(int(factor * self.videoSlider.value()))
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -364,12 +363,13 @@ class VideoCutter(QWidget):
         else:
             self.factor += 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
+        sliderValueMillis = int(self.videoSlider.value() / factor_)
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
-        self.setTimelineSize(factor=self.factor / factor_)
-        # self.setPosition(int(normalizedSliderPosition * self.factor))
+        self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
+        self.setPosition(sliderValueMillis + 1)
 
     @pyqtSlot()
     def toolbarMinus(self):
@@ -379,11 +379,14 @@ class VideoCutter(QWidget):
         else:
             self.factor -= 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
-        self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum / self.factor))
+        sliderValueMillis = int(self.videoSlider.value() / factor_)
+        self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
-        self.setTimelineSize(factor=float(self.factor) / float(factor_))
+        self.setTimelineSize()
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
+        self.setPosition(sliderValueMillis - 1)
+
 
 
     @pyqtSlot()
@@ -722,7 +725,7 @@ class VideoCutter(QWidget):
 
         self.videoListWidget.renderList(self.videoList)
         # self.sliderWidget.hideThumbs()
-        self.sliderWidget.setEnabled(False)
+        self.videoSliderWidget.setEnabled(False)
 
         self.videoLayout.replaceWidget(self.videoPlayerWidget, self.novideoWidget)
         self.frameCounter.hide()
@@ -766,8 +769,9 @@ class VideoCutter(QWidget):
             self.mpvWidget.play(self.currentMedia)
             self.videoService.setMedia(self.currentMedia)
             self.videoSlider.setEnabled(True)
+            self.videoSlider.currentRectangleIndex = -1
             self.videoSlider.setFocus()
-            self.sliderWidget.setEnabled(True)
+            self.videoSliderWidget.setEnabled(True)
             self.mediaAvailable = True
             self.timelineMinusButton.button.setEnabled(True)
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")

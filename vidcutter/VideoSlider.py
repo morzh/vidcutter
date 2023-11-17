@@ -115,7 +115,7 @@ class VideoSlider(QSlider):
         # self.setMaximum(self.parent.parent.size().width() - 20)
 
     def initSliderParameters(self) -> None:
-        self.widgetWidth = self.parent.sliderWidget.width()
+        self.widgetWidth = self.parent.videoSliderWidget.width()
         self.frameCounterMaximum = self.parent.frameCounter.maximum()
 
     def initStyle(self) -> None:
@@ -336,14 +336,14 @@ class VideoSlider(QSlider):
                     return region_idx
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
-        # region_start = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
-        # region_end = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
-        region_start = int(start / (1e3 * self.parent.duration) * self.width())
-        region_end = int(end / (1e3 * self.parent.duration) * self.width())
-        width = region_end - region_start
+        # regionStart = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        # regionEnd = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
+        regionStart = int(start / (1e3 * self.parent.duration) * self.width())
+        regionEnd = int(end / (1e3 * self.parent.duration) * self.width())
+        width = regionEnd - regionStart
         y = int((self.height() - self._regionHeight) / 2)
         height = self._regionHeight
-        self._regions.append(QRect(region_start + self.offset, y - 8, width, height))
+        self._regions.append(QRect(regionStart + self.offset, y - 8, width, height))
         self._regionsVisibility.append(visibility)
         self.update()
 
@@ -393,7 +393,7 @@ class VideoSlider(QSlider):
     @pyqtSlot(list)
     def buildTimeline(self, thumbs: list) -> None:
         self.initStyle()
-        self.parent.sliderWidget.setLoader(False)
+        self.parent.videoSliderWidget.setLoader(False)
         if self.parent.newproject:
             self.parent.renderVideoClips()
             self.parent.newproject = False
@@ -410,7 +410,7 @@ class VideoSlider(QSlider):
 
     @pyqtSlot()
     def on_rangeChanged(self) -> None:
-        self.parent.sliderWidget.setLoader(False)
+        self.parent.videoSliderWidget.setLoader(False)
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         if self.parent.mediaAvailable:
