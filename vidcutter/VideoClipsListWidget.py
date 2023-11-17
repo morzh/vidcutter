@@ -158,6 +158,7 @@ class VideoClipsListWidget(QListWidget):
         actionClasses = copy.deepcopy(self.parent.videoList.actionClassesLabels)
         actionClasses.append(self.parent.videoList.actionClassUnknownLabel)
         videoIndex = self.parent.videoList.currentVideoIndex
+        scrollBarValue = self.verticalScrollBar().value()
         self.clipsHasRendered = False
         self.clear()
         self.parent.videoSlider.clearRegions()
@@ -183,6 +184,7 @@ class VideoClipsListWidget(QListWidget):
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
             self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+        self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 
     def comboBoxIndexChanged(self, value, clipIndex):
@@ -213,6 +215,10 @@ class VideoClipsListWidget(QListWidget):
         if clipIndex != newClipIndex:
             self.renderClips(self.parent.videoList.videos[videoIndex].clips)
             self.item(newClipIndex).setSelected(True)
+            clipsNumber = len(self.parent.videoList.videos[videoIndex].clips)
+            scrollBarValueNormalized = float(newClipIndex) / float(clipsNumber)
+            scrollBarValue = int(scrollBarValueNormalized * (self.verticalScrollBar().maximum() - self.verticalScrollBar().minimum()))
+            self.verticalScrollBar().setValue(scrollBarValue)
             # self.setFocus()
         else:
             self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
