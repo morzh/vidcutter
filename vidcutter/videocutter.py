@@ -1408,3 +1408,10 @@ class VideoCutter(QWidget):
         if hasattr(self, 'filterProgressBar') and self.filterProgressBar.isVisible():
             self.filterProgressBar.update()
         super(VideoCutter, self).showEvent(event)
+
+    def fixThumbnails(self, clipList):
+        """
+        Just in case something went wrong with thumbnails, ue this method.
+        But this means something wrong with the code, this case should not arise
+        """
+        pass

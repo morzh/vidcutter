@@ -217,6 +217,12 @@ class VideoClipsListWidget(QListWidget):
             self.item(newClipIndex).setSelected(True)
             clipsNumber = len(self.parent.videoList.videos[videoIndex].clips)
             scrollBarValueNormalized = float(newClipIndex) / float(clipsNumber)
+
+            if scrollBarValueNormalized < 0.025:
+                scrollBarValueNormalized = 0.0
+            elif scrollBarValueNormalized > 0.975:
+                scrollBarValueNormalized = 1.0
+
             scrollBarValue = int(scrollBarValueNormalized * (self.verticalScrollBar().maximum() - self.verticalScrollBar().minimum()))
             self.verticalScrollBar().setValue(scrollBarValue)
             # self.setFocus()

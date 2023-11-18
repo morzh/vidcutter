@@ -20,17 +20,17 @@ from vidcutter.VideoItemClip import VideoItemClip
 
 
 class CursorStates(Enum):
-    CursorOnBeginSide = 1
-    CURSOR_ON_END_SIDE = 2
-    CURSOR_IS_INSIDE = 3
+    cursorOnBeginSide = 1
+    cursorOnEndSide = 2
+    cursorIsInside = 3
 
 
 class RectangleEditState(Enum):
-    FREE_STATE = 1
-    BUILDING_SQUARE = 2
-    BEGIN_SIDE_EDIT = 3
-    END_SIDE_EDIT = 4
-    RECTANGLE_MOVE = 5
+    freeState = 1
+    buildingSquare = 2
+    beginSideEdit = 3
+    endSideEdit = 4
+    rectangleMove = 5
 
 
 class VideoSlider(QSlider):
@@ -93,8 +93,8 @@ class VideoSlider(QSlider):
         self.rangeChanged.connect(self.on_rangeChanged)
         self.installEventFilter(self)
 
-        self.free_cursor_on_side = 0
-        self.state = RectangleEditState.FREE_STATE
+        self.freeCursorOnSide = 0
+        self.state = RectangleEditState.freeState
         self.begin = QPoint()
         self.end = QPoint()
         self.currentRectangleIndex = -1
@@ -104,8 +104,6 @@ class VideoSlider(QSlider):
         self.numberGradientSteps = 50
         self.regionOutlineWidth = 4
         self.baseMaximum = 0
-
-        # self.thumbsize = QSize()
 
     def init_attributes(self):
         self.setEnabled(False)
@@ -250,7 +248,7 @@ class VideoSlider(QSlider):
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
 
-        if not self.free_cursor_on_side:
+        if not self.freeCursorOnSide:
             return
 
         glowAlpha = 150
@@ -260,7 +258,7 @@ class VideoSlider(QSlider):
         maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
-        if self.free_cursor_on_side == CursorStates.CursorOnBeginSide:
+        if self.freeCursorOnSide == CursorStates.cursorOnBeginSide:
             begin = copy(self._regions[self.currentRectangleIndex].topLeft())
             end = copy(self._regions[self.currentRectangleIndex].bottomLeft())
             x_coordinate = begin.x()
@@ -279,7 +277,7 @@ class VideoSlider(QSlider):
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
 
-        elif self.free_cursor_on_side == CursorStates.CURSOR_ON_END_SIDE:
+        elif self.freeCursorOnSide == CursorStates.cursorOnEndSide:
             begin = copy(self._regions[self.currentRectangleIndex].topRight())
             end = copy(self._regions[self.currentRectangleIndex].bottomRight())
             x_coordinate = end.x()
@@ -297,7 +295,7 @@ class VideoSlider(QSlider):
             end = self._regions[self.currentRectangleIndex].bottomRight()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
-        elif self.free_cursor_on_side == CursorStates.CURSOR_IS_INSIDE:
+        elif self.freeCursorOnSide == CursorStates.cursorIsInside:
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             brushcolor = QColor(237, 242, 255, 150)
             painter.setBrush(brushcolor)
@@ -319,11 +317,11 @@ class VideoSlider(QSlider):
                     if y1 <= e_pos.y() <= y2:
                         self.currentRectangleIndex = region_idx
                         if abs(self.begin.x() - e_pos.x()) <= 5:
-                            return CursorStates.CursorOnBeginSide
+                            return CursorStates.cursorOnBeginSide
                         elif abs(self.end.x() - e_pos.x()) <= 5:
-                            return CursorStates.CURSOR_ON_END_SIDE
+                            return CursorStates.cursorOnEndSide
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
-                            return CursorStates.CURSOR_IS_INSIDE
+                            return CursorStates.cursorIsInside
         return 0
 
     def mouseCursorRegionIndex(self, e_pos):
@@ -425,7 +423,7 @@ class VideoSlider(QSlider):
         qApp.sendEvent(self.parent, event)
 
     def applyEvent(self, event):
-        if self.state == RectangleEditState.BEGIN_SIDE_EDIT:
+        if self.state == RectangleEditState.beginSideEdit:
             rectangle_left_value = max(event.x(), 0)
             self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
             value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
@@ -433,14 +431,14 @@ class VideoSlider(QSlider):
             self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
             # self.parent.videoList.videos.pop(self.currentRectangleIndex)
             self.parent.videoList.setCurrentVideoClipStartTime(time_start)
-        elif self.state == RectangleEditState.END_SIDE_EDIT:
+        elif self.state == RectangleEditState.endSideEdit:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
             value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value)
             self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
             self.parent.videoList.setCurrentVideoClipEndTime(time)
-        elif self.state == RectangleEditState.RECTANGLE_MOVE:
+        elif self.state == RectangleEditState.rectangleMove:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
             self._regions[self.currentRectangleIndex].moveLeft(shift_value)
@@ -471,8 +469,8 @@ class VideoSlider(QSlider):
             self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.add(clip)
 
             self.parent.renderVideoClips()
-            self.state = RectangleEditState.FREE_STATE
-            self.free_cursor_on_side = 0
+            self.state = RectangleEditState.freeState
+            self.freeCursorOnSide = 0
             self.repaint()
 
         elif event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
@@ -480,12 +478,12 @@ class VideoSlider(QSlider):
                 self.dragPosition = event.pos()
                 self.dragRectPosition = self._regions[self.currentRectangleIndex].topLeft()
                 side = self.mouseCursorState(event.pos())
-                if side == CursorStates.CursorOnBeginSide:
-                    self.state = RectangleEditState.BEGIN_SIDE_EDIT
-                elif side == CursorStates.CURSOR_ON_END_SIDE:
-                    self.state = RectangleEditState.END_SIDE_EDIT
-                elif side == CursorStates.CURSOR_IS_INSIDE:
-                    self.state = RectangleEditState.RECTANGLE_MOVE
+                if side == CursorStates.cursorOnBeginSide:
+                    self.state = RectangleEditState.beginSideEdit
+                elif side == CursorStates.cursorOnEndSide:
+                    self.state = RectangleEditState.endSideEdit
+                elif side == CursorStates.cursorIsInside:
+                    self.state = RectangleEditState.rectangleMove
             elif self.parent.mediaAvailable and self.isEnabled():
                 # new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 new_position = int(event.x() / self.width() * (self.maximum() - self.minimum()))
@@ -495,17 +493,17 @@ class VideoSlider(QSlider):
 
         elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress:
             if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
-                if self.state == RectangleEditState.FREE_STATE:
-                    self.free_cursor_on_side = self.mouseCursorState(event.pos())
-                    if self.free_cursor_on_side:
+                if self.state == RectangleEditState.freeState:
+                    self.freeCursorOnSide = self.mouseCursorState(event.pos())
+                    if self.freeCursorOnSide:
                         self.setCursor(Qt.SizeHorCursor)
                     else:
                         self.unsetCursor()
                 else:
                     self.applyEvent(event)
             else:
-                self.state = RectangleEditState.FREE_STATE
-                self.free_cursor_on_side = 0
+                self.state = RectangleEditState.freeState
+                self.freeCursorOnSide = 0
                 self.unsetCursor()
             self.repaint()
 
@@ -525,7 +523,6 @@ class VideoSlider(QSlider):
             self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())
             self.parent.playMediaTimeClip(index)
             return
-
 
 
 class SliderProgress(QProgressBar):
