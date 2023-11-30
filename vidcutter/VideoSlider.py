@@ -105,7 +105,7 @@ class VideoSlider(QSlider):
         self.regionOutlineWidth = 4
         self.baseMaximum = 0
 
-    def init_attributes(self):
+    def initAttributes(self):
         self.setEnabled(False)
         self.setTracking(True)
         self.setMouseTracking(True)
@@ -402,7 +402,7 @@ class VideoSlider(QSlider):
 
     @pyqtSlot(int)
     def on_valueChanged(self, value: int) -> None:
-        # print('on_valueChanged::value:', value, 'on_valueChanged::self.restrictValue', self.restrictValue)
+        print('on_valueChanged::value:', value, 'on_valueChanged::self.restrictValue', self.restrictValue)
         if value < self.restrictValue:
             self.setSliderPosition(self.restrictValue)
 

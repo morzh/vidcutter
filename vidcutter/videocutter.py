@@ -79,7 +79,7 @@ class VideoCutter(QWidget):
         self.updater = Updater(self.parent)
 
         self.videoSlider = VideoSlider(self)
-        self.videoSlider.init_attributes()
+        self.videoSlider.initAttributes()
         self.videoSlider.sliderMoved.connect(self.setPosition)
 
         self.videoSliderWidget = VideoSliderWidget(self, self.videoSlider)
@@ -364,6 +364,7 @@ class VideoCutter(QWidget):
             self.factor += 2
         self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
         sliderValueMillis = int(self.videoSlider.value() / factor_)
+        print('toolbarPlus::self.videoSlider.setMaximum', int(self.videoSlider.baseMaximum * self.factor))
         self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum * self.factor))
         self.timelineFactorLabel.setText(str(self.factor))
         self.setTimelineSize()

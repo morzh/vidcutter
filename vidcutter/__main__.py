@@ -360,6 +360,7 @@ def main():
     app.setQuitOnLastWindowClosed(True)
 
     win = MainWindow()
+    win.statusBar().hide()
     win.stylename = app.style().objectName().lower()
     app.setActivationWindow(win)
     app.aboutToQuit.connect(MainWindow.cleanup)

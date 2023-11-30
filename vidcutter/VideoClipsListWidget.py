@@ -22,25 +22,32 @@ class ClipsListWidgetItem(QWidget):
         super().__init__(parent)
         self.item = QListWidgetItem()
         self.widget = QWidget()
+
         self.comboBox = QComboBox(self)
         self.comboBox.setFixedWidth(180)
+        self.comboBox.setToolTip('Set clip class name')
+
         self.checkBox = QCheckBox(self)
-        self.layout1 = QHBoxLayout()
-        self.layout1.addWidget(self.comboBox)
-        self.layout1.setSpacing(10)
-        self.layout1.addWidget(self.checkBox)
+        self.checkBox.setToolTip('Timeline clip visibility')
+
+        self.clipClassLayout = QHBoxLayout()
+        self.clipClassLayout.addWidget(self.comboBox)
+        self.clipClassLayout.setSpacing(10)
+        self.clipClassLayout.addWidget(self.checkBox)
 
         # self.startTimeLabel = QLabel("Start time")
         self.timeStart = QTimeEdit(self)
         self.timeStart.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.timeStart.setDisplayFormat('hh:mm:ss.zzz')
         self.timeStart.setFixedWidth(95)
+        self.timeStart.setToolTip('Start time of a clip')
 
         # self.endTimeLabel = QLabel("End time")
         self.timeEnd = QTimeEdit(self)
         self.timeEnd.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.timeEnd.setDisplayFormat('hh:mm:ss.zzz')
         self.timeEnd.setFixedWidth(95)
+        self.timeEnd.setToolTip('End time of a clip')
 
         self.clipNumber = QLabel()
 
@@ -60,7 +67,7 @@ class ClipsListWidgetItem(QWidget):
         self.layout2.addLayout(self.layoutTime)
 
         self.layoutGlobal = QVBoxLayout()
-        self.layoutGlobal.addLayout(self.layout1)
+        self.layoutGlobal.addLayout(self.clipClassLayout)
         self.layoutGlobal.addLayout(self.layout2)
 
         self.layoutGlobal.setSizeConstraint(QLayout.SetFixedSize)

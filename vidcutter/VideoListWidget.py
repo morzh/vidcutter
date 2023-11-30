@@ -46,7 +46,10 @@ class VideoListWidget(QListWidget):
         self.clear()
         for index, video in enumerate(video_list.videos):
             list_item = QListWidgetItem(self)
-            tooltip_string = ''.join(['FILENAME: \n', video.filename, '\n', 'DURATION:\n', video.duration.toString(self.parent.timeformat)])
+            tooltip_string = ''.join(['FILENAME: \n', video.filename, '\n',
+                                      'DURATION:\n', video.duration.toString(self.parent.timeformat), '\n',
+                                      '----------------------------------------\n',
+                                      'Double click to load video'])
             list_item.setToolTip(tooltip_string)
             list_item.setStatusTip('Reorder clips with mouse drag & drop or right-click menu on the clip to be moved')
             list_item.setTextAlignment(Qt.AlignVCenter)
