@@ -166,10 +166,13 @@ class VideoClipsListWidget(QListWidget):
         for itemIndex, videoClip in enumerate(videoClipItems):
             briefInfo = 'Here should ba a tooltip'
             listItem = ClipsListWidgetItem()
+            if QPixmap.isNull(videoClip.thumbnail):
+                listItem.setThumbnail(QPixmap(100, 100))
+            else:
+                listItem.setThumbnail(videoClip.thumbnail)
             listItem.setToolTip(briefInfo)
             listItem.setComboBoxItems(actionClasses)
             listItem.setVisibility(bool(videoClip.visibility))
-            listItem.setThumbnail(videoClip.thumbnail)
             listItem.setTimeStart(videoClip.timeStart)
             listItem.setTimeEnd(videoClip.timeEnd)
             listItem.setNumber(itemIndex + 1)

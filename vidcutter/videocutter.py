@@ -383,8 +383,8 @@ class VideoCutter(QWidget):
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
         # self.setPosition(sliderValueMillis - 1)
-        print('videoSlider.maximum()', self.timeline.maximum())
-        print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
+        # print('videoSlider.maximum()', self.timeline.maximum())
+        # print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
 
 
 
@@ -768,7 +768,6 @@ class VideoCutter(QWidget):
             self.timeline.setEnabled(True)
             self.timeline.currentRectangleIndex = -1
             self.timeline.setFocus()
-            # self.videoSliderWidget.setEnabled(True)
 
             self.mediaAvailable = True
             self.timelineMinusButton.button.setEnabled(True)
