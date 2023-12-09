@@ -491,9 +491,9 @@ class VideoCutter(QWidget):
         # self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
         self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem, statusTip='Remove selected clip from list', enabled=False)
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
-        self.toggleVisibilityAction = QAction(self.removeAllIcon, 'Toggle clips visibility', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
-        self.turnVisibilityOnAction = QAction(self.removeAllIcon, 'Turn clips visibility ON', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
-        self.turnVisibilityOffAction = QAction(self.removeAllIcon, 'Turn clips visibility OFF', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
+        self.toggleVisibilityAction = QAction(self.removeAllIcon, 'Toggle clips visibility', self, triggered=self.toggleClipsVisibility, statusTip='Remove all clips for current video', enabled=False)
+        self.turnVisibilityOnAction = QAction(self.removeAllIcon, 'Turn clips visibility ON', self, triggered=self.turnClipsVisibilityOn, statusTip='Remove all clips for current video', enabled=False)
+        self.turnVisibilityOffAction = QAction(self.removeAllIcon, 'Turn clips visibility OFF', self, triggered=self.turnClipsVisibilityOff, statusTip='Remove all clips for current video', enabled=False)
 
         # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
@@ -673,8 +673,7 @@ class VideoCutter(QWidget):
     def removeItem(self) -> None:
         index = self.videoClipsList.currentRow()
         if self.mediaAvailable:
-            if self.inCut and index == self.videoClipsList.count() - 1:
-                self.inCut = False
+            if index == self.videoClipsList.count() - 1:
                 self.initMediaControls()
         elif len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0:
             self.initMediaControls(False)
@@ -687,6 +686,23 @@ class VideoCutter(QWidget):
         dialog = VCConfirmDialog(self, 'Delete clips', 'Delete all clips of the current video?')
         dialog.accepted.connect(lambda: self.on_clearList())
         dialog.exec_()
+
+    def toggleClipsVisibility(self) -> None:
+        for index_clip in range(len(self.videoList.videos[self.videoList.currentVideoIndex].clips)):
+            new_visibility = 2 - self.videoList.videos[self.videoList.currentVideoIndex].clips[index_clip].visibility
+            self.videoList.videos[self.videoList.currentVideoIndex].clips[index_clip].visibility = new_visibility
+        self.renderVideoClips()
+
+    def turnClipsVisibilityOn(self) -> None:
+        for index_clip in range(len(self.videoList.videos[self.videoList.currentVideoIndex].clips)):
+            self.videoList.videos[self.videoList.currentVideoIndex].clips[index_clip].visibility = 2
+        self.renderVideoClips()
+
+    def turnClipsVisibilityOff(self) -> None:
+        for index_clip in range(len(self.videoList.videos[self.videoList.currentVideoIndex].clips)):
+            self.videoList.videos[self.videoList.currentVideoIndex].clips[index_clip].visibility = 0
+        self.renderVideoClips()
+
 
     def on_clearList(self) -> None:
         # self.clipTimes.clear()
