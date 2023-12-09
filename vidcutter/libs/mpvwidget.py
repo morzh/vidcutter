@@ -207,8 +207,8 @@ class mpvWidget(QOpenGLWidget):
                         self.parent.setPosition(0)
                     elif event_prop.name == 'time-pos':
                         if event_prop.data is not None:
-                            print('mpvWidget eventHandler time-pos', event_prop.data * self.parent.factor)
-                            self.positionChanged.emit(event_prop.data * self.parent.factor, self.property('estimated-frame-number'))
+                            print('mpvWidget eventHandler time-pos', event_prop.data)
+                            self.positionChanged.emit(event_prop.data, self.property('estimated-frame-number'))
                     elif event_prop.name == 'duration':
                         self.durationChanged.emit(event_prop.data, self.property('estimated-frame-count'))
             except mpv.MPVError as e:
@@ -223,10 +223,6 @@ class mpvWidget(QOpenGLWidget):
         if os.path.isfile(filepath):
             self.mpv.command('loadfile', filepath, 'replace')
 
-    '''
-    def playbackSpeed(self, speed=1.0) -> None:
-        self.mpv.command('speed', speed)
-    '''
 
     def frameStep(self) -> None:
         self.mpv.command('frame-step')

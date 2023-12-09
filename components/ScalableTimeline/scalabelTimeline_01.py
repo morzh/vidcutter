@@ -12,8 +12,7 @@ from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
                              QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget, QScrollBar, QSlider)
-
+                             QVBoxLayout, QWidget, QScrollBar, QSlider, QLineEdit)
 
 
 class scalableTimeline(QWidget):
@@ -21,7 +20,7 @@ class scalableTimeline(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.logger = logging.getLogger(__name__)
-        self.theme = self.parent.theme
+        # self.theme = self.parent.theme
 
         self.sliderBaseWidth = 770
         self.factor = 1
@@ -33,7 +32,7 @@ class scalableTimeline(QWidget):
         self.slider = QSlider()
         self.slider.setOrientation(Qt.Horizontal)
         self.slider.setFixedSize(self.sliderBaseWidth, 10)
-        self.slider.setTickInterval(self.sliderBaseWidth)
+        # self.slider.setTickInterval(self.sliderBaseWidth)
 
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.slider)
@@ -41,18 +40,46 @@ class scalableTimeline(QWidget):
         scrollAreaLayout.addWidget(self.scrollArea)
 
         buttonLayout = QHBoxLayout(self)
-        buttton_plus = QPushButton()
-        buttton_plus.setText('+')
-        buttton_minus = QPushButton()
-        buttton_minus.setText('-')
+        butttonPlus = QPushButton()
+        butttonPlus.setText('+')
+
+        butttonMinus = QPushButton()
+        butttonMinus.setText('-')
+
+        buttonMaximum = QPushButton()
+        buttonMaximum.setText('Max')
+        buttonMaximum.clicked.connect(self.on_maximumButtonPressed)
+
+        rangeWidthEdit = QLineEdit()
+        rangeWidthEdit.setFixedWidth(120)
+        rangeWidthEdit.textChanged[str].connect(self.on_widthChanged)
+        rangeWidthLabel = QLabel()
+        rangeWidthLabel.setText('Width')
+
+        rangeMinimumEdit = QLineEdit()
+        rangeMinimumEdit.setFixedWidth(120)
+        rangeMinimumEdit.textChanged[str].connect(self.on_rangeMinimumChanged)
+        rangeMinimumLabel = QLabel()
+        rangeMinimumLabel.setText('Range min')
+
+        rangeMaximumEdit = QLineEdit()
+        rangeMaximumEdit.setFixedWidth(120)
+        rangeMaximumEdit.textChanged[str].connect(self.on_rangeMaximumChanged)
+        rangeMaximumLabel = QLabel()
+        rangeMaximumLabel.setText('Range max')
+
         self.label_factor = QLabel()
         self.label_factor.setText('1')
-        buttonLayout.addWidget(buttton_plus)
-        buttonLayout.addWidget(buttton_minus)
-        buttonLayout.addWidget(self.label_factor)
+        self.label_factor.setAlignment(Qt.AlignCenter)
 
-        buttton_plus.clicked.connect(self.increaseSliderWidth)
-        buttton_minus.clicked.connect(self.decreaseSliderWidth)
+
+        buttonLayout.addWidget(butttonMinus)
+        buttonLayout.addWidget(self.label_factor)
+        buttonLayout.addWidget(butttonPlus)
+
+
+        butttonPlus.clicked.connect(self.increaseSliderWidth)
+        butttonMinus.clicked.connect(self.decreaseSliderWidth)
 
         scrollAreaLayout.addLayout(buttonLayout)
 
@@ -60,6 +87,27 @@ class scalableTimeline(QWidget):
         self.setGeometry(200, 200, 800, 20)
         self.setWindowTitle('Slider Scroll Text')
         self.show()
+
+
+    def on_widthChanged(self, width):
+        try:
+            self.slider.setFixedWidth(int(width))
+        except:
+            print('''Can't set width value of''', value)
+    def on_rangeMinimumChanged(self, value: str):
+        try:
+            self.slider.setMinimum(int(value))
+        except:
+            print('''Can't set minimum value of''', value)
+
+    def on_rangeMaximumChanged(self, value: str):
+        try:
+            self.slider.setMaximum(int(value))
+        except:
+            print('''Can't set maximum value of''', value)
+
+    def on_maximumButtonPressed(self):
+        self.slider.setValue(self.slider.maximum())
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -84,16 +132,17 @@ class scalableTimeline(QWidget):
         self.slider.setFixedWidth(self.factor * self.sliderBaseWidth)
         self.slider.setMaximum(self.factor * self.sliderBaseWidth)
 
+
 class SliderInsideScroll(QScrollBar):
     pass
 
 
 def main():
-   app = QApplication(sys.argv)
-   dialog = scalableTimeline()
-   dialog.show()
-   app.exec_()
+    app = QApplication(sys.argv)
+    dialog = scalableTimeline()
+    dialog.show()
+    app.exec_()
 
 
 if __name__ == '__main__':
-   main()
+    main()

@@ -541,6 +541,7 @@ cdef class Context(object):
 
         Wraps: mpv_command_node and mpv_command_node_async
         """
+
         assert self._ctx
         cdef mpv_node node = self._prep_native_value(cmdlist, self._format_for(cmdlist))
         cdef mpv_node noderesult

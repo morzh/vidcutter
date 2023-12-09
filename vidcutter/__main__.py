@@ -280,10 +280,9 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         self.cutter.setTimelineSize()
+        self.cutter.renderSliderVideoClips()
         try:
             if self.isEnabled() and self.cutter.mediaAvailable and False:
-                if self.cutter.videoSlider.thumbnailsOn:
-                    self.cutter.videoSliderWidget.setLoader(True)
                 if self.resizeTimer:
                     self.killTimer(self.resizeTimer)
                 self.resizeTimer = self.startTimer(500)
