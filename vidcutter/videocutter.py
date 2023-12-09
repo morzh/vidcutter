@@ -366,8 +366,8 @@ class VideoCutter(QWidget):
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
         # self.setPosition(sliderValueMillis + 1)
-        print('videoSlider.maximum()', self.timeline.maximum())
-        print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
+        # print('videoSlider.maximum()', self.timeline.maximum())
+        # print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
 
     @pyqtSlot()
     def toolbarMinus(self):

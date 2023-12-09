@@ -207,7 +207,7 @@ class mpvWidget(QOpenGLWidget):
                         self.parent.setPosition(0)
                     elif event_prop.name == 'time-pos':
                         if event_prop.data is not None:
-                            print('mpvWidget eventHandler time-pos', event_prop.data)
+                            # print('mpvWidget eventHandler time-pos', event_prop.data)
                             self.positionChanged.emit(event_prop.data, self.property('estimated-frame-number'))
                     elif event_prop.name == 'duration':
                         self.durationChanged.emit(event_prop.data, self.property('estimated-frame-count'))
@@ -231,7 +231,7 @@ class mpvWidget(QOpenGLWidget):
         self.mpv.command('frame-back-step')
 
     def seek(self, pos, method='absolute+exact') -> None:
-        print('seek', 'pos:', pos)
+        # print('seek', 'pos:', pos)
         self.mpv.command('seek', pos, method)
 
     def pause(self) -> None:
