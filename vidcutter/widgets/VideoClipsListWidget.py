@@ -21,6 +21,7 @@ class ClipsListWidgetItem(QWidget):
         self.widget = QWidget()
 
         self.comboBox = QComboBox(self)
+        self.comboBox.wheelEvent = lambda event: None
         self.comboBox.setFixedWidth(180)
         self.comboBox.setToolTip('Set clip class name')
 
