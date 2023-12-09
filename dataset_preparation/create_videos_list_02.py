@@ -1,10 +1,7 @@
 import json
-import os
 import pickle
-import sys
 
 # import matplotlib.pyplot as plt
-import moviepy
 import numpy as np
 from PyQt5.QtCore import QTime
 from PyQt5.QtGui import QImage, QPixmap

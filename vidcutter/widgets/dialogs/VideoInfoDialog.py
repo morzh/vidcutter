@@ -1,16 +1,9 @@
 import logging
-import sys
-from datetime import datetime
 
-from PyQt5.Qt import PYQT_VERSION_STR
-from PyQt5.QtCore import QFile, QObject, QSize, QTextStream, Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QStyleFactory,
-                             QTabWidget, QVBoxLayout, QWidget, QTextEdit, QTableWidget, QTableWidgetItem, qApp)
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QVBoxLayout, QWidget, QTextEdit, QTableWidget, QTableWidgetItem)
 
-from vidcutter.libs.config import cached_property
-import vidcutter
-import vidcutter.dialogs.VideoInfoDialogStyleSheet as styleSheet
+import vidcutter.widgets.dialogs.VideoInfoDialogStyleSheet as styleSheet
 
 
 class VideoDescriptionDialog(QDialog):

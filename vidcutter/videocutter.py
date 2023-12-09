@@ -14,20 +14,19 @@ from sortedcontainers import SortedList
 import sip
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QStyle,
-                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget, QScrollArea, QGraphicsScene, QGraphicsView)
+from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
+                             QVBoxLayout, QWidget, QScrollArea)
 
 
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
-from vidcutter.dialogs.about import About
-from vidcutter.dialogs.changelog import Changelog
-from vidcutter.dialogs.mediainfo import MediaInfo
+from vidcutter.widgets.dialogs.about import About
+from vidcutter.widgets.dialogs.changelog import Changelog
+from vidcutter.widgets.dialogs.mediainfo import MediaInfo
 from vidcutter.mediastream import StreamSelector
-from vidcutter.dialogs.settings import SettingsDialog
-from vidcutter.dialogs.updater import Updater
-from vidcutter.VideoClipsListWidget import VideoClipsListWidget
+from vidcutter.widgets.dialogs.settings import SettingsDialog
+from vidcutter.widgets.dialogs.updater import Updater
+from vidcutter.widgets.VideoClipsListWidget import VideoClipsListWidget
 from vidcutter.VideoStyle import VideoStyleDark, VideoStyleLight
 
 from vidcutter.libs.config import Config, InvalidMediaException, VideoFilter
@@ -35,15 +34,15 @@ from vidcutter.libs.mpvwidget import mpvWidget
 from vidcutter.libs.notifications import JobCompleteNotification
 from vidcutter.libs.taskbarprogress import TaskbarProgress
 from vidcutter.libs.videoservice import VideoService
-from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCChapterInputDialog, VCMessageBox,
+from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCMessageBox,
                                     VCProgressDialog, VCTimeCounter, VCToolBarButton, VCToolBarComboBox, VCVolumeSlider, VCConfirmDialog)
 
 from vidcutter.VideoItemClip import VideoItemClip
 
-from vidcutter.VideoSliderWidget import VideoSliderWidget
-from vidcutter.VideoListWidget import VideoListWidget
+from vidcutter.widgets.VideoSliderWidget import VideoSliderWidget
+from vidcutter.widgets.VideoListWidget import VideoListWidget
 from vidcutter.QPixmapPickle import QPixmapPickle
-from vidcutter.dialogs.VideoInfoDialog import VideoDescriptionDialog
+from vidcutter.widgets.dialogs.VideoInfoDialog import VideoDescriptionDialog
 
 
 class VideoCutter(QWidget):
@@ -724,9 +723,6 @@ class VideoCutter(QWidget):
         self.videoClipsList.clear()
 
         self.videoListWidget.renderList(self.videoList)
-        # self.sliderWidget.hideThumbs()
-        # self.videoSliderWidget.setEnabled(False)
-
         self.videoLayout.replaceWidget(self.videoPlayerWidget, self.novideoWidget)
         self.frameCounter.hide()
         self.timeCounter.hide()
