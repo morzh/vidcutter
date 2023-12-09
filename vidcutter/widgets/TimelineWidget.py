@@ -159,6 +159,12 @@ class TimelineWidget(QSlider):
     # def maximum(self):
     #     return self.parent.factor * super().maximum()
 
+    def sliderPositionFromValue(self, minimum: int, maximum: int, logicalValue: int, span: int, upsideDown: bool = ...) -> int:
+        return int(float(logicalValue) / float(maximum - minimum) * span)
+
+    def sliderValueFromPosition(self, minimum: int, maximum: int, position, span: int) -> int:
+        return int(position / span * float(maximum - minimum))
+
     def setRestrictValue(self, value: int = 0, force: bool = False) -> None:
         self.restrictValue = value
         if value > 0 or force:
@@ -172,7 +178,10 @@ class TimelineWidget(QSlider):
     def renderVideoSegments(self, clips: list[VideoItemClip]):
         self.clearRegions()
         for videoClip in clips:
-            self.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            clipStart = videoClip.timeStart.msecsSinceStartOfDay()
+            clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
+            clipVisibility = videoClip.visibility
+            self.addRegion(clipStart, clipEnd, clipVisibility)
         self.update()
 
     def paintEvent(self, event: QPaintEvent) -> None:
@@ -202,9 +211,9 @@ class TimelineWidget(QSlider):
                     painter.drawLine(x, y, x, y - h)
                     if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
                         painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                        # timecode = QStyle.sliderValueFromPosition(self.minimum(), int(self.maximum()), x - self.offset, self.width() - (self.offset * 2))
+                        timecode = self.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset, self.width() - (self.offset * 2))
                         # timecode = int(x / (self.maximum() - self.minimum()) * self.width())
-                        timecode = x / (self.width()) * self.parent.duration
+                        # timecode = x / (self.width()) * self.parent.duration
                         timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
                         painter.drawText(x + 4, y + 6, timecode)
                 if x + 30 > self.width():
@@ -327,8 +336,8 @@ class TimelineWidget(QSlider):
                     return region_idx
 
     def addRegion(self, start: int, end: int, visibility=2) -> None:
-        regionStart = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
-        regionEnd = self.style().sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
+        regionStart = self.sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        regionEnd = self.sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
         # regionStart = int(start / (1e3 * self.parent.duration) * self.width())
         # regionEnd = int(end / (1e3 * self.parent.duration) * self.width())
         width = regionEnd - regionStart
@@ -401,7 +410,8 @@ class TimelineWidget(QSlider):
 
     @pyqtSlot()
     def on_rangeChanged(self) -> None:
-        self.parent.videoSliderWidget.setLoader(False)
+        # self.parent.videoSliderWidget.setLoader(False)
+        pass
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         if self.parent.mediaAvailable:
@@ -419,7 +429,7 @@ class TimelineWidget(QSlider):
         if self.state == self.RectangleEditState.beginSideEdit:
             rectangle_left_value = max(event.x(), 0)
             self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            value_begin = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
             time_start = self.parent.delta2QTime(value_begin)
             self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
             # self.parent.videoList.videos.pop(self.currentRectangleIndex)
@@ -427,7 +437,7 @@ class TimelineWidget(QSlider):
         elif self.state == self.RectangleEditState.endSideEdit:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
-            value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
+            value = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value)
             self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
             self.parent.videoList.setCurrentVideoClipEndTime(time)
@@ -437,8 +447,8 @@ class TimelineWidget(QSlider):
             self._regions[self.currentRectangleIndex].moveLeft(shift_value)
             rectangle_left_value = max(self._regions[self.currentRectangleIndex].left(), 0)
             rectangle_right_value = min(self._regions[self.currentRectangleIndex].right(), self.width() - 1)
-            value_begin = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
-            value_end = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
+            value_begin = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
+            value_end = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
             self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
             self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
@@ -478,7 +488,7 @@ class TimelineWidget(QSlider):
                 elif side == self.CursorStates.cursorIsInside:
                     self.state = self.RectangleEditState.rectangleMove
             elif self.parent.mediaAvailable and self.isEnabled():
-                new_position = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
+                new_position = self.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 # new_position = int(event.x() / self.width() * (self.maximum() - self.minimum()))
                 self.setValue(new_position)
                 self.parent.setPosition(new_position)
