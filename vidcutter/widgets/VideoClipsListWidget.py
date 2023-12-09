@@ -212,22 +212,18 @@ class VideoClipsListWidget(QListWidget):
         newClipIndex = self.parent.videoList.videos[videoIndex].clips.bisect_right(clip)
         self.parent.videoList.videos[videoIndex].clips.add(clip)
 
+        thumbnail = self.parent.captureImage(self.parent.currentMedia, time)
+        self.parent.videoList.videos[videoIndex].clips[newClipIndex].thumbnail = thumbnail
+
         if clipIndex != newClipIndex:
             self.renderClips(self.parent.videoList.videos[videoIndex].clips)
             self.item(newClipIndex).setSelected(True)
             clipsNumber = len(self.parent.videoList.videos[videoIndex].clips)
             scrollBarValueNormalized = float(newClipIndex) / float(clipsNumber)
-
-            if scrollBarValueNormalized < 0.025:
-                scrollBarValueNormalized = 0.0
-            elif scrollBarValueNormalized > 0.975:
-                scrollBarValueNormalized = 1.0
-
             scrollBarValue = int(scrollBarValueNormalized * (self.verticalScrollBar().maximum() - self.verticalScrollBar().minimum()))
             self.verticalScrollBar().setValue(scrollBarValue)
             # self.setFocus()
-        else:
-            self.parent.timeline.renderVideoSegments(self.parent.videoList[videoIndex].clips)
+        self.parent.renderVideoClips()
 
     def timeEndChanged(self, time, clipIndex):
         videoIndex = self.parent.videoList.currentVideoIndex

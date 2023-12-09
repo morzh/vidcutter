@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QStyledItemDelegate, QComboBox, QApplication, QListV
 
 class TableModel(QtCore.QAbstractTableModel):
     """
-    A simple 5x4 table model to demonstrate the delegates
+    A simple 5x4 table data_model to demonstrate the delegates
     """
     def rowCount(self, parent=QtCore.QModelIndex()): return 5
     def columnCount(self, parent=QtCore.QModelIndex()): return 4
@@ -74,7 +74,7 @@ if __name__=="__main__":
 
     class Widget(PyQt5.QtWidgets.QWidget):
         """
-        A simple test widget to contain and own the model and table.
+        A simple test widget to contain and own the data_model and table.
         """
         def __init__(self, parent=None):
             PyQt5.QtWidgets.QWidget.__init__(self, parent)
