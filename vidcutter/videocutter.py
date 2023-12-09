@@ -39,7 +39,7 @@ from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMe
 
 from vidcutter.VideoItemClip import VideoItemClip
 
-from vidcutter.widgets.VideoSliderWidget import VideoSliderWidget
+from vidcutter.widgets.TimelineWidget import TimelineWidget
 from vidcutter.widgets.VideoListWidget import VideoListWidget
 from vidcutter.QPixmapPickle import QPixmapPickle
 from vidcutter.widgets.dialogs.VideoInfoDialog import VideoDescriptionDialog
@@ -75,9 +75,9 @@ class VideoCutter(QWidget):
         self.initTheme()
         self.updater = Updater(self.parent)
 
-        self.videoSlider = VideoSliderWidget(self)
-        self.videoSlider.initAttributes()
-        self.videoSlider.sliderMoved.connect(self.setPosition)
+        self.timeline = TimelineWidget(self)
+        self.timeline.initAttributes()
+        self.timeline.sliderMoved.connect(self.setPosition)
 
         # self.videoSliderWidget = VideoSliderWidget(self, self.videoSlider)
         # self.videoSliderWidget.init_attributes()
@@ -85,7 +85,7 @@ class VideoCutter(QWidget):
         self.sliderWidgetScroll = QScrollArea()
         self.sliderWidgetScroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.sliderWidgetScroll.setFixedHeight(62)
-        self.sliderWidgetScroll.setWidget(self.videoSlider)
+        self.sliderWidgetScroll.setWidget(self.timeline)
         self.sliderWidgetScroll.setAlignment(Qt.AlignCenter)
         self.sliderWidgetScroll.setContentsMargins(0, 0, 0, 0)
         self.sliderWidgetScroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -118,7 +118,7 @@ class VideoCutter(QWidget):
         self.lastFolder = self.settings.value('lastFolder', QDir.homePath(), type=str)
 
         self.videoService = VideoService(self.settings, self)
-        self.videoService.progress.connect(self.videoSlider.updateProgress)
+        self.videoService.progress.connect(self.timeline.updateProgress)
         self.videoService.error.connect(self.completeOnError)
         self.videoService.addScenes.connect(self.addScenes)
 
@@ -324,7 +324,7 @@ class VideoCutter(QWidget):
         layout.addLayout(controlsLayout)
 
         self.setLayout(layout)
-        self.videoSlider.initStyle()
+        self.timeline.initStyle()
         self.setTimelineSize()
 
 
@@ -333,8 +333,8 @@ class VideoCutter(QWidget):
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
         self.sliderWidgetScroll.setFixedHeight(126)
 
-        self.videoSlider.setFixedWidth(self.factor * windowSize.width() - 20)
-        self.videoSlider.setFixedHeight(108)
+        self.timeline.setFixedWidth(self.factor * windowSize.width() - 20)
+        self.timeline.setFixedHeight(108)
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -366,8 +366,8 @@ class VideoCutter(QWidget):
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
         # self.setPosition(sliderValueMillis + 1)
-        print('videoSlider.maximum()', self.videoSlider.maximum())
-        print('self.videoSlider.baseMaximum', self.videoSlider.baseMaximum)
+        print('videoSlider.maximum()', self.timeline.maximum())
+        print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
 
     @pyqtSlot()
     def toolbarMinus(self):
@@ -383,8 +383,8 @@ class VideoCutter(QWidget):
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
         # self.setPosition(sliderValueMillis - 1)
-        print('videoSlider.maximum()', self.videoSlider.maximum())
-        print('self.videoSlider.baseMaximum', self.videoSlider.baseMaximum)
+        print('videoSlider.maximum()', self.timeline.maximum())
+        print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
 
 
 
@@ -719,7 +719,7 @@ class VideoCutter(QWidget):
         with open(filepath, 'rb') as f:
             self.videoList = pickle.load(f)
 
-        self.videoSlider.setUpdatesEnabled(True)
+        self.timeline.setUpdatesEnabled(True)
         self.videoClipsList.clear()
 
         self.videoListWidget.renderList(self.videoList)
@@ -765,9 +765,9 @@ class VideoCutter(QWidget):
             self.mpvWidget.play(self.currentMedia)
             self.videoService.setMedia(self.currentMedia)
 
-            self.videoSlider.setEnabled(True)
-            self.videoSlider.currentRectangleIndex = -1
-            self.videoSlider.setFocus()
+            self.timeline.setEnabled(True)
+            self.timeline.currentRectangleIndex = -1
+            self.timeline.setFocus()
             # self.videoSliderWidget.setEnabled(True)
 
             self.mediaAvailable = True
@@ -776,7 +776,7 @@ class VideoCutter(QWidget):
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
-            self.setPosition(self.videoSlider.minimum())
+            self.setPosition(self.timeline.minimum())
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
@@ -869,19 +869,19 @@ class VideoCutter(QWidget):
         self.toolbarSave.setEnabled(flag)
         # self.fullscreenButton.setEnabled(flag)
         self.fullscreenAction.setEnabled(flag)
-        self.videoSlider.clearRegions()
+        self.timeline.clearRegions()
         if flag:
-            self.videoSlider.setRestrictValue(0)
+            self.timeline.setRestrictValue(0)
         else:
-            self.videoSlider.setValue(0)
-            self.videoSlider.setRange(0, 0)
+            self.timeline.setValue(0)
+            self.timeline.setRange(0, 0)
             self.timeCounter.reset()
             self.frameCounter.reset()
         self.saveProjectAction.setEnabled(False)
 
     @pyqtSlot(int)
     def setPosition(self, position: int) -> None:
-        if position >= self.videoSlider.restrictValue:
+        if position >= self.timeline.restrictValue:
             self.mpvWidget.seek(position / 1e3)
         # self.update()
         # self.repaint()
@@ -889,9 +889,9 @@ class VideoCutter(QWidget):
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
         progress *= 1000
-        if self.videoSlider.restrictValue < progress or progress == 0:
+        if self.timeline.restrictValue < progress or progress == 0:
             # print('progress:', progress)
-            self.videoSlider.setValue(int(progress))
+            self.timeline.setValue(int(progress))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
             if self.clipIsPlayingIndex >= 0:
@@ -905,10 +905,10 @@ class VideoCutter(QWidget):
     def on_durationChanged(self, duration: float, frames: int) -> None:
         self.duration = duration
         duration *= 1000
-        self.videoSlider.setRange(0, int(duration))
+        self.timeline.setRange(0, int(duration))
         # self.videoSlider.baseMaximum = int(duration)
         print('on_durationChanged', duration)
-        print('on_durationChanged, maximum', self.videoSlider.maximum())
+        print('on_durationChanged, maximum', self.timeline.maximum())
         # self.videoSlider.setMaximum(10 * int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
@@ -936,8 +936,8 @@ class VideoCutter(QWidget):
             # self.clipTimes[item_index][5] = item_state
             self.videoList.videos[self.videoList.currentVideoIndex].clips[item_index].visibility = item_state
 
-            self.videoSlider.setRegionVizivility(item_index, item_state)
-            self.videoSlider.update()
+            self.timeline.setRegionVizivility(item_index, item_state)
+            self.timeline.update()
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
@@ -951,7 +951,7 @@ class VideoCutter(QWidget):
                 self.playMediaTimeClip(row)
             else:
                 # if not len(self.clipTimes[row][3]):
-                self.videoSlider.selectRegion(row)
+                self.timeline.selectRegion(row)
         except:
             self.doPass()
 
@@ -1036,7 +1036,7 @@ class VideoCutter(QWidget):
         self.filterProgressBar.show()
 
     def clipStart(self) -> None:
-        starttime = self.delta2QTime(self.videoSlider.value())
+        starttime = self.delta2QTime(self.timeline.value())
         clipsNumber = len(self.videoList.videos[self.videoList.currentVideoIndex].clips)
         defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
 
@@ -1051,7 +1051,7 @@ class VideoCutter(QWidget):
         self.toolbarStart.setDisabled(True)
         self.toolbarEnd.setEnabled(True)
 
-        self.videoSlider.setRestrictValue(self.videoSlider.value(), True)
+        self.timeline.setRestrictValue(self.timeline.value(), True)
         self.inCut = True
 
         sorted(self.videoList.videos[self.videoList.currentVideoIndex].clips)
@@ -1064,7 +1064,7 @@ class VideoCutter(QWidget):
         clip_item_last = self.videoList.videos[self.videoList.currentVideoIndex].bisect_index  # .clipsLast()
         # clip_item_last = self.videoList.videos[self.videoList.current_video_index][-1]  # .clipsLast()
         bisect_index = self.videoList.videos[self.videoList.currentVideoIndex].bisect_index
-        time_end = self.delta2QTime(self.videoSlider.value())
+        time_end = self.delta2QTime(self.timeline.value())
         self.videoList.videos[self.videoList.currentVideoIndex].clips[bisect_index].timeEnd = time_end
         self.videoList.videos[self.videoList.currentVideoIndex].clips[bisect_index].visibility = 2
         # clip_item_last.timeEnd = time_end
@@ -1074,7 +1074,7 @@ class VideoCutter(QWidget):
         self.toolbarEnd.setDisabled(True)
 
         self.timeCounter.setMinimum()
-        self.videoSlider.setRestrictValue(0, False)
+        self.timeline.setRestrictValue(0, False)
         self.inCut = False
         self.renderVideoClips()
         self.videoClipsList.scrollToBottom()
@@ -1091,13 +1091,13 @@ class VideoCutter(QWidget):
         clip = self.videoList.videos[self.videoList.currentVideoIndex].clips.pop(start)
         self.videoList.videos[self.videoList.currentVideoIndex].clips.insert(index, clip)
         if not len(clip.visibility): #????? was clip[3]
-            self.videoSlider.switchRegions(start, index)
+            self.timeline.switchRegions(start, index)
         self.renderVideoClips()
 
     def renderSliderVideoClips(self) -> None:
         if not self.mediaAvailable:
             return
-        self.videoSlider.clearRegions()
+        self.timeline.clearRegions()
         self.totalRuntime = 0
         # force to update sorted list
         self.videoClipsList.renderSliderVideoCLips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
@@ -1105,7 +1105,7 @@ class VideoCutter(QWidget):
     def renderVideoClips(self) -> None:
         if not self.mediaAvailable:
             return
-        self.videoSlider.clearRegions()
+        self.timeline.clearRegions()
         self.totalRuntime = 0
         # force to update sorted list
         self.videoClipsList.renderClips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
@@ -1147,7 +1147,7 @@ class VideoCutter(QWidget):
             # noinspection PyCallByClass
             QFile.rename(filename, self.finalFilename)
         self.videoService.finalize(self.finalFilename)
-        self.videoSlider.updateProgress()
+        self.timeline.updateProgress()
         self.toolbarSave.setEnabled(True)
         self.parent.lock_gui(False)
         self.notify = JobCompleteNotification(
@@ -1156,7 +1156,7 @@ class VideoCutter(QWidget):
             self.delta2QTime(self.totalRuntime).toString(self.runtimeformat),
             self.getAppIcon(encoded=True),
             self)
-        self.notify.closed.connect(self.videoSlider.clearProgress)
+        self.notify.closed.connect(self.timeline.clearProgress)
         self.notify.show()
         if self.smartcut:
             QTimer.singleShot(1000, self.cleanup)
@@ -1168,7 +1168,7 @@ class VideoCutter(QWidget):
             self.videoService.smartabort()
             QTimer.singleShot(1500, self.cleanup)
         self.parent.lock_gui(False)
-        self.videoSlider.clearProgress()
+        self.timeline.clearProgress()
         self.toolbarSave.setEnabled(True)
         self.parent.errorHandler(errormsg)
 
@@ -1298,7 +1298,7 @@ class VideoCutter(QWidget):
             pause = self.mpvWidget.property('pause')
             mute = self.mpvWidget.property('mute')
             vol = self.mpvWidget.property('volume')
-            pos = self.videoSlider.value() / 1000
+            pos = self.timeline.value() / 1000
             if self.mpvWidget.originalParent is not None:
                 self.mpvWidget.shutdown()
                 sip.delete(self.mpvWidget)
@@ -1346,12 +1346,12 @@ class VideoCutter(QWidget):
                 return
 
             if event.key() == Qt.Key_Home:
-                self.setPosition(self.videoSlider.minimum())
+                self.setPosition(self.timeline.minimum())
                 return
 
             if event.key() == Qt.Key_End:
-                print('Qt.Key_End', 'self.videoSlider.width():', self.videoSlider.width(), 'self.videoSlider.maximum()', self.videoSlider.maximum())
-                self.setPosition(self.videoSlider.maximum())
+                print('Qt.Key_End', 'self.videoSlider.width():', self.timeline.width(), 'self.videoSlider.maximum()', self.timeline.maximum())
+                self.setPosition(self.timeline.maximum())
                 return
 
             if event.key() == Qt.Key_Left:

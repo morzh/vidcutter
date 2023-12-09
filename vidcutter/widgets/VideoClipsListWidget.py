@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-import os
-import sys
 import copy
 
-from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint
-from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QPixmap, QContextMenuEvent, QBrush, QPainterPath
-from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QComboBox, QProgressBar, QSizePolicy, QStyle, QWidget, QComboBox, QListWidgetItem, QHBoxLayout, QVBoxLayout, QTimeEdit, QAbstractSpinBox,
-                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QStyleOptionComboBox, QStyleOptionMenuItem, QLabel, QLayout)
+from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime
+from PyQt5.QtGui import QColor, QFont, QMouseEvent, QPainter, QPalette, QPixmap, QPainterPath
+from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QProgressBar, QSizePolicy, QStyle, QWidget, QComboBox, QListWidgetItem, QHBoxLayout, QVBoxLayout, QTimeEdit, QAbstractSpinBox,
+                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QLabel, QLayout)
 
 # from PySide2 import QtGui, QtCore, QtWidgets
 
@@ -145,20 +142,16 @@ class VideoClipsListWidget(QListWidget):
         self.clipsHasRendered = False
         self.viewport().setAttribute(Qt.WA_Hover)
 
-
-    def hasFocus(self):
-        return True
-
     def mousePressEvent(self, event):
         self._mouseButton = event.button()
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
     def renderSliderVideoCLips(self, videoClipItems: list[VideoItemClip]) -> None:
         self.clipsHasRendered = False
-        self.parent.videoSlider.clearRegions()
+        self.parent.timeline.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
-            self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
         self.clipsHasRendered = True
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
@@ -168,14 +161,14 @@ class VideoClipsListWidget(QListWidget):
         scrollBarValue = self.verticalScrollBar().value()
         self.clipsHasRendered = False
         self.clear()
-        self.parent.videoSlider.clearRegions()
+        self.parent.timeline.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
             briefInfo = 'Here should ba a tooltip'
             listItem = ClipsListWidgetItem()
             listItem.setToolTip(briefInfo)
             listItem.setComboBoxItems(actionClasses)
-            listItem.setVisibility(videoClip.visibility)
+            listItem.setVisibility(bool(videoClip.visibility))
             listItem.setThumbnail(videoClip.thumbnail)
             listItem.setTimeStart(videoClip.timeStart)
             listItem.setTimeEnd(videoClip.timeEnd)
@@ -190,7 +183,7 @@ class VideoClipsListWidget(QListWidget):
             listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
-            self.parent.videoSlider.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 
@@ -200,16 +193,14 @@ class VideoClipsListWidget(QListWidget):
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = -1
         else:
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = value
-        self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
-        # print(self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex)
+        self.parent.timeline.renderVideoSegments(self.parent.videoList[videoIndex].clips)
 
     def checkBoxStateChanged(self, state, clipIndex: int):
         indexVideo = self.parent.videoList.currentVideoIndex
         self.parent.videoList[indexVideo].clips[clipIndex].visibility = state
-        self.parent.videoSlider.setRegionVizivility(clipIndex, state)
+        self.parent.timeline.setRegionVizivility(clipIndex, state)
 
     def timeStartChanged(self, time, clipIndex):
-        # print('startTimeChanged', time, clipIndex)
         videoIndex = self.parent.videoList.currentVideoIndex
         clip = self.parent.videoList.videos[videoIndex].clips[clipIndex]
         self.parent.videoList.videos[videoIndex].clips.pop(clipIndex)
@@ -218,7 +209,6 @@ class VideoClipsListWidget(QListWidget):
         newClipIndex = self.parent.videoList.videos[videoIndex].clips.bisect_right(clip)
         self.parent.videoList.videos[videoIndex].clips.add(clip)
 
-        # self.parent.renderVideoClips()
         if clipIndex != newClipIndex:
             self.renderClips(self.parent.videoList.videos[videoIndex].clips)
             self.item(newClipIndex).setSelected(True)
@@ -234,23 +224,22 @@ class VideoClipsListWidget(QListWidget):
             self.verticalScrollBar().setValue(scrollBarValue)
             # self.setFocus()
         else:
-            self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
+            self.parent.timeline.renderVideoSegments(self.parent.videoList[videoIndex].clips)
 
     def timeEndChanged(self, time, clipIndex):
-        # print('endTimeChanged', time, clipIndex)
         videoIndex = self.parent.videoList.currentVideoIndex
         self.parent.videoList[videoIndex].clips[clipIndex].timeEnd = time
-        self.parent.videoSlider.renderVideoSegments(self.parent.videoList[videoIndex].clips)
+        self.parent.timeline.renderVideoSegments(self.parent.videoList[videoIndex].clips)
 
-    def showProgress(self, steps: int) -> None:
-        for row in range(self.count()):
-            item = self.item(row)
-            progress = ListProgress(steps, self.visualItemRect(item), self)
-            self._progressBars.append(progress)
+    # def showProgress(self, steps: int) -> None:
+    #     for row in range(self.count()):
+    #         item = self.item(row)
+    #         progress = ListProgress(steps, self.visualItemRect(item), self)
+    #         self._progressBars.append(progress)
 
     @pyqtSlot()
     @pyqtSlot(int)
-    def updateProgress(self, item: int=None) -> None:
+    def updateProgress(self, item: int = None) -> None:
         if self.count():
             if item is None:
                 [progress.setValue(progress.value() + 1) for progress in self._progressBars]
@@ -283,7 +272,7 @@ class VideoClipsListWidget(QListWidget):
 
 
 class VideoClipItemStyle(QStyledItemDelegate):
-    def __init__(self, parent: VideoClipsListWidget=None):
+    def __init__(self, parent: VideoClipsListWidget = None):
         super(VideoClipItemStyle, self).__init__(parent)
         self.parent = parent
         self.theme = self.parent.theme
@@ -321,7 +310,7 @@ class VideoClipItemStyle(QStyledItemDelegate):
         painter.setPen(penColor)
         painter.drawRect(rectangle)
 
-    def clipText(self, text: str, painter: QPainter, chapter: bool=False) -> str:
+    def clipText(self, text: str, painter: QPainter, chapter: bool = False) -> str:
         metrics = painter.fontMetrics()
         return metrics.elidedText(text, Qt.ElideRight, (self.parent.width() - 10 if chapter else 100 - 10))
 
@@ -329,14 +318,14 @@ class VideoClipItemStyle(QStyledItemDelegate):
         return QSize(220, 150)
 
 
-class ListProgress(QProgressBar):
-    def __init__(self, steps: int, geometry: QRect, parent=None):
-        super(ListProgress, self).__init__(parent)
-        self.setStyle(QStyleFactory.create('Fusion'))
-        self.setRange(0, steps)
-        self.setValue(0)
-        self.setGeometry(geometry)
-        palette = self.palette()
-        palette.setColor(QPalette.Highlight, QColor(100, 44, 104))
-        self.setPalette(palette)
-        self.show()
+# class ListProgress(QProgressBar):
+#     def __init__(self, steps: int, geometry: QRect, parent=None):
+#         super(ListProgress, self).__init__(parent)
+#         self.setStyle(QStyleFactory.create('Fusion'))
+#         self.setRange(0, steps)
+#         self.setValue(0)
+#         self.setGeometry(geometry)
+#         palette = self.palette()
+#         palette.setColor(QPalette.Highlight, QColor(100, 44, 104))
+#         self.setPalette(palette)
+#         self.show()

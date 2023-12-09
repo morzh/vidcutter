@@ -1,17 +1,8 @@
 #!-*- coding:utf-8 -*-
-import os
 import sys
-import logging
 
-from PyQt5 import uic
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QDialog, QApplication, QListWidgetItem, QScrollArea
-
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
-                          Qt, QTime, QTimer, QUrl)
-from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
-                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QApplication, QScrollArea, QHBoxLayout, QLabel, QPushButton,
                              QVBoxLayout, QWidget, QScrollBar, QSlider, QLineEdit)
 
 
@@ -19,8 +10,6 @@ class scalableTimeline(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        self.logger = logging.getLogger(__name__)
-        # self.theme = self.parent.theme
 
         self.sliderBaseWidth = 770
         self.factor = 1

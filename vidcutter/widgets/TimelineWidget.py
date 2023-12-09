@@ -1,22 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
 import logging
 import sys
 from copy import copy
 from enum import Enum
 
 import PySide2
-from PyQt5.QtCore import QEvent, QObject, QRect, QSettings, QSize, QThread, Qt, pyqtSignal, pyqtSlot, QPoint
+from PyQt5.QtCore import QEvent, QObject, QRect, Qt, pyqtSlot, QPoint
 from PyQt5.QtGui import QColor, QFont, QKeyEvent, QMouseEvent, QPaintEvent, QPalette, QPen, QWheelEvent, QPainter
-from PyQt5.QtWidgets import (qApp, QHBoxLayout, QLabel, QLayout, QProgressBar, QSizePolicy, QSlider, QStyle,
-                             QStyleFactory, QStyleOptionSlider, QStylePainter, QWidget, QApplication, QScrollBar)
+from PyQt5.QtWidgets import (qApp, QProgressBar, QSlider, QStyle, QStyleFactory, QStyleOptionSlider, QStylePainter, QApplication)
 
 from vidcutter.VideoItemClip import VideoItemClip
 
 
-class VideoSliderWidget(QSlider):
+class TimelineWidget(QSlider):
     class CursorStates(Enum):
         cursorOnBeginSide = 1
         cursorOnEndSide = 2
@@ -30,7 +28,7 @@ class VideoSliderWidget(QSlider):
         rectangleMove = 5
 
     def __init__(self, parent=None):
-        super(VideoSliderWidget, self).__init__(parent)
+        super(TimelineWidget, self).__init__(parent)
         self.parent = parent
         self.dragRectPosition = QPoint()
         self.dragPosition = QPoint()
@@ -357,12 +355,12 @@ class VideoSliderWidget(QSlider):
         self._regionSelected = -1
         self.update()
 
-    @pyqtSlot(int)
-    def showProgress(self, steps: int) -> None:
-        if len(self._regions):
-            [self._progressbars.append(SliderProgress(steps, rect, self)) for rect in self._regions]
-        else:
-            self.parent.videoClipsList.showProgress(steps)
+    # @pyqtSlot(int)
+    # def showProgress(self, steps: int) -> None:
+    #     if len(self._regions):
+    #         [self._progressbars.append(SliderProgress(steps, rect, self)) for rect in self._regions]
+    #     else:
+    #         self.parent.videoClipsList.showProgress(steps)
 
     @pyqtSlot()
     @pyqtSlot(int)
@@ -505,7 +503,7 @@ class VideoSliderWidget(QSlider):
         elif event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
             self.mouseCursorRegionIndex(event)
 
-        return super(VideoSliderWidget, self).eventFilter(obj, event)
+        return super(TimelineWidget, self).eventFilter(obj, event)
 
     def mousePressEvent(self, event):
         # super().mousePressEvent(event)
