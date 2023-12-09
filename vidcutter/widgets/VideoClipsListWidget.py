@@ -39,6 +39,7 @@ class ClipsListWidgetItem(QWidget):
         self.timeStart.setDisplayFormat('hh:mm:ss.zzz')
         self.timeStart.setFixedWidth(95)
         self.timeStart.setToolTip('Start time of a clip')
+        self.timeStart.wheelEvent = lambda event: None
 
         # self.endTimeLabel = QLabel("End time")
         self.timeEnd = QTimeEdit(self)
@@ -46,13 +47,12 @@ class ClipsListWidgetItem(QWidget):
         self.timeEnd.setDisplayFormat('hh:mm:ss.zzz')
         self.timeEnd.setFixedWidth(95)
         self.timeEnd.setToolTip('End time of a clip')
+        self.timeEnd.wheelEvent = lambda event: None
 
         self.clipNumber = QLabel()
 
         self.layoutTime = QVBoxLayout()
-        # self.layoutTime.addWidget(self.startTimeLabel, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeStart, 0, Qt.AlignLeft)
-        # self.layoutTime.addWidget(self.endTimeLabel, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeEnd, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.clipNumber, 0, Qt.AlignLeft)
 
@@ -75,8 +75,6 @@ class ClipsListWidgetItem(QWidget):
         target = QPixmap(pixmap.size())
         target.fill(Qt.transparent)
         painter = QPainter(target)
-
-        # pixmap = pixmap.scaled(90, 90, Qt.KeepAspectRatio)
 
         painter.setRenderHint(QPainter.Antialiasing, True)
         painter.setRenderHint(QPainter.HighQualityAntialiasing, True)

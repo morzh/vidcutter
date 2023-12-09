@@ -23,7 +23,6 @@ class scalableTimeline(QWidget):
         self.slider.setFixedSize(self.sliderBaseWidth, 10)
         self.slider.setRange(0, 504641)
         self.slider.setFixedWidth(4736)
-        # self.slider.setTickInterval(self.sliderBaseWidth)
 
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.slider)

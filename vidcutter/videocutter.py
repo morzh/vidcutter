@@ -486,11 +486,14 @@ class VideoCutter(QWidget):
 
     # noinspection PyArgumentList
     def _initActions(self) -> None:
-        self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list', triggered=self.moveItemUp, enabled=False)
-        self.moveItemDownAction = QAction(self.downIcon, 'Move clip down', self, triggered=self.moveItemDown, statusTip='Move clip position down in list', enabled=False)
+        # self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list', triggered=self.moveItemUp, enabled=False)
+        # self.moveItemDownAction = QAction(self.downIcon, 'Move clip down', self, triggered=self.moveItemDown, statusTip='Move clip position down in list', enabled=False)
+        # self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
         self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem, statusTip='Remove selected clip from list', enabled=False)
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
-        self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
+        self.toggleVisibilityAction = QAction(self.removeAllIcon, 'Toggle clips visibility', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
+        self.turnVisibilityOnAction = QAction(self.removeAllIcon, 'Turn clips visibility ON', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
+        self.turnVisibilityOffAction = QAction(self.removeAllIcon, 'Turn clips visibility OFF', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
 
         # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
@@ -533,6 +536,10 @@ class VideoCutter(QWidget):
 
         self.clipIndexContextmenu.addAction(self.removeItemAction)
         self.clipIndexContextmenu.addAction(self.removeAllAction)
+        self.clipIndexContextmenu.addSeparator()
+        self.clipIndexContextmenu.addAction(self.toggleVisibilityAction)
+        self.clipIndexContextmenu.addAction(self.turnVisibilityOnAction)
+        self.clipIndexContextmenu.addAction(self.turnVisibilityOffAction)
 
         self.clipindex_removemenu.addActions([self.removeItemAction, self.removeAllAction])
         self.clipindex_removemenu.aboutToShow.connect(self.initRemoveMenu)
@@ -602,8 +609,16 @@ class VideoCutter(QWidget):
     def initRemoveMenu(self):
         self.removeItemAction.setEnabled(False)
         self.removeAllAction.setEnabled(False)
+        self.toggleVisibilityAction.setEnabled(False)
+        self.turnVisibilityOnAction.setEnabled(False)
+        self.turnVisibilityOffAction.setEnabled(False)
+
         if self.videoClipsList.count():
             self.removeAllAction.setEnabled(True)
+            self.toggleVisibilityAction.setEnabled(True)
+            self.turnVisibilityOnAction.setEnabled(True)
+            self.turnVisibilityOffAction.setEnabled(True)
+
             if len(self.videoClipsList.selectedItems()):
                 self.removeItemAction.setEnabled(True)
 
@@ -611,14 +626,14 @@ class VideoCutter(QWidget):
         globalPos = self.videoClipsList.mapToGlobal(pos)
         self.initRemoveMenu()
         index = self.videoClipsList.currentRow()
-        if index != -1:
-            if len(self.videoClipsList.selectedItems()):
-                self.editChapterAction.setEnabled(self.createChapters)
-            if not self.inCut:
-                if index > 0:
-                    self.moveItemUpAction.setEnabled(True)
-                if index < self.videoClipsList.count() - 1:
-                    self.moveItemDownAction.setEnabled(True)
+        # if index != -1:
+        #     if len(self.videoClipsList.selectedItems()):
+        #         self.editChapterAction.setEnabled(self.createChapters)
+        #     if not self.inCut:
+        #         if index > 0:
+        #             self.moveItemUpAction.setEnabled(True)
+        #         if index < self.videoClipsList.count() - 1:
+        #             self.moveItemDownAction.setEnabled(True)
         self.clipIndexContextmenu.exec_(globalPos)
 
     def videoListDoubleClick(self) -> None:

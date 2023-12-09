@@ -516,16 +516,17 @@ class TimelineWidget(QSlider):
         return super(TimelineWidget, self).eventFilter(obj, event)
 
     def mousePressEvent(self, event):
-        # super().mousePressEvent(event)
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
+            # event.accept()
             return
         elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
             index = self.mouseCursorRegionIndex(event)
             clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[index]
             self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())
             self.parent.playMediaTimeClip(index)
-            return
+            # event.accept()
+        super().mousePressEvent(event)
 
 
 class SliderProgress(QProgressBar):
