@@ -5,14 +5,11 @@ import logging
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QDialog, QApplication, QListWidgetItem, QScrollArea
+from PyQt5.QtWidgets import QScrollArea
 
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize,
-                          Qt, QTime, QTimer, QUrl)
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel,
-                             QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget, QScrollBar, QSlider, QLineEdit)
+from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel,QPushButton, QVBoxLayout, QWidget, QScrollBar, QSlider, QLineEdit)
 
 
 class scalableTimeline(QWidget):
@@ -27,8 +24,8 @@ class scalableTimeline(QWidget):
         self.factor_maximum = 16
         scrollAreaLayout = QVBoxLayout(self)
 
-        self.scrollBar = QScrollBar()
-        self.scrollBar.setOrientation(Qt.Horizontal)
+        # self.scrollBar = QScrollBar()
+        # self.scrollBar.setOrientation(Qt.Horizontal)
         self.slider = QSlider()
         self.slider.setOrientation(Qt.Horizontal)
         self.slider.setFixedSize(self.sliderBaseWidth, 10)

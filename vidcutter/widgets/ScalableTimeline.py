@@ -1,2 +1,0 @@
-class ScalableTimeline:
-    pass

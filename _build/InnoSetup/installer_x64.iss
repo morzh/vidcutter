@@ -10,9 +10,9 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{CCDC440A-CC57-4BED-8CDE-1DA285976A64}
-AppName=VidCutter
+AppName=VideoLabelingTool
 AppVersion={#AppVersion}
-AppVerName=VidCutter
+AppVerName=VideoLabelingTool
 AppPublisher=Pete Alexandrou
 AppPublisherURL=https://vidcutter.ozmartians.com
 DefaultDirName={pf}\VidCutter

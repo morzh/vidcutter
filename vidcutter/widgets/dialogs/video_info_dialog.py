@@ -3,7 +3,7 @@ import logging
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QVBoxLayout, QWidget, QTextEdit, QTableWidget, QTableWidgetItem)
 
-import vidcutter.widgets.dialogs.VideoInfoDialogStyleSheet as styleSheet
+import vidcutter.widgets.dialogs.video_info_dialog_style_sheet as styleSheet
 
 
 class VideoDescriptionDialog(QDialog):

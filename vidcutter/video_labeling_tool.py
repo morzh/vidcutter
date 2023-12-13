@@ -21,12 +21,12 @@ from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, 
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
 from vidcutter.widgets.dialogs.about import About
-from vidcutter.widgets.dialogs.changelog import Changelog
-from vidcutter.widgets.dialogs.mediainfo import MediaInfo
-from vidcutter.mediastream import StreamSelector
+from vidcutter.widgets.dialogs.change_log import Changelog
+from vidcutter.widgets.dialogs.media_info import MediaInfo
+from vidcutter.media_stream import StreamSelector
 from vidcutter.widgets.dialogs.settings import SettingsDialog
 from vidcutter.widgets.dialogs.updater import Updater
-from vidcutter.widgets.VideoClipsListWidget import VideoClipsListWidget
+from vidcutter.widgets.video_clips_list_widget import VideoClipsListWidget
 from vidcutter.VideoStyle import VideoStyleDark, VideoStyleLight
 
 from vidcutter.libs.config import Config, InvalidMediaException, VideoFilter
@@ -39,20 +39,20 @@ from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMe
 
 from vidcutter.VideoItemClip import VideoItemClip
 
-from vidcutter.widgets.TimelineWidget import TimelineWidget
-from vidcutter.widgets.VideoListWidget import VideoListWidget
+from vidcutter.widgets.timeline_widget import TimelineWidget
+from vidcutter.widgets.video_list_widget import VideoListWidget
 from vidcutter.QPixmapPickle import QPixmapPickle
-from vidcutter.widgets.dialogs.VideoInfoDialog import VideoDescriptionDialog
+from vidcutter.widgets.dialogs.video_info_dialog import VideoDescriptionDialog
 
 
-class VideoCutter(QWidget):
+class VideoLabelingTool(QWidget):
     errorOccurred = pyqtSignal(str)
     timeformat = 'hh:mm:ss.zzz'
     runtimeformat = 'hh:mm:ss'
 
     def __init__(self, parent: QMainWindow):
-        super(VideoCutter, self).__init__(parent)
-        self.setObjectName('videocutter')
+        super(VideoLabelingTool, self).__init__(parent)
+        self.setObjectName('videolabelingtool')
         self.logger = logging.getLogger(__name__)
         self.parent = parent
         self.theme = self.parent.theme
@@ -498,7 +498,7 @@ class VideoCutter(QWidget):
         # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
 
-        self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoCutter.viewLogs, statusTip='View the application\'s log file')
+        self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoLabelingTool.viewLogs, statusTip='View the application\'s log file')
         self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
         self.aboutQtAction = QAction('About Qt', self, triggered=qApp.aboutQt, statusTip='About Qt')
         self.aboutAction = QAction('About {}'.format(qApp.applicationName()), self, triggered=self.aboutApp, statusTip='About {}'.format(qApp.applicationName()))
@@ -911,6 +911,7 @@ class VideoCutter(QWidget):
 
     @pyqtSlot(int)
     def setPosition(self, position: int) -> None:
+        # print('setPosition', position)
         if position >= self.timeline.restrictValue:
             self.mpvWidget.seek(position / 1e3)
         # self.update()
@@ -920,7 +921,7 @@ class VideoCutter(QWidget):
     def on_positionChanged(self, progress: float, frame: int) -> None:
         progress *= 1000
         if self.timeline.restrictValue < progress or progress == 0:
-            # print('progress:', progress)
+            print('on_positionChanged.progress:', progress)
             self.timeline.setValue(int(progress))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
@@ -1433,12 +1434,12 @@ class VideoCutter(QWidget):
                 self.speedDown()
                 return
 
-        super(VideoCutter, self).keyPressEvent(event)
+        super(VideoLabelingTool, self).keyPressEvent(event)
 
     def showEvent(self, event: QShowEvent) -> None:
         if hasattr(self, 'filterProgressBar') and self.filterProgressBar.isVisible():
             self.filterProgressBar.update()
-        super(VideoCutter, self).showEvent(event)
+        super(VideoLabelingTool, self).showEvent(event)
 
     def fixThumbnails(self, clipList):
         """

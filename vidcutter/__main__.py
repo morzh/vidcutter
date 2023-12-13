@@ -37,8 +37,8 @@ from PyQt5.QtGui import (QCloseEvent, QContextMenuEvent, QDragEnterEvent, QDropE
                          QResizeEvent, QSurfaceFormat, qt_set_sequence_auto_mnemonic)
 from PyQt5.QtWidgets import qApp, QMainWindow, QMessageBox, QSizePolicy
 
-from vidcutter.VideoConsole import ConsoleHandler, ConsoleWidget, VideoLogger
-from vidcutter.videocutter import VideoCutter
+from vidcutter.video_console import ConsoleHandler, ConsoleWidget, VideoLogger
+from vidcutter.video_labeling_tool import VideoLabelingTool
 
 from vidcutter.libs.singleapplication import SingleApplication
 from vidcutter.libs.widgets import VCMessageBox
@@ -182,10 +182,10 @@ class MainWindow(QMainWindow):
             self.video = file_path
 
     def init_cutter(self) -> None:
-        self.cutter = VideoCutter(self)
+        self.cutter = VideoLabelingTool(self)
         self.cutter.errorOccurred.connect(self.errorHandler)
         self.setCentralWidget(self.cutter)
-        qApp.setWindowIcon(VideoCutter.getAppIcon(encoded=False))
+        qApp.setWindowIcon(VideoLabelingTool.getAppIcon(encoded=False))
 
     @staticmethod
     def get_bitness() -> int:

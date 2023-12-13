@@ -1,0 +1,2 @@
+class ScalableTimelineWidget:
+    pass

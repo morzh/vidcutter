@@ -24,7 +24,7 @@
 
 __version__ = '6.0.5.1'
 
-__appname__ = 'VidCutter'
+__appname__ = 'VideoLabelingTool'
 __domain__ = 'ozmartians.com'
 __desktopid__ = 'com.ozmartians.VidCutter'
 __appid__ = 'vidcutter-CCDC440A-CC57-4BED-8CDE-1DA285976A64'

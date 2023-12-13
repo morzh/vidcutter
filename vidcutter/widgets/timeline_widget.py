@@ -184,14 +184,7 @@ class TimelineWidget(QSlider):
             self.addRegion(clipStart, clipEnd, clipVisibility)
         self.update()
 
-    def paintEvent(self, event: QPaintEvent) -> None:
-        painter = QStylePainter(self)
-        opt = QStyleOptionSlider()
-        self.initStyleOption(opt)
-        font = painter.font()
-        font.setPixelSize(11)
-        painter.setFont(font)
-
+    def drawTicks_(self, painter: QStylePainter):
         if self.tickPosition() != QSlider.NoTicks:
             x = 8
             for i in range(self.minimum(), self.width(), 8):
@@ -220,6 +213,8 @@ class TimelineWidget(QSlider):
                     break
                 x += 15
 
+    def drawClips_(self, painter: QStylePainter, opt: QStyleOptionSlider):
+        # opt = QStyleOptionSlider()
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
         videoIndex = self.parent.videoList.currentVideoIndex
@@ -250,9 +245,7 @@ class TimelineWidget(QSlider):
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
 
-        if not self.freeCursorOnSide:
-            return
-
+    def drawCLipsEditMode_(self, painter: QStylePainter):
         glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
         glowColor = QColor(255, 255, 255, glowAlpha)
@@ -303,6 +296,22 @@ class TimelineWidget(QSlider):
             painter.setBrush(brushColor)
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
             painter.drawRoundedRect(self._regions[self.currentRectangleIndex], 2, 2)
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        painter = QStylePainter(self)
+        opt = QStyleOptionSlider()
+        self.initStyleOption(opt)
+        font = painter.font()
+        font.setPixelSize(11)
+        painter.setFont(font)
+
+        self.drawTicks_(painter)
+        self.drawClips_(painter, opt)
+
+        if not self.freeCursorOnSide:
+            return
+
+        self.drawCLipsEditMode_(painter)
 
     def setRegionVizivility(self, index, state):
         if len(self._regionsVisibility) > 0:

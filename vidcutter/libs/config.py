@@ -120,18 +120,18 @@ class VideoFilter(Enum):
     BLACKDETECT = 1
 
 
-class VidCutterException(Exception):
+class VltException(Exception):
     def __init__(self, msg: str=None):
-        super(VidCutterException, self).__init__(msg)
+        super(VltException, self).__init__(msg)
         self.msg = msg
 
 
-class InvalidMediaException(VidCutterException):
+class InvalidMediaException(VltException):
     def __init__(self, msg: str=None):
         super(InvalidMediaException, self).__init__(msg)
 
 
-class ToolNotFoundException(VidCutterException):
+class ToolNotFoundException(VltException):
     def __init__(self, msg: str=None):
         super(ToolNotFoundException, self).__init__(msg)
 

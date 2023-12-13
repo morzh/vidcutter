@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=VidCutter
+Name=VideoLabelingTool
 GenericName=Media Cutter + Joiner
-X-GNOME-FullName=VidCutter
+X-GNOME-FullName=VideoLabelingTool
 Comment=the simplest + fastest video cutter & joiner
 Exec=vidcutter %f
 Terminal=false
