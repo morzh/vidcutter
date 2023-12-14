@@ -118,8 +118,8 @@ class QTimeLine(QWidget):
             path = QPainterPath()
             qp.setPen(sample.color)
             path.addRoundedRect(QRectF(t/scale, 50, sample.duration/scale, 50), 10, 10)
-            sample.startPos = t/scale
-            sample.endPos = t/scale + sample.duration/scale
+            sample.startPosition = t / scale
+            sample.endPosition = t / scale + sample.duration / scale
             qp.fillPath(path, sample.color)
             qp.drawPath(path)
 
@@ -196,7 +196,7 @@ class QTimeLine(QWidget):
     def checkSelection(self, x):
         # Check if user clicked in video sample
         for sample in self.videoSamples:
-            if sample.startPos < x < sample.endPos:
+            if sample.startPosition < x < sample.endPosition:
                 sample.color = Qt.darkCyan
                 if self.selectedSample is not sample:
                     self.selectedSample = sample

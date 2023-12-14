@@ -393,6 +393,7 @@ class TimelineWidget(QSlider):
 
     @pyqtSlot()
     def clearProgress(self) -> None:
+        print('clearProgress')
         for progress in self._progressbars:
             progress.hide()
             progress.deleteLater()

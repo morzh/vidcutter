@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QPoint, QLine, QRect, QRectF, pyqtSignal
 from PyQt5.QtGui import QPainter, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath, QPixmap
-from PyQt5.QtWidgets import QWidget, QLineEdit, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QStylePainter, QWidget, QLineEdit, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
 from numpy import load
 
@@ -26,11 +26,11 @@ class VideoSample:
             self.picture = picture.scaledToHeight(45)
         else:
             self.picture = None
-        self.startPos = 0  # Inicial position
-        self.endPos = self.duration  # End position
+        self.startPosition = 0  # Initial position
+        self.endPosition = self.duration  # End position
 
 
-class QTimeLine(QWidget):
+class TimeLine(QWidget):
     positionChanged = pyqtSignal(int)
     selectionChanged = pyqtSignal(VideoSample)
 
@@ -39,6 +39,14 @@ class QTimeLine(QWidget):
         self.duration = duration
         self.length = length
         self.parent = parent
+
+        self.sliderAreaHorizontalOffset = 8
+        self.sliderAreaTopOffset = 20
+        self.sliderAreaHeight = 27
+        self.sliderAreaTicksGap = 15
+        self.majorTicksHeight = 20
+        self.minorTicksHeight = 10
+        self.timeLineHeight = 100
 
         # Set variables
         self.backgroundColor = __backgroudColor__
@@ -58,21 +66,43 @@ class QTimeLine(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(300, 300, self.length, 200)
+        # self.setGeometry(300, 300, self.length, 200)
+        self.setFixedWidth(self.length)
+        self.setFixedHeight(self.timeLineHeight)
+
         self.setWindowTitle("Timeline Test")
         # Set Background
-        pal = QPalette()
-        pal.setColor(QPalette.Background, self.backgroundColor)
-        self.setPalette(pal)
+        palette = QPalette()
+        palette.setColor(QPalette.Background, self.backgroundColor)
+        self.setPalette(palette)
 
-    def paintEvent(self, event):
-        painter = QPainter()
-        painter.begin(self)
-        painter.setPen(self.textColor)
-        painter.setFont(self.font)
-        painter.setRenderHint(QPainter.Antialiasing)
+    def drawTicksVlt_(self, painter: QStylePainter):
+        x = 8
+        for i in range(self.minimum(), self.width(), 8):
+            if i % 5 == 0:
+                h, w, z = 16, 1, 13
+            else:
+                h, w, z = 8, 1, 23
+            tickColor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
+            pen = QPen(tickColor)  # , Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+            pen.setWidthF(w)
+            painter.setPen(pen)
+
+            y = self.rect().bottom() - z
+            painter.drawLine(x, y, x, y - h)
+            if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
+                painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
+                timecode = self.sliderValueFromPosition(self.minimum(), self.maximum(), x - self.offset, self.width() - (self.offset * 2))
+                # timecode = int(x / (self.maximum() - self.minimum()) * self.width())
+                # timecode = x / (self.width()) * self.parent.duration
+                timecode = self.parent.delta2QTime(timecode).toString(self.parent.runtimeformat)
+                painter.drawText(x + 4, y + 6, timecode)
+            if x + 30 > self.width():
+                break
+            x += 15
+
+    def drawTicks_(self, painter):
         w = 0
-        # Draw time
         scale = self.getScale()
         while w <= self.width():
             painter.drawText(w - 50, 0, 100, 100, Qt.AlignHCenter, self.getTimeString(w * scale))
@@ -92,61 +122,44 @@ class QTimeLine(QWidget):
                 painter.drawLine(3 * point, 40, 3 * point, 20)
             point += 10
 
+
+    def paintEvent(self, event):
+        painter = QPainter()
+        painter.begin(self)
+        painter.setPen(self.textColor)
+        painter.setFont(self.font)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # self.drawTicks_(painter)
+
         if self.pos is not None and self.is_in:
-            painter.drawLine(self.pos.x(), 0, self.pos.x(), 40)
+            x = self.pos.x()
+            x = self.parent.clip(x, self.sliderAreaHorizontalOffset, self.width() - 2 * self.sliderAreaHorizontalOffset)
+            painter.drawLine(x, self.sliderAreaTopOffset, x, self.timeLineHeight)
 
         if self.pointerPos is not None:
-            x = int(self.parent.clip(self.pointerTimePos, 0, self.duration)/self.getScale())
-            line = QLine(QPoint(x, 40), QPoint(x, self.height()))
-            poly = QPolygon([QPoint(x - 10, 20),
-                             QPoint(x + 10, 20),
-                             QPoint(x, 40)])
+            x = self.sliderAreaHorizontalOffset + int(self.parent.clip(self.pointerTimePos, 0, self.duration) / self.getScale())
+            line = QLine(QPoint(x, 10), QPoint(x, self.height()))
+            sliderHandle = QPolygon([QPoint(x - 7, 8), QPoint(x + 7, 8), QPoint(x, 17)])
         else:
-            line = QLine(QPoint(0, 0), QPoint(0, self.height()))
-            poly = QPolygon([QPoint(-10, 20), QPoint(10, 20), QPoint(0, 40)])
+            shift = self.sliderAreaHorizontalOffset
+            line = QLine(QPoint(shift, 0), QPoint(shift, self.height()))
+            sliderHandle = QPolygon([QPoint(shift - 7, 10), QPoint(shift + 7, 10), QPoint(shift, 20)])
 
         # Draw samples
-        t = 0
-        for sample in self.videoSamples:
-            # Clear clip path
-            path = QPainterPath()
-            path.addRoundedRect(QRectF(t / scale, 50, sample.duration / scale, 200), 10, 10)
-            painter.setClipPath(path)
-
-            # Draw sample
-            path = QPainterPath()
-            painter.setPen(sample.color)
-            path.addRoundedRect(QRectF(t/scale, 50, sample.duration/scale, 50), 10, 10)
-            sample.startPos = t/scale
-            sample.endPos = t/scale + sample.duration/scale
-            painter.fillPath(path, sample.color)
-            painter.drawPath(path)
-
-            # Draw preview pictures
-            if sample.picture is not None:
-                if sample.picture.size().width() < sample.duration/scale:
-                    path = QPainterPath()
-                    path.addRoundedRect(QRectF(t/scale, 52.5, sample.picture.size().width(), 45), 10, 10)
-                    painter.setClipPath(path)
-                    painter.drawPixmap(QRect(t/scale, 52.5, sample.picture.size().width(), 45), sample.picture)
-                else:
-                    path = QPainterPath()
-                    path.addRoundedRect(QRectF(t / scale, 52.5, sample.duration/scale, 45), 10, 10)
-                    painter.setClipPath(path)
-                    pic = sample.picture.copy(0, 0, sample.duration/scale, 45)
-                    painter.drawPixmap(QRect(t / scale, 52.5, sample.duration/scale, 45), pic)
-            t += sample.duration
 
         # Clear clip path
-        path = QPainterPath()
-        path.addRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height())
-        painter.setClipPath(path)
+        # path = QPainterPath()
+        # path.addRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height())
+        # painter.setClipPath(path)
+
+        painter.drawRoundedRect(self.sliderAreaHorizontalOffset, self.sliderAreaTopOffset, self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight, 3, 3)
 
         # Draw pointer
         painter.setPen(Qt.darkCyan)
         painter.setBrush(QBrush(Qt.darkCyan))
 
-        painter.drawPolygon(poly)
+        painter.drawPolygon(sliderHandle)
         painter.drawLine(line)
         painter.end()
 
@@ -155,12 +168,13 @@ class QTimeLine(QWidget):
         self.pos = event.pos()
 
         # if mouse is being pressed, update pointer
-        if self.clicking:
+        if self.clicking and self.pos.x():
             x = self.pos.x()
-            self.pointerPos = x
+            # x = self.parent.clip(x, self.sliderAreaHorizontalOffset, self.width() - 2 * self.sliderAreaHorizontalOffset)
+            self.pointerPos = x - self.sliderAreaHorizontalOffset
             self.positionChanged.emit(x)
-            self.checkSelection(x)
-            self.pointerTimePos = self.pointerPos*self.getScale()
+            # self.checkSelection(x)
+            self.pointerTimePos = self.pointerPos * self.getScale()
 
         self.update()
 
@@ -168,11 +182,12 @@ class QTimeLine(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             x = event.pos().x()
-            self.pointerPos = x
+            # x = self.parent.clip(x, self.sliderAreaHorizontalOffset, self.width() - 2 * self.sliderAreaHorizontalOffset)
+            self.pointerPos = x - self.sliderAreaHorizontalOffset
             self.positionChanged.emit(x)
             self.pointerTimePos = self.pointerPos * self.getScale()
 
-            self.checkSelection(x)
+            # self.checkSelection(x)
 
             self.update()
             self.clicking = True  # Set clicking check to true
@@ -195,7 +210,7 @@ class QTimeLine(QWidget):
     def checkSelection(self, x):
         # Check if user clicked in video sample
         for sample in self.videoSamples:
-            if sample.startPos < x < sample.endPos:
+            if sample.startPosition < x < sample.endPosition:
                 sample.color = Qt.darkCyan
                 if self.selectedSample is not sample:
                     self.selectedSample = sample
@@ -212,7 +227,7 @@ class QTimeLine(QWidget):
 
     # Get scale from length
     def getScale(self):
-        return float(self.duration)/float(self.width())
+        return float(self.duration)/float(self.width() - 2 * self.sliderAreaHorizontalOffset)
 
     # Get duration
     def getDuration(self):
@@ -235,20 +250,24 @@ class QTimeLine(QWidget):
         self.font = font
 
 
-class ScalableQtimeLine(QWidget):
+class ScalableTimeLine(QWidget):
     def __init__(self, duration, parent=None):
         super().__init__(parent)
         self.sliderBaseWidth = 770
         self.factor = 1
-        self.factor_maximum = 16
+        self.factorMaximum = 16
 
-        self.timeline = QTimeLine(duration, 770, self)
+        self.timeline = TimeLine(duration, 770, self)
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.timeline)
+        self.scrollArea.setContentsMargins(0, 0, 0, 0)
         self.scrollArea.setAlignment(Qt.AlignVCenter)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setFixedHeight(self.timeline.timeLineHeight + 16)
 
         scrollAreaLayout = QVBoxLayout(self)
         scrollAreaLayout.addWidget(self.scrollArea)
+        scrollAreaLayout.setContentsMargins(0, 0, 0, 0)
 
         buttonLayout = QHBoxLayout(self)
         buttonPlus = QPushButton()
@@ -280,8 +299,15 @@ class ScalableQtimeLine(QWidget):
         scrollAreaLayout.addLayout(buttonLayout)
 
         self.setLayout(scrollAreaLayout)
-        self.setGeometry(200, 200, 800, 20)
+        # self.setGeometry(200, 200, 800, 20)
         self.setWindowTitle('Slider Scroll Text')
+
+
+    def initAttributes(self):
+        pass
+
+    def initStyle(self):
+        pass
 
     def clip(self, value, minimum, maximum):
         return minimum if value < minimum else maximum if value > maximum else value
@@ -291,7 +317,7 @@ class ScalableQtimeLine(QWidget):
             self.factor += 1
         else:
             self.factor += 2
-        self.factor = self.clip(self.factor, 1, self.factor_maximum)
+        self.factor = self.clip(self.factor, 1, self.factorMaximum)
         self.label_factor.setText(str(self.factor))
         self.timeline.setFixedWidth(self.factor * self.sliderBaseWidth)
         # self.slider.setMaximum(self.factor * self.sliderBaseWidth)
@@ -301,10 +327,13 @@ class ScalableQtimeLine(QWidget):
             self.factor -= 1
         else:
             self.factor -= 2
-        self.factor = self.clip(self.factor, 1, self.factor_maximum)
+        self.factor = self.clip(self.factor, 1, self.factorMaximum)
         self.label_factor.setText(str(self.factor))
         self.timeline.setFixedWidth(self.factor * self.sliderBaseWidth)
         # self.slider.setMaximum(self.factor * self.sliderBaseWidth)
+
+    def value(self):
+        return 0
 
     def setValue(self, seconds: float):
         try:
@@ -315,10 +344,39 @@ class ScalableQtimeLine(QWidget):
         except ValueError:
             return
 
+    def setRestrictValue(self, value, force=False):
+        pass
+
+    def update(self):
+        self.timeline.update()
+
+    def clearRegions(self) -> None:
+        pass
+
+    def updateProgress(self, region: int = None) -> None:
+        pass
+
+    def clearProgress(self):
+        pass
+
+    def minimum(self):
+        pass
+
+    def maximum(self):
+        pass
+
+    def width(self):
+        pass
+
+    def setFixedWidth(self, w):
+        pass
+
+
+
 
 def main():
     app = QApplication(sys.argv)
-    scalable_timeline = ScalableQtimeLine(2.5)
+    scalable_timeline = ScalableTimeLine(2.5)
     scalable_timeline.show()
     app.exec_()
 

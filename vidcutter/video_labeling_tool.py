@@ -17,7 +17,6 @@ from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent
 from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
                              QVBoxLayout, QWidget, QScrollArea)
 
-
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
 from vidcutter.widgets.dialogs.about import About
@@ -60,7 +59,7 @@ class VideoLabelingTool(QWidget):
         self.settings = self.parent.settings
         self.filter_settings = Config.filter_settings()
         self.currentMedia, self.mediaAvailable, self.mpvError = None, False, False
-        self.projectDirty, self.projectSaved, self.debugonstart = False, False, False
+        self.projectDirty, self.projectSaved, self.debugOnStart = False, False, False
         self.notify = None
         self.fonts = []
         self._dataFolder = ''
@@ -140,7 +139,7 @@ class VideoLabelingTool(QWidget):
         self.videoClipsList.model().rowsInserted.connect(self.setProjectDirty)
         self.videoClipsList.model().rowsRemoved.connect(self.setProjectDirty)
         self.videoClipsList.model().rowsMoved.connect(self.setProjectDirty)
-        self.videoClipsList.model().rowsMoved.connect(self.syncClipList)
+        # self.videoClipsList.model().rowsMoved.connect(self.syncClipList)
 
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
@@ -327,7 +326,6 @@ class VideoLabelingTool(QWidget):
         self.timeline.initStyle()
         self.setTimelineSize()
 
-
     def setTimelineSize(self):
         windowSize = self.parent.size()
         self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
@@ -386,8 +384,6 @@ class VideoLabelingTool(QWidget):
         # print('videoSlider.maximum()', self.timeline.maximum())
         # print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
 
-
-
     @pyqtSlot()
     def showAppMenu(self) -> None:
         pos = self.menuButton.mapToGlobal(self.menuButton.rect().topLeft())
@@ -405,12 +401,12 @@ class VideoLabelingTool(QWidget):
         self.style().loadQSS(self.theme)
         QApplication.setFont(QFont('Noto Sans', 12 if sys.platform == 'darwin' else 10, 300))
 
-    def getMPV(self, parent: QWidget=None, file: str=None, start: float=0, pause: bool=True, mute: bool=False,
-               volume: int=None) -> mpvWidget:
+    def getMPV(self, parent: QWidget = None, file: str = None, start: float = 0, pause: bool = True, mute: bool = False,
+               volume: int = None) -> mpvWidget:
         widget = mpvWidget(
             parent=parent,
             file=file,
-            #vo='opengl-cb',
+            # vo='opengl-cb',
             pause=pause,
             start=start,
             mute=mute,
@@ -496,7 +492,7 @@ class VideoLabelingTool(QWidget):
         self.turnVisibilityOffAction = QAction(self.removeAllIcon, 'Turn clips visibility OFF', self, triggered=self.turnClipsVisibilityOff, statusTip='Remove all clips for current video', enabled=False)
 
         # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
-        self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)',  enabled=False)
+        self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)', enabled=False)
 
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoLabelingTool.viewLogs, statusTip='View the application\'s log file')
         self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
@@ -663,7 +659,6 @@ class VideoLabelingTool(QWidget):
     def moveItemDown(self) -> None:
         index = self.videoClipsList.currentRow()
         if index != -1:
-
             tempVideoItem = self.videoList.videos[self.videoList.currentVideoIndex].clips[index]
             del self.videoList.videos[self.videoList.currentVideoIndex].clips[index]
             self.videoList.videos[self.videoList.currentVideoIndex].clips.insert(index + 1, tempVideoItem)
@@ -702,7 +697,6 @@ class VideoLabelingTool(QWidget):
         for index_clip in range(len(self.videoList.videos[self.videoList.currentVideoIndex].clips)):
             self.videoList.videos[self.videoList.currentVideoIndex].clips[index_clip].visibility = 0
         self.renderVideoClips()
-
 
     def on_clearList(self) -> None:
         # self.clipTimes.clear()
@@ -926,8 +920,8 @@ class VideoLabelingTool(QWidget):
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
             if self.clipIsPlayingIndex >= 0:
-                current_clip_end = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
-                if progress > current_clip_end:
+                currentClipEnd = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
+                if progress > currentClipEnd:
                     self.playMedia()
                     self.clipIsPlaying = False
                     self.clipIsPlayingIndex = -1
@@ -938,8 +932,8 @@ class VideoLabelingTool(QWidget):
         duration *= 1000
         self.timeline.setRange(0, int(duration))
         # self.videoSlider.baseMaximum = int(duration)
-        print('on_durationChanged', duration)
-        print('on_durationChanged, maximum', self.timeline.maximum())
+        # print('on_durationChanged', duration)
+        # print('on_durationChanged, maximum', self.timeline.maximum())
         # self.videoSlider.setMaximum(10 * int(duration))
         self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
@@ -949,10 +943,10 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot(QListWidgetItem)
     def editClipVisibility(self, item: QListWidgetItem = None) -> None:
         try:
-            item_index = self.videoClipsList.row(item)
-            item_state = item.checkState()
-            # self.clipTimes[item_index][5] = item_state
-            self.videoList.videos[self.videoList.currentVideoIndex].clips[item_index].visibility = item_state
+            itemIndex = self.videoClipsList.row(item)
+            itemState = item.checkState()
+            # self.clipTimes[itemIndex][5] = itemState
+            self.videoList.videos[self.videoList.currentVideoIndex].clips[itemIndex].visibility = itemState
             self.renderVideoClips()
         except Exception:
             self.doPass()
@@ -961,13 +955,13 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot(QListWidgetItem)
     def videosVisibility(self, item) -> None:
         if self.videoClipsList.clipsHasRendered:
-            item_index = self.videoClipsList.row(item)
-            item_state = item.checkState()
+            itemIndex = self.videoClipsList.row(item)
+            itemState = item.checkState()
 
-            # self.clipTimes[item_index][5] = item_state
-            self.videoList.videos[self.videoList.currentVideoIndex].clips[item_index].visibility = item_state
+            # self.clipTimes[itemIndex][5] = itemState
+            self.videoList.videos[self.videoList.currentVideoIndex].clips[itemIndex].visibility = itemState
 
-            self.timeline.setRegionVizivility(item_index, item_state)
+            self.timeline.setRegionVizivility(itemIndex, itemState)
             self.timeline.update()
 
     @pyqtSlot()
@@ -1003,25 +997,25 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot(bool)
     def toggleConsole(self) -> None:
         self.showConsole = not self.showConsole
-        if not hasattr(self, 'debugonstart'):
-            self.debugonstart = os.getenv('DEBUG', False)
+        if not hasattr(self, 'debugOnStart'):
+            self.debugOnStart = os.getenv('DEBUG', False)
         if self.showConsole:
             self.mpvWidget.setLogLevel('v')
             os.environ['DEBUG'] = '1'
             self.parent.console.show()
         else:
-            if not self.debugonstart:
+            if not self.debugOnStart:
                 os.environ['DEBUG'] = '0'
                 self.mpvWidget.setLogLevel('error')
             self.parent.console.hide()
         self.saveSetting('showConsole', self.showConsole)
 
-    @pyqtSlot(bool)
-    def toggleSmartCut(self, checked: bool) -> None:
-        self.smartcut = checked
-        self.saveSetting('smartcut', self.smartcut)
-        self.smartcutButton.setChecked(self.smartcut)
-        # self.showText('SmartCut {}'.format('enabled' if checked else 'disabled'))
+    # @pyqtSlot(bool)
+    # def toggleSmartCut(self, checked: bool) -> None:
+    #     self.smartcut = checked
+    #     self.saveSetting('smartcut', self.smartcut)
+    #     self.smartcutButton.setChecked(self.smartcut)
+    # self.showText('SmartCut {}'.format('enabled' if checked else 'disabled'))
 
     @pyqtSlot(list)
     def addScenes(self, scenes: List[list]) -> None:
@@ -1067,16 +1061,16 @@ class VideoLabelingTool(QWidget):
         self.filterProgressBar.show()
 
     def clipStart(self) -> None:
-        starttime = self.delta2QTime(self.timeline.value())
+        startTime = self.delta2QTime(self.timeline.value())
         clipsNumber = len(self.videoList.videos[self.videoList.currentVideoIndex].clips)
-        defaultClipName = 'Squat.' + str(clipsNumber + 1).zfill(3)
+        defaultClipName = 'Other'
 
-        clip = VideoItemClip(starttime, QTime(), self.captureImage(self.currentMedia, starttime), defaultClipName, 0)
+        clip = VideoItemClip(startTime, QTime(), self.captureImage(self.currentMedia, startTime), defaultClipName, 0)
         bisect_index = self.videoList.videos[self.videoList.currentVideoIndex].clips.bisect_right(clip)
         self.videoList.videos[self.videoList.currentVideoIndex].bisect_index = bisect_index
         self.videoList.videos[self.videoList.currentVideoIndex].clips.add(clip)
 
-        self.timeCounter.setMinimum(starttime.toString(self.timeformat))
+        self.timeCounter.setMinimum(startTime.toString(self.timeformat))
         self.frameCounter.lockMinimum()
 
         self.toolbarStart.setDisabled(True)
@@ -1085,25 +1079,20 @@ class VideoLabelingTool(QWidget):
         self.timeline.setRestrictValue(self.timeline.value(), True)
         self.inCut = True
 
-        sorted(self.videoList.videos[self.videoList.currentVideoIndex].clips)
-
+        # sorted(self.videoList.videos[self.videoList.currentVideoIndex].clips)
         self.renderVideoClips()
-        self.videoClipsList.scrollToBottom()
+        # self.videoClipsList.scrollToBottom()
 
     def clipEnd(self) -> None:
         # item = self.clipTimes[len(self.clipTimes) - 1]
-        clip_item_last = self.videoList.videos[self.videoList.currentVideoIndex].bisect_index  # .clipsLast()
-        # clip_item_last = self.videoList.videos[self.videoList.current_video_index][-1]  # .clipsLast()
+        # clip_item_last = self.videoList.videos[self.videoList.currentVideoIndex].bisect_index  # .clipsLast()
         bisect_index = self.videoList.videos[self.videoList.currentVideoIndex].bisect_index
         time_end = self.delta2QTime(self.timeline.value())
         self.videoList.videos[self.videoList.currentVideoIndex].clips[bisect_index].timeEnd = time_end
         self.videoList.videos[self.videoList.currentVideoIndex].clips[bisect_index].visibility = 2
-        # clip_item_last.timeEnd = time_end
-        # clip_item_last.visibility = 2
 
         self.toolbarStart.setEnabled(True)
         self.toolbarEnd.setDisabled(True)
-
         self.timeCounter.setMinimum()
         self.timeline.setRestrictValue(0, False)
         self.inCut = False
@@ -1113,17 +1102,18 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot()
     @pyqtSlot(bool)
     def setProjectDirty(self, dirty: bool = True) -> None:
+        print('setProjectDirty')
         self.projectDirty = dirty
 
     # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
-    @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
-    def syncClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None: #should replace syncClipList
-        index = row - 1 if start < row else row
-        clip = self.videoList.videos[self.videoList.currentVideoIndex].clips.pop(start)
-        self.videoList.videos[self.videoList.currentVideoIndex].clips.insert(index, clip)
-        if not len(clip.visibility): #????? was clip[3]
-            self.timeline.switchRegions(start, index)
-        self.renderVideoClips()
+    # @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
+    # def syncClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None: #should replace syncClipList
+    #     index = row - 1 if start < row else row
+    #     clip = self.videoList.videos[self.videoList.currentVideoIndex].clips.pop(start)
+    #     self.videoList.videos[self.videoList.currentVideoIndex].clips.insert(index, clip)
+    #     if not len(clip.visibility):
+    #         self.timeline.switchRegions(start, index)
+    #     self.renderVideoClips()
 
     def renderSliderVideoClips(self) -> None:
         if not self.mediaAvailable:
@@ -1292,7 +1282,7 @@ class VideoLabelingTool(QWidget):
         about.exec_()
 
     @staticmethod
-    def getAppIcon(encoded: bool=False):
+    def getAppIcon(encoded: bool = False):
         icon = QIcon.fromTheme(qApp.applicationName().lower(), QIcon(':/images/vidcutter-small.png'))
         if not encoded:
             return icon
@@ -1306,7 +1296,7 @@ class VideoLabelingTool(QWidget):
         return icon
 
     @staticmethod
-    def sizeof_fmt(num: float, suffix: chr='B') -> str:
+    def sizeof_fmt(num: float, suffix: chr = 'B') -> str:
         for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
             if abs(num) < 1024.0:
                 return "%3.1f %s%s" % (num, unit, suffix)
@@ -1418,7 +1408,7 @@ class VideoLabelingTool(QWidget):
                     self.clipEnd()
                 return
 
-            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  #  and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  # and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 self.toolbarPlus()
                 return
 
