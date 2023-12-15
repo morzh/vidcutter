@@ -78,28 +78,25 @@ class TimeLine(QWidget):
         self.setPalette(palette)
 
     def drawTicksVlt_(self, painter: QStylePainter):
-        x = self.sliderAreaHorizontalOffset
         scale = self.getScale()
-        for i in range(0, self.width() - 2 * self.sliderAreaHorizontalOffset, 8):
-            if i % 5 == 0:
+        y = self.rect().top() + self.sliderAreaTopOffset + self.sliderAreaHeight + 8
+        tickStep = 20
+        for i in range(0, self.width() - 2 * self.sliderAreaHorizontalOffset, tickStep):
+            x = i + self.sliderAreaHorizontalOffset
+            if i % (tickStep * 5) == 0:
                 h, w, z = 25, 1, 10
+                if self.parent.mediaAvailable and i < self.width() - (tickStep * 5):
+                    painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
+                    timecode = self.getTimeString(i * scale, False)
+                    painter.drawText(x + 5, y + 25, timecode)
             else:
                 h, w, z = 8, 1, 10
+
             tickColor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
             pen = QPen(tickColor)  # , Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
             pen.setWidthF(w)
             painter.setPen(pen)
-
-            y = self.rect().top() + self.sliderAreaTopOffset + self.sliderAreaHeight + 8
             painter.drawLine(x, y, x, y + h)
-            # if self.parent.mediaAvailable and i % 10 == 0 and (x + 4 + 50) < self.width():
-            if i % 10 == 0 and (x + 4 + 60) < self.width():
-                painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
-                timecode = self.getTimeString(i * scale, False)
-                painter.drawText(x + 4, y + 25, timecode)
-            x += 20
-            if x > self.width() - self.sliderAreaHorizontalOffset:
-                break
 
     def drawTicks_(self, painter):
         w = 0
@@ -137,7 +134,7 @@ class TimeLine(QWidget):
             painter.drawLine(x, self.sliderAreaTopOffset, x, self.timeLineHeight)
 
         if self.pointerPixelPosition is not None:
-            x = self.pointerPixelPosition
+            x = int(self.pointerPixelPosition)
             line = QLine(QPoint(x, 10), QPoint(x, self.height()))
             sliderHandle = QPolygon([QPoint(x - 7, 9), QPoint(x + 7, 9), QPoint(x, 18)])
         else:
@@ -241,6 +238,7 @@ class ScalableTimeLine(QWidget):
         self.scrollArea.setAlignment(Qt.AlignVCenter)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.scrollArea.setFixedHeight(self.timeline.timeLineHeight + 16)
+        self.mediaAvailable = True
 
         scrollAreaLayout = QVBoxLayout(self)
         scrollAreaLayout.addWidget(self.scrollArea)
