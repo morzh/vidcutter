@@ -40,6 +40,7 @@ from vidcutter.VideoItemClip import VideoItemClip
 
 from vidcutter.widgets.timeline_widget import TimelineWidget
 from vidcutter.widgets.video_list_widget import VideoListWidget
+from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine
 from vidcutter.QPixmapPickle import QPixmapPickle
 from vidcutter.widgets.dialogs.video_info_dialog import VideoDescriptionDialog
 
@@ -74,9 +75,10 @@ class VideoLabelingTool(QWidget):
         self.initTheme()
         self.updater = Updater(self.parent)
 
-        self.timeline = TimelineWidget(self)
-        self.timeline.initAttributes()
-        self.timeline.sliderMoved.connect(self.setPosition)
+        self.timeline = ScalableTimeLine(self)
+        # self.timeline = TimelineWidget(self)
+        # self.timeline.initAttributes()
+        # self.timeline.sliderMoved.connect(self.setPosition)
 
         # self.videoSliderWidget = VideoSliderWidget(self, self.videoSlider)
         # self.videoSliderWidget.init_attributes()
