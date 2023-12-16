@@ -75,10 +75,10 @@ class VideoLabelingTool(QWidget):
         self.initTheme()
         self.updater = Updater(self.parent)
 
-        self.timeline = ScalableTimeLine(self)
-        # self.timeline = TimelineWidget(self)
-        # self.timeline.initAttributes()
-        # self.timeline.sliderMoved.connect(self.setPosition)
+        # self.timeline = ScalableTimeLine(self)
+        self.timeline = TimelineWidget(self)
+        self.timeline.initAttributes()
+        self.timeline.sliderMoved.connect(self.setPosition)
 
         # self.videoSliderWidget = VideoSliderWidget(self, self.videoSlider)
         # self.videoSliderWidget.init_attributes()

@@ -5,9 +5,9 @@ from base64 import b64encode
 
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QApplication
+
 from PyQt5.QtCore import Qt, QPoint, QLine, QRect, QRectF, pyqtSignal
-from PyQt5.QtGui import QPainter, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath, QPixmap
+from PyQt5.QtGui import QPainter, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath
 from PyQt5.QtWidgets import QWidget, QFrame, QScrollArea, QVBoxLayout
 
 from numpy import load

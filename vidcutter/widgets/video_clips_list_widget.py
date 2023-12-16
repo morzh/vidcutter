@@ -185,7 +185,7 @@ class VideoClipsListWidget(QListWidget):
             listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
-            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            # self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 
