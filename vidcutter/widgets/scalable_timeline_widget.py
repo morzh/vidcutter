@@ -21,7 +21,7 @@ class TimeLine(QWidget):
     positionChanged = pyqtSignal(int)
 
     def __init__(self, parent=None):
-        super(QWidget, self).__init__()
+        super().__init__()
         self.duration = -1.0
         self.length = 400
         self.parent = parent
@@ -34,6 +34,7 @@ class TimeLine(QWidget):
         self.minorTicksHeight = 10
         self.timeLineHeight = 100
         self.theme = 'dark'
+        self.setObjectName('videoslider')
 
         # Set variables
         self.backgroundColor = __backgroudColor__
@@ -73,7 +74,7 @@ class TimeLine(QWidget):
             x = i + self.sliderAreaHorizontalOffset
             if i % timeTickStep == 0:
                 h, w, z = 30, 1, 10
-                if self.parent.parent.mediaAvailable and i < self.width() - (tickStep * 5):
+                if i < self.width() - (tickStep * 5):
                     painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
                     timecode = self.getTimeString(i * scale, millisecondsFlag)
                     painter.drawText(x + 5, y + 25, timecode)
@@ -115,8 +116,10 @@ class TimeLine(QWidget):
         painter.drawRoundedRect(self.sliderAreaHorizontalOffset, self.sliderAreaTopOffset,
                                 self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight,
                                 3, 3)
-        self.drawTicks_(painter)
-        self.drawSlider_(painter)
+
+        if self.parent.parent.mediaAvailable:
+            self.drawTicks_(painter)
+            self.drawSlider_(painter)
         painter.end()
 
     # Mouse movement
@@ -200,19 +203,16 @@ class ScalableTimeLine(QScrollArea):
         self.restrictValue = 0
 
         self.timeline = TimeLine(self)
-        self.scrollArea = QScrollArea()
-        self.scrollArea.setWidget(self.timeline)
-        self.scrollArea.setContentsMargins(0, 0, 0, 0)
-        self.scrollArea.setAlignment(Qt.AlignVCenter)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setFixedHeight(self.timeline.timeLineHeight + 16)
-        self.setWidget(self.scrollArea)
+        self.setWidget(self.timeline)
+        self.setAlignment(Qt.AlignVCenter)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
 
     def value(self):
-        return 0
+        return self.timeline.pointerTimePosition
 
     def setRange(self, start, end):
-        pass
+        self.timeline.duration = end
 
     def setValue(self, seconds: int):
         try:
@@ -225,10 +225,10 @@ class ScalableTimeLine(QScrollArea):
 
     def setEnabled(self, flag):
         self.timeline.setEnabled(flag)
-        self.scrollArea.setEnabled(flag)
+        super().setEnabled(flag)
 
     def setRestrictValue(self, value, force=False):
-        pass
+        self.restrictValue = value
 
     def update(self):
         self.timeline.update()
@@ -254,10 +254,10 @@ class ScalableTimeLine(QScrollArea):
         return self.width()
 
     def setFixedWidth(self, width):
-        self.scrollArea.setFixedWidth(width)
+        super().setFixedWidth(width)
         self.timeline.setFixedWidth(width - 2)
 
     def setFixedHeight(self, height):
-        self.scrollArea.setFixedHeight(height)
+        super().setFixedHeight(height)
         self.timeline.setFixedHeight(height - 2)
 

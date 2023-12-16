@@ -8,8 +8,8 @@ from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine, TimeLin
 
 
 class ScalableTimeLineWindow(QWidget):
-    def __init__(self, duration, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.factor = 1
         self.factorMaximum = 16
         self.mediaAvailable = True
@@ -20,7 +20,7 @@ class ScalableTimeLineWindow(QWidget):
         scrollAreaLayout.addWidget(self.timeline)
         # scrollAreaLayout.setContentsMargins(0, 0, 0, 0)
 
-        buttonLayout = QHBoxLayout(self)
+        buttonLayout = QHBoxLayout()
         buttonPlus = QPushButton()
         buttonPlus.setText('+')
 
@@ -92,9 +92,10 @@ class ScalableTimeLineWindow(QWidget):
         super().setFixedWidth(w + 36)
         self.timeline.setFixedWidth(w)
 
+
 def main():
     app = QApplication(sys.argv)
-    scalable_timeline = ScalableTimeLineWindow(12.5)
+    scalable_timeline = ScalableTimeLineWindow()
     scalable_timeline.timeline.setFixedWidth(800)
     scalable_timeline.timeline.timeline.duration = 15.5
     # scalable_timeline.setFixedHeight(102)
