@@ -18,7 +18,7 @@ __font__ = QFont('Decorative', 10)
 
 
 class TimeLine(QWidget):
-    positionChanged = pyqtSignal(int)
+    sliderMoved = pyqtSignal(int)
 
     def __init__(self, parent=None):
         super().__init__()
@@ -27,12 +27,12 @@ class TimeLine(QWidget):
         self.parent = parent
 
         self.sliderAreaHorizontalOffset = 8
-        self.sliderAreaTopOffset = 20
+        self.sliderAreaTopOffset = 15
         self.sliderAreaHeight = 27
         self.sliderAreaTicksGap = 15
         self.majorTicksHeight = 20
         self.minorTicksHeight = 10
-        self.timeLineHeight = 100
+        self.timeLineHeight = 85
         self.theme = 'dark'
         self.setObjectName('videoslider')
 
@@ -94,12 +94,14 @@ class TimeLine(QWidget):
 
         if self.pointerPixelPosition is not None:
             x = int(self.pointerPixelPosition)
-            line = QLine(QPoint(x, 10), QPoint(x, self.height()))
-            sliderHandle = QPolygon([QPoint(x - 7, 9), QPoint(x + 7, 9), QPoint(x, 18)])
+            y = self.sliderAreaTopOffset -1
+            line = QLine(QPoint(x, self.sliderAreaTopOffset), QPoint(x, self.height()))
+            sliderHandle = QPolygon([QPoint(x - 7, 5), QPoint(x + 7, 5), QPoint(x, y)])
         else:
             x = self.sliderAreaHorizontalOffset
+            y = self.sliderAreaTopOffset - 1
             line = QLine(QPoint(x, 0), QPoint(x, self.height()))
-            sliderHandle = QPolygon([QPoint(x - 7, 9), QPoint(x + 7, 9), QPoint(x, 18)])
+            sliderHandle = QPolygon([QPoint(x - 7, 5), QPoint(x + 7, 5), QPoint(x, y)])
 
         painter.setPen(Qt.darkCyan)
         painter.setBrush(QBrush(Qt.darkCyan))
@@ -117,7 +119,7 @@ class TimeLine(QWidget):
                                 self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight,
                                 3, 3)
 
-        if self.parent.parent.mediaAvailable:
+        if self.isEnabled():
             self.drawTicks_(painter)
             self.drawSlider_(painter)
         painter.end()
@@ -130,7 +132,7 @@ class TimeLine(QWidget):
         if self.clicking and x:
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset,
                                                   self.width() - self.sliderAreaHorizontalOffset)
-            self.positionChanged.emit(self.pointerPixelPosition)
+            self.sliderMoved.emit(self.pointerPixelPosition)
         self.update()
 
     # Mouse pressed
@@ -139,7 +141,7 @@ class TimeLine(QWidget):
             x = event.pos().x()
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             self.pointerTimePosition = (self.pointerPixelPosition - self.sliderAreaHorizontalOffset) * self.getScale()
-            self.positionChanged.emit(self.pointerPixelPosition)
+            self.sliderMoved.emit(self.pointerPixelPosition)
             self.update()
             self.clicking = True  # Set clicking check to true
 
@@ -207,6 +209,9 @@ class ScalableTimeLine(QScrollArea):
         self.setAlignment(Qt.AlignVCenter)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
+    def initAttributes(self):
+        self.setEnabled(False)
+        self.timeline.setEnabled(False)
 
     def value(self):
         return self.timeline.pointerTimePosition
@@ -259,5 +264,5 @@ class ScalableTimeLine(QScrollArea):
 
     def setFixedHeight(self, height):
         super().setFixedHeight(height)
-        self.timeline.setFixedHeight(height - 2)
+        self.timeline.setFixedHeight(height - 16)
 

@@ -75,10 +75,10 @@ class VideoLabelingTool(QWidget):
         self.initTheme()
         self.updater = Updater(self.parent)
 
-        # self.timeline = ScalableTimeLine(self)
-        self.timeline = TimelineWidget(self)
+        self.timeline = ScalableTimeLine(self)
+        # self.timeline = TimelineWidget(self)
         self.timeline.initAttributes()
-        self.timeline.sliderMoved.connect(self.setPosition)
+        self.timeline.timeline.sliderMoved.connect(self.setPosition)
 
         # self.videoSliderWidget = VideoSliderWidget(self, self.videoSlider)
         # self.videoSliderWidget.init_attributes()
@@ -320,21 +320,18 @@ class VideoLabelingTool(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 0)
         layout.addLayout(self.videoLayout)
-        layout.addWidget(self.sliderWidgetScroll)
+        layout.addWidget(self.timeline)
         layout.addSpacing(5)
         layout.addLayout(controlsLayout)
 
         self.setLayout(layout)
-        self.timeline.initStyle()
+        # self.timeline.initStyle()
         self.setTimelineSize()
 
     def setTimelineSize(self):
         windowSize = self.parent.size()
-        self.sliderWidgetScroll.setFixedWidth(windowSize.width() - 18)
-        self.sliderWidgetScroll.setFixedHeight(126)
-
         self.timeline.setFixedWidth(self.factor * windowSize.width() - 20)
-        self.timeline.setFixedHeight(108)
+        self.timeline.setFixedHeight(101)
 
     def clip(self, val, min_, max_):
         return min_ if val < min_ else max_ if val > max_ else val
@@ -931,13 +928,12 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
         self.duration = duration
-        duration *= 1000
-        self.timeline.setRange(0, int(duration))
+        self.timeline.setRange(0, duration)
         # self.videoSlider.baseMaximum = int(duration)
         # print('on_durationChanged', duration)
         # print('on_durationChanged, maximum', self.timeline.maximum())
         # self.videoSlider.setMaximum(10 * int(duration))
-        self.timeCounter.setDuration(self.delta2QTime(round(duration)).toString(self.timeformat))
+        self.timeCounter.setDuration(self.delta2QTime(round(duration * 1000)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
         self.renderVideoClips()
 
@@ -947,7 +943,7 @@ class VideoLabelingTool(QWidget):
         try:
             itemIndex = self.videoClipsList.row(item)
             itemState = item.checkState()
-            # self.clipTimes[itemIndex][5] = itemState
+            # self.clipTimes[idingtemIndex][5] = itemState
             self.videoList.videos[self.videoList.currentVideoIndex].clips[itemIndex].visibility = itemState
             self.renderVideoClips()
         except Exception:
