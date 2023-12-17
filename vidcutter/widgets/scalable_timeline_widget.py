@@ -53,11 +53,8 @@ class TimeLine(QWidget):
         self.initAttributes()
 
     def initAttributes(self):
-        # self.setGeometry(300, 300, self.length, 200)
         self.setFixedWidth(self.length)
         self.setFixedHeight(self.timeLineHeight)
-
-        # self.setWindowTitle("Timeline Test")
         # Set Background
         palette = QPalette()
         palette.setColor(QPalette.Background, self.backgroundColor)
@@ -94,7 +91,7 @@ class TimeLine(QWidget):
 
         if self.pointerPixelPosition is not None:
             x = int(self.pointerPixelPosition)
-            y = self.sliderAreaTopOffset -1
+            y = self.sliderAreaTopOffset - 1
             line = QLine(QPoint(x, self.sliderAreaTopOffset), QPoint(x, self.height()))
             sliderHandle = QPolygon([QPoint(x - 7, 5), QPoint(x + 7, 5), QPoint(x, y)])
         else:
@@ -132,7 +129,7 @@ class TimeLine(QWidget):
         if self.clicking and x:
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset,
                                                   self.width() - self.sliderAreaHorizontalOffset)
-            self.sliderMoved.emit(self.pointerPixelPosition)
+            # self.sliderMoved.emit(self.pointerPixelPosition)
         self.update()
 
     # Mouse pressed
@@ -141,7 +138,7 @@ class TimeLine(QWidget):
             x = event.pos().x()
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             self.pointerTimePosition = (self.pointerPixelPosition - self.sliderAreaHorizontalOffset) * self.getScale()
-            self.sliderMoved.emit(self.pointerPixelPosition)
+            self.sliderMoved.emit(int(self.pointerTimePosition * 1000))
             self.update()
             self.clicking = True  # Set clicking check to true
 
@@ -174,26 +171,21 @@ class TimeLine(QWidget):
             return "%02d:%02d:%02d.%03d" % (hours, minutes, seconds, milliseconds)
 
     # Get scale from length
-    def getScale(self):
+    def getScale(self) -> float:
         return float(self.duration) / float(self.width() - 2 * self.sliderAreaHorizontalOffset)
 
-    # Get duration
-    def getDuration(self):
+    def getDuration(self) -> float:
         return self.duration
 
-    # Get selected sample
     def getSelectedSample(self):
         return self.selectedSample
 
-    # Set background color
-    def setBackgroundColor(self, color):
+    def setBackgroundColor(self, color) -> None:
         self.backgroundColor = color
 
-    # Set text color
-    def setTextColor(self, color):
+    def setTextColor(self, color) -> None:
         self.textColor = color
 
-    # Set Font
     def setTextFont(self, font):
         self.font = font
 
@@ -203,23 +195,53 @@ class ScalableTimeLine(QScrollArea):
         super().__init__(parent)
         self.parent = parent
         self.restrictValue = 0
+        self.factor_ = 1
+        self.maximumFactor_ = 20
+        self.baseWidth_ = 100
 
         self.timeline = TimeLine(self)
         self.setWidget(self.timeline)
         self.setAlignment(Qt.AlignVCenter)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
-    def initAttributes(self):
+    def initAttributes(self) -> None:
         self.setEnabled(False)
         self.timeline.setEnabled(False)
 
-    def value(self):
+    @property
+    def baseWidth(self) -> int:
+        return self.baseWidth_
+
+    @baseWidth.setter
+    def baseWidth(self, value: int) -> None:
+        if value > 0:
+            self.baseWidth_ = value
+
+    @property
+    def factor(self) -> int:
+        return self.factor_
+
+    @factor.setter
+    def factor(self, value: int) -> None:
+        if value >= 1:
+            self.factor_ = value
+            self.timeline.setFixedWidth(self.baseWidth_ * self.factor_)
+
+    @property
+    def maximumFactor(self) -> int:
+        return self.maximumFactor_
+
+    @maximumFactor.setter
+    def maximumFactor(self, value: int) -> None:
+        self.maximumFactor_ = value
+
+    def value(self) -> float:
         return self.timeline.pointerTimePosition
 
-    def setRange(self, start, end):
-        self.timeline.duration = end
+    def setDuration(self, duration) -> None:
+        self.timeline.duration = duration
 
-    def setValue(self, seconds: int):
+    def setValue(self, seconds: int) -> None:
         try:
             seconds = float(seconds)
             self.timeline.pointerPixelPosition = round(seconds / self.timeline.getScale() + self.timeline.sliderAreaHorizontalOffset)
@@ -228,14 +250,14 @@ class ScalableTimeLine(QScrollArea):
         except ValueError('seconds should be in float number format'):
             return
 
-    def setEnabled(self, flag):
+    def setEnabled(self, flag) -> None:
         self.timeline.setEnabled(flag)
         super().setEnabled(flag)
 
-    def setRestrictValue(self, value, force=False):
+    def setRestrictValue(self, value, force=False) -> None:
         self.restrictValue = value
 
-    def update(self):
+    def update(self) -> None:
         self.timeline.update()
 
     def clearRegions(self) -> None:
@@ -255,14 +277,13 @@ class ScalableTimeLine(QScrollArea):
         """maximum slider pixel position in PIXELS"""
         return self.timeline.width() - self.timeline.sliderAreaHorizontalOffset
 
-    def width(self):
+    def width(self) -> int:
         return self.width()
 
-    def setFixedWidth(self, width):
+    def setFixedWidth(self, width) -> None:
         super().setFixedWidth(width)
         self.timeline.setFixedWidth(width - 2)
 
-    def setFixedHeight(self, height):
+    def setFixedHeight(self, height) -> None:
         super().setFixedHeight(height)
         self.timeline.setFixedHeight(height - 16)
-

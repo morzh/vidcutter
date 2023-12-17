@@ -776,6 +776,7 @@ class VideoLabelingTool(QWidget):
             return
         self.currentMedia = filepath
         self.projectDirty, self.projectSaved = False, False
+        self.timeline.setEnabled(False)
         self.initMediaControls(True)
         self.totalRuntime = 0
         # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
@@ -897,7 +898,7 @@ class VideoLabelingTool(QWidget):
             self.timeline.setRestrictValue(0)
         else:
             self.timeline.setValue(0)
-            self.timeline.setRange(0, 0)
+            self.timeline.setDuration(0)
             self.timeCounter.reset()
             self.frameCounter.reset()
         self.saveProjectAction.setEnabled(False)
@@ -914,8 +915,8 @@ class VideoLabelingTool(QWidget):
     def on_positionChanged(self, progress: float, frame: int) -> None:
         progress *= 1000
         if self.timeline.restrictValue < progress or progress == 0:
-            print('on_positionChanged.progress:', progress)
-            self.timeline.setValue(int(progress))
+            # print('on_positionChanged.progress:', progress)
+            self.timeline.setValue(int(progress / 1e3))
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
             if self.clipIsPlayingIndex >= 0:
@@ -928,7 +929,7 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
         self.duration = duration
-        self.timeline.setRange(0, duration)
+        self.timeline.setDuration(duration)
         # self.videoSlider.baseMaximum = int(duration)
         # print('on_durationChanged', duration)
         # print('on_durationChanged, maximum', self.timeline.maximum())
