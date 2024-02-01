@@ -10,10 +10,8 @@ from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine, TimeLin
 class ScalableTimeLineWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.factor = 1
-        self.factorMaximum = 16
         self.mediaAvailable = True
-        self.sliderBaseWidth = 770
+        self.theme = 'dark'
 
         self.timeline = ScalableTimeLine(self)
         scrollAreaLayout = QVBoxLayout(self)
@@ -58,22 +56,12 @@ class ScalableTimeLineWindow(QWidget):
         pass
 
     def toolbarPlus(self):
-        if self.factor == 1:
-            self.factor += 1
-        else:
-            self.factor += 2
-        self.factor = TimeLine.clip(self.factor, 1, self.factorMaximum)
-        self.label_factor.setText(str(self.factor))
-        self.timeline.timeline.setFixedWidth(self.factor * self.sliderBaseWidth)
+        self.timeline.factor += 1
+        self.label_factor.setText(str(self.timeline.factor))
 
     def toolbarMinus(self):
-        if self.factor == 2:
-            self.factor -= 1
-        else:
-            self.factor -= 2
-        self.factor = TimeLine.clip(self.factor, 1, self.factorMaximum)
-        self.label_factor.setText(str(self.factor))
-        self.timeline.timeline.setFixedWidth(self.factor * self.sliderBaseWidth)
+        self.timeline.factor -= 1
+        self.label_factor.setText(str(self.timeline.factor))
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key_Home:

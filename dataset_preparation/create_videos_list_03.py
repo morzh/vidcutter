@@ -1,14 +1,17 @@
 import json
 import pickle
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 from PyQt5.QtCore import QTime
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QApplication
 from moviepy.editor import *
 
 from vidcutter.VideoItem import VideoItem
 from vidcutter.VideoList import VideoList
+
+from vidcutter.QPixmapPickle import QPixmapPickle
 
 ci_build_and_not_headless = False
 try:
@@ -23,7 +26,8 @@ if sys.platform.startswith("linux") and ci_and_not_headless:
     os.environ.pop("QT_QPA_FONTDIR")
 
 
-videos_list_path = '/home/anton/work/fitMate/datasets/ALEX_test_set_squats_001/'
+# videos_list_path = '/home/anton/work/fitMate/datasets/ALEX_test_set_squats_001/'
+videos_list_path = '/home/anton/work/fitMate/datasets/squats_2022_ten_frames'
 image_size = 128
 data_filename = 'data.pickle'
 
@@ -81,6 +85,8 @@ for video_file in video_files:
 
     video_file_clip.filename = video_file
     video_duration = video_file_clip.duration
+    video_fps = video_file_clip.fps
+    video_frames = video_duration * video_fps
     thumb = video_file_clip.get_frame(0.5 * video_duration)
 
     video_item_duration = QTime(0, 0)
@@ -99,18 +105,17 @@ for video_file in video_files:
     plt.show()
     '''
 
-    '''
     height, width, channel = thumb_cropped.shape
     bytesPerLine = 3 * width
     qt_image = QImage(thumb_cropped.data.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
     qt_image.scaledToWidth(image_size)
     qt_pixmap = QPixmap.fromImage(qt_image)
-    '''
+
 
     videoItem = VideoItem()
     videoItem.filename = video_file
     videoItem.duration = video_item_duration
-    videoItem.thumbnail = thumb_cropped
+    videoItem.thumbnail = QPixmapPickle(qt_pixmap)
     videoItem.youtubeId = youtube_id
 
     videos.append(videoItem)

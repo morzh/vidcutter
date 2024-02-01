@@ -4,21 +4,17 @@ import tempfile
 from base64 import b64encode
 
 import sys
+from copy import copy
+
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QPoint, QLine, QRect, QRectF, pyqtSignal
 from PyQt5.QtGui import QPainter, QKeyEvent, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath, QPixmap
-from PyQt5.QtWidgets import QDialog, QStylePainter, QWidget, QLineEdit, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
-
-from numpy import load
-
-__textColor__ = QColor(187, 187, 187)
-__backgroudColor__ = QColor(60, 63, 65)
-__font__ = QFont('Decorative', 10)
+from PyQt5.QtWidgets import QStyle, QStylePainter, QWidget, QStyleOptionSlider, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
 
 class TimeLine(QWidget):
-    sliderMoved = pyqtSignal(int)
+    sliderMoved = pyqtSignal(float)
 
     def __init__(self, parent=None):
         super().__init__()
@@ -33,24 +29,28 @@ class TimeLine(QWidget):
         self.majorTicksHeight = 20
         self.minorTicksHeight = 10
         self.timeLineHeight = 85
-        self.theme = 'dark'
-        self.setObjectName('videoslider')
+        self.setObjectName('timeline')
 
         # Set variables
-        self.backgroundColor = __backgroudColor__
-        self.textColor = __textColor__
-        self.font = __font__
+        self.backgroundColor = QColor('#1b2326') if self.parent.theme == 'dark' else QColor(187, 187, 187)
+        self.textColor = QColor(190, 190, 190) if self.parent.theme == 'dark' else Qt.black
+        self.font = QFont('Decorative', 10)
         self.pos = None
         self.pointerPixelPosition = None
         self.pointerTimePosition = None
         self.selectedSample = None
         self.clicking = False  # Check if mouse left button is being pressed
         self.is_in = False  # check if user is in the widget
+        self.setObjectName('timeline')
+        # self.parent.mpvWidget.positionChanged.connect(self.positionChanged)
 
         self.setMouseTracking(True)  # Mouse events
         self.setAutoFillBackground(True)  # background
-
         self.initAttributes()
+
+
+    def positionChanged(self):
+        print('positionChanged')
 
     def initAttributes(self):
         self.setFixedWidth(self.length)
@@ -65,6 +65,7 @@ class TimeLine(QWidget):
         y = self.rect().top() + self.sliderAreaTopOffset + self.sliderAreaHeight + 8
         tickStep = 20
         timeTickStep = tickStep * 5
+        tickColor = QColor('#8F8F8F' if self.parent.theme == 'dark' else '#444')
         millisecondsFlag = True if self.getTimeString(0) == self.getTimeString(timeTickStep * scale) else False
 
         for i in range(0, self.width() - 2 * self.sliderAreaHorizontalOffset, tickStep):
@@ -72,23 +73,23 @@ class TimeLine(QWidget):
             if i % timeTickStep == 0:
                 h, w, z = 30, 1, 10
                 if i < self.width() - (tickStep * 5):
-                    painter.setPen(Qt.white if self.theme == 'dark' else Qt.black)
+                    painter.setPen(self.textColor)
                     timecode = self.getTimeString(i * scale, millisecondsFlag)
                     painter.drawText(x + 5, y + 25, timecode)
             else:
                 h, w, z = 8, 1, 10
 
-            tickColor = QColor('#8F8F8F' if self.theme == 'dark' else '#444')
             pen = QPen(tickColor)  # , Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
             pen.setWidthF(w)
             painter.setPen(pen)
             painter.drawLine(x, y, x, y + h)
 
     def drawSlider_(self, painter):
+        # print('self.pointerPixelPosition', self.pointerPixelPosition)
         if self.pos is not None and self.is_in:
             x = self.clip(self.pos.x(), self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             painter.drawLine(x, self.sliderAreaTopOffset, x, self.timeLineHeight)
-
+            # print('drawSlider_::self.pos.x()', self.pos.x(), x)
         if self.pointerPixelPosition is not None:
             x = int(self.pointerPixelPosition)
             y = self.sliderAreaTopOffset - 1
@@ -105,20 +106,59 @@ class TimeLine(QWidget):
         painter.drawPolygon(sliderHandle)
         painter.drawLine(line)
 
-    def paintEvent(self, event):
-        painter = QPainter()
-        painter.begin(self)
-        painter.setPen(self.textColor)
-        painter.setFont(self.font)
-        # painter.setRenderHint(QPainter.Antialiasing)
+    def drawFrame_(self, painter):
+        if self.isEnabled():
+            painter.setPen(self.textColor)
+        else:
+            painter.setPen(QColor(60, 60, 60))
 
         painter.drawRoundedRect(self.sliderAreaHorizontalOffset, self.sliderAreaTopOffset,
                                 self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight,
                                 3, 3)
 
+    def drawClips_(self, painter: QStylePainter, opt: QStyleOptionSlider):
+        # opt = QStyleOptionSlider()
+        opt.subControls = QStyle.SC_SliderGroove
+        painter.drawComplexControl(QStyle.CC_Slider, opt)
+        videoIndex = self.parent.videoList.currentVideoIndex
+        if not len(self._progressbars):
+            if len(self._regions) == len(self._regionsVisibility):  # should always be true
+                visible_region = self.visibleRegion().boundingRect()
+                for index, (rect, rectViz) in enumerate(zip(self._regions, self._regionsVisibility)):
+                    if rectViz == 0:
+                        continue
+                    rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
+                    rect.setHeight(self._regionHeight)
+                    rectClass = rect.adjusted(0, 0, 0, 0)
+                    brushColor = QColor(150, 190, 78, 150) if self._regions.index(rect) == self._regionSelected else QColor(237, 242, 255, 150)
+                    painter.setBrush(brushColor)
+                    painter.setPen(QColor(50, 50, 50, 170))
+                    painter.setRenderHints(QPainter.HighQualityAntialiasing)
+                    painter.drawRoundedRect(rect, 2, 2)
+                    painter.setFont(QFont('Noto Sans', 13 if sys.platform == 'darwin' else 11, QFont.SansSerif))
+                    painter.setPen(Qt.black if self.theme == 'dark' else Qt.white)
+                    rectClass = rectClass.intersected(visible_region)
+                    rectClass = rectClass.adjusted(5, 0, -5, 0)
+                    actionClassIndex = self.parent.videoList[videoIndex].clips[index].actionClassIndex
+                    if actionClassIndex == -1:
+                        actionClassLabel = copy(self.parent.videoList.actionClassUnknownLabel)
+                    else:
+                        actionClassLabel = copy(self.parent.videoList.actionClassesLabels[actionClassIndex])
+                    painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
+        opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
+        painter.drawComplexControl(QStyle.CC_Slider, opt)
+
+    def paintEvent(self, event):
+        opt = QStyleOptionSlider()
+        painter = QPainter()
+        painter.begin(self)
+        painter.setFont(self.font)
+        # painter.setRenderHint(QPainter.Antialiasing)
+        self.drawFrame_(painter)
         if self.isEnabled():
             self.drawTicks_(painter)
             self.drawSlider_(painter)
+            self.drawClips_(painter, opt)
         painter.end()
 
     # Mouse movement
@@ -135,16 +175,22 @@ class TimeLine(QWidget):
     # Mouse pressed
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            x = event.pos().x()
-            self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
-            self.pointerTimePosition = (self.pointerPixelPosition - self.sliderAreaHorizontalOffset) * self.getScale()
-            self.sliderMoved.emit(int(self.pointerTimePosition * 1000))
-            self.update()
+            # x = event.pos().x()
+            # self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
+            # self.pointerTimePosition = (self.pointerPixelPosition - self.sliderAreaHorizontalOffset) * self.getScale()
+            # self.sliderMoved.emit(self.pointerTimePosition)
+            # self.update()
             self.clicking = True  # Set clicking check to true
 
     # Mouse release
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
+            x = event.pos().x()
+            self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
+            self.pointerTimePosition = (self.pointerPixelPosition - self.sliderAreaHorizontalOffset) * self.getScale()
+            # print('mousePressEvent::self.pointerTimePosition', self.pointerTimePosition)
+            self.sliderMoved.emit(self.pointerTimePosition)
+            self.update()
             self.clicking = False  # Set clicking check to false
 
     # Enter
@@ -197,12 +243,14 @@ class ScalableTimeLine(QScrollArea):
         self.restrictValue = 0
         self.factor_ = 1
         self.maximumFactor_ = 20
-        self.baseWidth_ = 100
+        self.baseWidth_ = 800
+        self.theme = 'dark'
 
         self.timeline = TimeLine(self)
         self.setWidget(self.timeline)
         self.setAlignment(Qt.AlignVCenter)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setObjectName('scalable_timeline')
 
     def initAttributes(self) -> None:
         self.setEnabled(False)
@@ -214,7 +262,7 @@ class ScalableTimeLine(QScrollArea):
 
     @baseWidth.setter
     def baseWidth(self, value: int) -> None:
-        if value > 0:
+        if value >= 1:
             self.baseWidth_ = value
 
     @property
@@ -223,9 +271,8 @@ class ScalableTimeLine(QScrollArea):
 
     @factor.setter
     def factor(self, value: int) -> None:
-        if value >= 1:
-            self.factor_ = value
-            self.timeline.setFixedWidth(self.baseWidth_ * self.factor_)
+        self.factor_ = TimeLine.clip(value, 1, self.maximumFactor_)
+        self.timeline.setFixedWidth(self.factor_ * self.baseWidth_ - 2)
 
     @property
     def maximumFactor(self) -> int:
@@ -233,7 +280,8 @@ class ScalableTimeLine(QScrollArea):
 
     @maximumFactor.setter
     def maximumFactor(self, value: int) -> None:
-        self.maximumFactor_ = value
+        if value >= 1:
+            self.maximumFactor_ = value
 
     def value(self) -> float:
         return self.timeline.pointerTimePosition
@@ -241,13 +289,13 @@ class ScalableTimeLine(QScrollArea):
     def setDuration(self, duration) -> None:
         self.timeline.duration = duration
 
-    def setValue(self, seconds: int) -> None:
+    def setValue(self, seconds: str | float) -> None:
         try:
             seconds = float(seconds)
             self.timeline.pointerPixelPosition = round(seconds / self.timeline.getScale() + self.timeline.sliderAreaHorizontalOffset)
             self.timeline.pointerTimePosition = seconds
             self.timeline.update()
-        except ValueError('seconds should be in float number format'):
+        except ValueError('seconds should be in the float number format'):
             return
 
     def setEnabled(self, flag) -> None:
@@ -259,6 +307,7 @@ class ScalableTimeLine(QScrollArea):
 
     def update(self) -> None:
         self.timeline.update()
+        super().update()
 
     def clearRegions(self) -> None:
         pass
@@ -282,7 +331,8 @@ class ScalableTimeLine(QScrollArea):
 
     def setFixedWidth(self, width) -> None:
         super().setFixedWidth(width)
-        self.timeline.setFixedWidth(width - 2)
+        self.baseWidth_ = width
+        self.timeline.setFixedWidth(self.factor_ * self.baseWidth_ - 2)
 
     def setFixedHeight(self, height) -> None:
         super().setFixedHeight(height)

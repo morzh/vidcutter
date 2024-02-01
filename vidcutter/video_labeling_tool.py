@@ -758,7 +758,7 @@ class VideoLabelingTool(QWidget):
 
         if self._dataFolder is not None:
             self.lastFolder = QFileInfo(self._dataFolder).absolutePath()
-            print('lastFolder', self.lastFolder)
+            # print('lastFolder', self.lastFolder)
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
@@ -793,6 +793,7 @@ class VideoLabelingTool(QWidget):
             self.timeline.setEnabled(True)
             self.timeline.currentRectangleIndex = -1
             self.timeline.setFocus()
+            self.timeline.factor = 1
 
             self.mediaAvailable = True
             self.timelineMinusButton.button.setEnabled(True)
@@ -903,20 +904,21 @@ class VideoLabelingTool(QWidget):
             self.frameCounter.reset()
         self.saveProjectAction.setEnabled(False)
 
-    @pyqtSlot(int)
-    def setPosition(self, position: int) -> None:
+    @pyqtSlot(float)
+    def setPosition(self, position: float) -> None:
         # print('setPosition', position)
         if position >= self.timeline.restrictValue:
-            self.mpvWidget.seek(position / 1e3)
-        # self.update()
+            self.mpvWidget.seek(position)
+        self.update()
         # self.repaint()
 
     @pyqtSlot(float, int)
     def on_positionChanged(self, progress: float, frame: int) -> None:
+        # print('on_positionChanged::progress', progress)
         progress *= 1000
         if self.timeline.restrictValue < progress or progress == 0:
             # print('on_positionChanged.progress:', progress)
-            self.timeline.setValue(int(progress / 1e3))
+            self.timeline.setValue(progress / 1e3)
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
             if self.clipIsPlayingIndex >= 0:

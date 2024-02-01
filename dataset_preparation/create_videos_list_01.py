@@ -26,7 +26,7 @@ if sys.platform.startswith("linux") and ci_and_not_headless:
     os.environ.pop("QT_QPA_FONTDIR")
 
 
-videos_list_path = '/home/anton/work/fitMate/datasets/ALEX_test_set_squats_001/'
+videos_list_path = '/home/anton/work/fitMate/datasets/squats_2022_ten_frames'
 image_size = 128
 data_filename = 'data.pickle'
 
