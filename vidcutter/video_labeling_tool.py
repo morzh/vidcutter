@@ -1103,7 +1103,7 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot()
     @pyqtSlot(bool)
     def setProjectDirty(self, dirty: bool = True) -> None:
-        print('setProjectDirty')
+        # print('setProjectDirty')
         self.projectDirty = dirty
 
     # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal

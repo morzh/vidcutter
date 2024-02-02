@@ -5,6 +5,7 @@ from base64 import b64encode
 
 import sys
 from copy import copy
+from enum import Enum
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication
@@ -12,9 +13,23 @@ from PyQt5.QtCore import Qt, QPoint, QLine, QRect, QRectF, pyqtSignal
 from PyQt5.QtGui import QPainter, QKeyEvent, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath, QPixmap
 from PyQt5.QtWidgets import QStyle, QStylePainter, QWidget, QStyleOptionSlider, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
+from vidcutter.VideoItemClip import VideoItemClip
+
 
 class TimeLine(QWidget):
     sliderMoved = pyqtSignal(float)
+
+    class CursorStates(Enum):
+        cursorOnBeginSide = 1
+        cursorOnEndSide = 2
+        cursorIsInside = 3
+
+    class RectangleEditState(Enum):
+        freeState = 1
+        buildingSquare = 2
+        beginSideEdit = 3
+        endSideEdit = 4
+        rectangleMove = 5
 
     def __init__(self, parent=None):
         super().__init__()
@@ -48,9 +63,49 @@ class TimeLine(QWidget):
         self.setAutoFillBackground(True)  # background
         self.initAttributes()
 
+        self._progressbars = []
+        self._regions = []
+        self._regionsVisibility = []
+        self._regionSelected = -1
+        self.currentRectangleIndex = -1
 
-    def positionChanged(self):
-        print('positionChanged')
+    def renderVideoSegments(self, clips: list[VideoItemClip]):
+        self.clearRegions()
+        for videoClip in clips:
+            clipStart = videoClip.timeStart.msecsSinceStartOfDay()
+            clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
+            clipVisibility = videoClip.visibility
+            self.addRegion(clipStart, clipEnd, clipVisibility)
+        self.update()
+
+    def addRegion(self, start: int, end: int, visibility=2) -> None:
+        regionStart = self.sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        regionEnd = self.sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
+        # regionStart = int(start / (1e3 * self.parent.duration) * self.width())
+        # regionEnd = int(end / (1e3 * self.parent.duration) * self.width())
+        width = regionEnd - regionStart
+        y = int((self.height() - self._regionHeight) / 2)
+        height = self._regionHeight
+        self._regions.append(QRect(regionStart + self.offset, y - 8, width, height))
+        self._regionsVisibility.append(visibility)
+        self.update()
+
+    def switchRegions(self, index1: int, index2: int) -> None:
+        region = self._regions.pop(index1)
+        regionVisibility = self._regionsVisibility.pop(index1)
+        self._regions.insert(index2, region)
+        self._regionsVisibility.insert(index2, regionVisibility)
+        self.update()
+
+    def selectRegion(self, clipindex: int) -> None:
+        self._regionSelected = clipindex
+        self.update()
+
+    def clearRegions(self) -> None:
+        self._regions.clear()
+        self._regionsVisibility.clear()
+        self._regionSelected = -1
+        self.update()
 
     def initAttributes(self):
         self.setFixedWidth(self.length)
@@ -118,9 +173,9 @@ class TimeLine(QWidget):
 
     def drawClips_(self, painter: QStylePainter, opt: QStyleOptionSlider):
         # opt = QStyleOptionSlider()
-        opt.subControls = QStyle.SC_SliderGroove
-        painter.drawComplexControl(QStyle.CC_Slider, opt)
-        videoIndex = self.parent.videoList.currentVideoIndex
+        # opt.subControls = QStyle.SC_SliderGroove
+        # painter.drawComplexControl(QStyle.CC_Slider, opt)
+        videoIndex = self.parent.parent.videoList.currentVideoIndex
         if not len(self._progressbars):
             if len(self._regions) == len(self._regionsVisibility):  # should always be true
                 visible_region = self.visibleRegion().boundingRect()
@@ -145,20 +200,76 @@ class TimeLine(QWidget):
                     else:
                         actionClassLabel = copy(self.parent.videoList.actionClassesLabels[actionClassIndex])
                     painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
-        opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
-        painter.drawComplexControl(QStyle.CC_Slider, opt)
+        # opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
+        # painter.drawComplexControl(QStyle.CC_Slider, opt)
+
+    def drawCLipsEditMode_(self, painter: QStylePainter):
+        glowAlpha = 150
+        highlightColor = QColor(190, 85, 200, 255)
+        glowColor = QColor(255, 255, 255, glowAlpha)
+        maximumGradientSteps = copy(self._regions[self.currentRectangleIndex].width())
+        maximumGradientSteps = int(maximumGradientSteps)
+        numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
+
+        if self.freeCursorOnSide == self.CursorStates.cursorOnBeginSide:
+            begin = copy(self._regions[self.currentRectangleIndex].topLeft())
+            end = copy(self._regions[self.currentRectangleIndex].bottomLeft())
+            coordinateX = begin.x()
+            begin.setX(coordinateX + self.regionOutlineWidth)
+            end.setX(coordinateX + self.regionOutlineWidth)
+            step = int(glowAlpha / numberGradientSteps)
+            for index_step in range(numberGradientSteps):
+                begin.setX(coordinateX + index_step)
+                end.setX(coordinateX + index_step)
+                glowColor.setAlpha(glowAlpha - step * index_step)
+                painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
+                painter.drawLine(begin, end)
+
+            begin = self._regions[self.currentRectangleIndex].topLeft()
+            end = self._regions[self.currentRectangleIndex].bottomLeft()
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
+            painter.drawLine(begin, end)
+
+        elif self.freeCursorOnSide == self.CursorStates.cursorOnEndSide:
+            begin = copy(self._regions[self.currentRectangleIndex].topRight())
+            end = copy(self._regions[self.currentRectangleIndex].bottomRight())
+            coordinateX = end.x()
+            begin.setX(coordinateX - self.regionOutlineWidth)
+            end.setX(coordinateX - self.regionOutlineWidth)
+            step = int(glowAlpha / numberGradientSteps)
+            for index_step in range(numberGradientSteps):
+                begin.setX(coordinateX - index_step)
+                end.setX(coordinateX - index_step)
+                glowColor.setAlpha(glowAlpha - step * index_step)
+                painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
+                painter.drawLine(begin, end)
+
+            begin = self._regions[self.currentRectangleIndex].topRight()
+            end = self._regions[self.currentRectangleIndex].bottomRight()
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
+            painter.drawLine(begin, end)
+        elif self.freeCursorOnSide == self.CursorStates.cursorIsInside:
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
+            brushColor = QColor(237, 242, 255, 150)
+            painter.setBrush(brushColor)
+            painter.setRenderHints(QPainter.HighQualityAntialiasing)
+            painter.drawRoundedRect(self._regions[self.currentRectangleIndex], 2, 2)
 
     def paintEvent(self, event):
         opt = QStyleOptionSlider()
         painter = QPainter()
         painter.begin(self)
-        painter.setFont(self.font)
         # painter.setRenderHint(QPainter.Antialiasing)
         self.drawFrame_(painter)
         if self.isEnabled():
+            painter.setFont(self.font)
             self.drawTicks_(painter)
             self.drawSlider_(painter)
             self.drawClips_(painter, opt)
+            # if not self.freeCursorOnSide:
+            #     return
+            # self.drawCLipsEditMode_(painter)
+
         painter.end()
 
     # Mouse movement
@@ -218,7 +329,10 @@ class TimeLine(QWidget):
 
     # Get scale from length
     def getScale(self) -> float:
-        return float(self.duration) / float(self.width() - 2 * self.sliderAreaHorizontalOffset)
+        if self.duration < 1e-6:
+            return 1.0
+        else:
+            return float(self.duration) / float(self.width() - 2 * self.sliderAreaHorizontalOffset)
 
     def getDuration(self) -> float:
         return self.duration
