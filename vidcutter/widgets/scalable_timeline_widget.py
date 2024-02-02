@@ -63,49 +63,14 @@ class TimeLine(QWidget):
         self.setAutoFillBackground(True)  # background
         self.initAttributes()
 
-        self._progressbars = []
-        self._regions = []
-        self._regionsVisibility = []
-        self._regionSelected = -1
         self.currentRectangleIndex = -1
 
-    def renderVideoSegments(self, clips: list[VideoItemClip]):
-        self.clearRegions()
-        for videoClip in clips:
-            clipStart = videoClip.timeStart.msecsSinceStartOfDay()
-            clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
-            clipVisibility = videoClip.visibility
-            self.addRegion(clipStart, clipEnd, clipVisibility)
-        self.update()
+        self.progressbars_ = []
+        self.regions_ = []
+        self.regionsVisibility_ = []
+        self.regionSelected_ = -1
+        self.regionHeight_ = 20
 
-    def addRegion(self, start: int, end: int, visibility=2) -> None:
-        regionStart = self.sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
-        regionEnd = self.sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
-        # regionStart = int(start / (1e3 * self.parent.duration) * self.width())
-        # regionEnd = int(end / (1e3 * self.parent.duration) * self.width())
-        width = regionEnd - regionStart
-        y = int((self.height() - self._regionHeight) / 2)
-        height = self._regionHeight
-        self._regions.append(QRect(regionStart + self.offset, y - 8, width, height))
-        self._regionsVisibility.append(visibility)
-        self.update()
-
-    def switchRegions(self, index1: int, index2: int) -> None:
-        region = self._regions.pop(index1)
-        regionVisibility = self._regionsVisibility.pop(index1)
-        self._regions.insert(index2, region)
-        self._regionsVisibility.insert(index2, regionVisibility)
-        self.update()
-
-    def selectRegion(self, clipindex: int) -> None:
-        self._regionSelected = clipindex
-        self.update()
-
-    def clearRegions(self) -> None:
-        self._regions.clear()
-        self._regionsVisibility.clear()
-        self._regionSelected = -1
-        self.update()
 
     def initAttributes(self):
         self.setFixedWidth(self.length)
@@ -172,26 +137,26 @@ class TimeLine(QWidget):
                                 3, 3)
 
     def drawClips_(self, painter: QStylePainter, opt: QStyleOptionSlider):
-        # opt = QStyleOptionSlider()
-        # opt.subControls = QStyle.SC_SliderGroove
+        opt = QStyleOptionSlider()
+        # opt.subControls = QStyle.SC_CustomBase
         # painter.drawComplexControl(QStyle.CC_Slider, opt)
         videoIndex = self.parent.parent.videoList.currentVideoIndex
-        if not len(self._progressbars):
-            if len(self._regions) == len(self._regionsVisibility):  # should always be true
+        if not len(self.progressbars_):
+            if len(self.regions_) == len(self.regionsVisibility_):  # should always be true
                 visible_region = self.visibleRegion().boundingRect()
-                for index, (rect, rectViz) in enumerate(zip(self._regions, self._regionsVisibility)):
+                for index, (rect, rectViz) in enumerate(zip(self.regions_, self.regionsVisibility_)):
                     if rectViz == 0:
                         continue
-                    rect.setY(int((self.height() - self._regionHeight) / 2) - 8)
-                    rect.setHeight(self._regionHeight)
+                    rect.setY(int((self.height() - self.regionHeight_) / 2) - 13)
+                    rect.setHeight(self.regionHeight_)
                     rectClass = rect.adjusted(0, 0, 0, 0)
-                    brushColor = QColor(150, 190, 78, 150) if self._regions.index(rect) == self._regionSelected else QColor(237, 242, 255, 150)
+                    brushColor = QColor(150, 190, 78, 150) if self.regions_.index(rect) == self.regionSelected_ else QColor(237, 242, 255, 150)
                     painter.setBrush(brushColor)
                     painter.setPen(QColor(50, 50, 50, 170))
                     painter.setRenderHints(QPainter.HighQualityAntialiasing)
                     painter.drawRoundedRect(rect, 2, 2)
                     painter.setFont(QFont('Noto Sans', 13 if sys.platform == 'darwin' else 11, QFont.SansSerif))
-                    painter.setPen(Qt.black if self.theme == 'dark' else Qt.white)
+                    painter.setPen(Qt.black if self.parent.theme == 'dark' else Qt.white)
                     rectClass = rectClass.intersected(visible_region)
                     rectClass = rectClass.adjusted(5, 0, -5, 0)
                     actionClassIndex = self.parent.videoList[videoIndex].clips[index].actionClassIndex
@@ -207,13 +172,13 @@ class TimeLine(QWidget):
         glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
         glowColor = QColor(255, 255, 255, glowAlpha)
-        maximumGradientSteps = copy(self._regions[self.currentRectangleIndex].width())
+        maximumGradientSteps = copy(self.regions_[self.currentRectangleIndex].width())
         maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
         if self.freeCursorOnSide == self.CursorStates.cursorOnBeginSide:
-            begin = copy(self._regions[self.currentRectangleIndex].topLeft())
-            end = copy(self._regions[self.currentRectangleIndex].bottomLeft())
+            begin = copy(self.regions_[self.currentRectangleIndex].topLeft())
+            end = copy(self.regions_[self.currentRectangleIndex].bottomLeft())
             coordinateX = begin.x()
             begin.setX(coordinateX + self.regionOutlineWidth)
             end.setX(coordinateX + self.regionOutlineWidth)
@@ -225,14 +190,14 @@ class TimeLine(QWidget):
                 painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
                 painter.drawLine(begin, end)
 
-            begin = self._regions[self.currentRectangleIndex].topLeft()
-            end = self._regions[self.currentRectangleIndex].bottomLeft()
+            begin = self.regions_[self.currentRectangleIndex].topLeft()
+            end = self.regions_[self.currentRectangleIndex].bottomLeft()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
 
         elif self.freeCursorOnSide == self.CursorStates.cursorOnEndSide:
-            begin = copy(self._regions[self.currentRectangleIndex].topRight())
-            end = copy(self._regions[self.currentRectangleIndex].bottomRight())
+            begin = copy(self.regions_[self.currentRectangleIndex].topRight())
+            end = copy(self.regions_[self.currentRectangleIndex].bottomRight())
             coordinateX = end.x()
             begin.setX(coordinateX - self.regionOutlineWidth)
             end.setX(coordinateX - self.regionOutlineWidth)
@@ -244,8 +209,8 @@ class TimeLine(QWidget):
                 painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
                 painter.drawLine(begin, end)
 
-            begin = self._regions[self.currentRectangleIndex].topRight()
-            end = self._regions[self.currentRectangleIndex].bottomRight()
+            begin = self.regions_[self.currentRectangleIndex].topRight()
+            end = self.regions_[self.currentRectangleIndex].bottomRight()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.freeCursorOnSide == self.CursorStates.cursorIsInside:
@@ -253,7 +218,7 @@ class TimeLine(QWidget):
             brushColor = QColor(237, 242, 255, 150)
             painter.setBrush(brushColor)
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
-            painter.drawRoundedRect(self._regions[self.currentRectangleIndex], 2, 2)
+            painter.drawRoundedRect(self.regions_[self.currentRectangleIndex], 2, 2)
 
     def paintEvent(self, event):
         opt = QStyleOptionSlider()
@@ -312,6 +277,9 @@ class TimeLine(QWidget):
     def leaveEvent(self, event):
         self.is_in = False
         self.update()
+
+    def timeToPixelPosition(self, time: float):
+        pass
 
     @staticmethod
     def clip(value, minimum, maximum):
@@ -403,10 +371,13 @@ class ScalableTimeLine(QScrollArea):
     def setDuration(self, duration) -> None:
         self.timeline.duration = duration
 
+    def secondsToPixelPosition(self, seconds: float) -> int:
+        return round(seconds / self.timeline.getScale() + self.timeline.sliderAreaHorizontalOffset)
+
     def setValue(self, seconds: str | float) -> None:
         try:
             seconds = float(seconds)
-            self.timeline.pointerPixelPosition = round(seconds / self.timeline.getScale() + self.timeline.sliderAreaHorizontalOffset)
+            self.timeline.pointerPixelPosition = self.secondsToPixelPosition(seconds)
             self.timeline.pointerTimePosition = seconds
             self.timeline.update()
         except ValueError('seconds should be in the float number format'):
@@ -423,8 +394,46 @@ class ScalableTimeLine(QScrollArea):
         self.timeline.update()
         super().update()
 
+    def renderVideoSegments(self, clips: list[VideoItemClip]):
+        self.timeline.clearRegions()
+        for videoClip in clips:
+            clipStart = videoClip.timeStart.msecsSinceStartOfDay()
+            clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
+            clipVisibility = videoClip.visibility
+            self.addRegion(clipStart.msecsSinceStartOfDay() * 1e-3, clipEnd.msecsSinceStartOfDay() * 1e-3, clipVisibility)
+        self.update()
+
+    def addRegion(self, start: float, end: float, visibility=2) -> None:
+
+        regionStart = self.secondsToPixelPosition(start)
+        regionEnd = self.secondsToPixelPosition(end)
+
+        # regionStart = self.sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        # regionEnd = self.sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
+
+        width = regionEnd - regionStart
+        y = int((self.height() - self.timeline.regionHeight_) / 2)
+        height = self.timeline.regionHeight_
+        self.timeline.regions_.append(QRect(regionStart, y, width, height))
+        self.timeline.regionsVisibility_.append(visibility)
+        self.update()
+
+    def switchRegions(self, index1: int, index2: int) -> None:
+        region = self.timeline.regions_.pop(index1)
+        regionVisibility = self._regionsVisibility.pop(index1)
+        self.timeline.regions_.insert(index2, region)
+        self.timeline.regionsVisibility_.insert(index2, regionVisibility)
+        self.update()
+
+    def selectRegion(self, clipindex: int) -> None:
+        self.timeline.regionSelected_ = clipindex
+        self.update()
+
     def clearRegions(self) -> None:
-        pass
+        self.timeline.regions_.clear()
+        self.timeline.regionsVisibility_.clear()
+        self.timeline.regionSelected_ = -1
+        self.update()
 
     def updateProgress(self, region: int = None) -> None:
         pass
@@ -451,3 +460,6 @@ class ScalableTimeLine(QScrollArea):
     def setFixedHeight(self, height) -> None:
         super().setFixedHeight(height)
         self.timeline.setFixedHeight(height - 16)
+
+    def sliderPositionFromValue(self, minimum: int, maximum: int, logicalValue: int, span: int) -> int:
+        return int(float(logicalValue) / float(maximum - minimum) * span)

@@ -150,7 +150,7 @@ class VideoClipsListWidget(QListWidget):
         self.parent.timeline.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
-            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.clipsHasRendered = True
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
@@ -185,7 +185,8 @@ class VideoClipsListWidget(QListWidget):
             listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
-            # self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay(), videoClip.timeEnd.msecsSinceStartOfDay(), videoClip.visibility)
+            # self.parent.timeline.addRegion(videoClip.timeStart, videoClip.timeEnd, videoClip.visibility)
+            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 
