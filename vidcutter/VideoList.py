@@ -7,7 +7,7 @@ from sortedcontainers import SortedList
 
 
 class VideoList:
-    def __init__(self, video_issues: list[str], actionLabels: list[str]):
+    def __init__(self, video_issues: list[str] = (), actionLabels: list[str] = ()):
         self._description: str = ''
         self._currentVideoIndex: int = 0
         self.videos: list[VideoItem] = []

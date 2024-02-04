@@ -160,7 +160,7 @@ class VideoClipsListWidget(QListWidget):
         scrollBarValue = self.verticalScrollBar().value()
         self.clipsHasRendered = False
         self.clear()
-        self.parent.timeline.clearRegions()
+        self.parent.scalableTimeline.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
             briefInfo = 'Here should ba a tooltip'
@@ -186,7 +186,7 @@ class VideoClipsListWidget(QListWidget):
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
             # self.parent.timeline.addRegion(videoClip.timeStart, videoClip.timeEnd, videoClip.visibility)
-            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
+            self.parent.scalableTimeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 
