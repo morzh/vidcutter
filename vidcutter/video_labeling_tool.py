@@ -39,7 +39,7 @@ from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMe
 
 from vidcutter.VideoItemClip import VideoItemClip
 
-from vidcutter.widgets.timeline_widget import TimelineWidget
+from vidcutter.widgets.timeline_widget__ import TimelineWidget
 from vidcutter.widgets.video_list_widget import VideoListWidget
 from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine
 from vidcutter.QPixmapPickle import QPixmapPickle
@@ -347,39 +347,17 @@ class VideoLabelingTool(QWidget):
         self.toolbarPlaybackSpeed.comboBox.setCurrentIndex(index)
 
     @pyqtSlot()
-    def toolbarPlus(self):
-        factor_ = copy.copy(self.factor)
-        if self.factor == 1:
-            self.factor += 1
-        else:
-            self.factor += 2
-        self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
-        # sliderValueMillis = int(self.videoSlider.value() / factor_)
-        self.setTimelineSize()
-        # self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum))
-        self.timelineFactorLabel.setText(str(self.factor))
+    def toolbarMinus(self):
+        self.scalableTimeline.factor -= 1
+        self.timelineFactorLabel.setText(str(self.scalableTimeline.factor))
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
-        # self.setPosition(sliderValueMillis + 1)
-        # print('videoSlider.maximum()', self.timeline.maximum())
-        # print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
 
     @pyqtSlot()
-    def toolbarMinus(self):
-        factor_ = copy.copy(self.factor)
-        if self.factor == 2:
-            self.factor -= 1
-        else:
-            self.factor -= 2
-        self.factor = self.clip(self.factor, self.factor_minimum, self.factor_maximum)
-        # self.videoSlider.setMaximum(int(self.videoSlider.baseMaximum))
-        self.timelineFactorLabel.setText(str(self.factor))
-        self.setTimelineSize()
-        if self.parent.isEnabled() and self.mediaAvailable:
-            self.renderSliderVideoClips()
-        # self.setPosition(sliderValueMillis - 1)
-        # print('videoSlider.maximum()', self.timeline.maximum())
-        # print('self.videoSlider.baseMaximum', self.timeline.baseMaximum)
+    def toolbarPlus(self):
+        self.scalableTimeline.factor += 1
+        self.timelineFactorLabel.setText(str(self.scalableTimeline.factor))
+
 
     @pyqtSlot()
     def showAppMenu(self) -> None:
@@ -781,12 +759,12 @@ class VideoLabelingTool(QWidget):
             self.scalableTimeline.factor = 1
 
             self.mediaAvailable = True
-            self.timelineMinusButton.button.setEnabled(True)
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
+            self.timelineMinusButton.button.setEnabled(True)
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
-            self.setPosition(self.scalableTimeline.minimum())
+            self.setPosition(0.0)
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
@@ -949,7 +927,7 @@ class VideoLabelingTool(QWidget):
             itemState = item.checkState()
             self.videoList.videos[self.videoList.currentVideoIndex].clips[itemIndex].visibility = itemState
             self.scalableTimeline.setRegionVizivility(itemIndex, itemState)
-            self.scalableTimeline.update()
+            self.scalableTimeline.repaint()
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
@@ -964,7 +942,6 @@ class VideoLabelingTool(QWidget):
             elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
                 self.playMediaTimeClip(row)
             else:
-                # if not len(self.clipTimes[row][3]):
                 self.scalableTimeline.selectRegion(row)
         except:
             self.doPass()
@@ -1118,7 +1095,7 @@ class VideoLabelingTool(QWidget):
         self.scalableTimeline.clearRegions()
         self.totalRuntime = 0
         # force to update sorted list
-        self.videoClipsList.renderSliderVideoCLips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
+        self.videoClipsList.renderTimelineVideoCLips(self.videoList.videos[self.videoList.currentVideoIndex].clips)
 
     def renderVideoClips(self) -> None:
         if not self.mediaAvailable:

@@ -145,12 +145,12 @@ class VideoClipsListWidget(QListWidget):
         self._mouseButton = event.button()
         super(VideoClipsListWidget, self).mousePressEvent(event)
 
-    def renderSliderVideoCLips(self, videoClipItems: list[VideoItemClip]) -> None:
+    def renderTimelineVideoCLips(self, videoClipItems: list[VideoItemClip]) -> None:
         self.clipsHasRendered = False
-        self.parent.timeline.clearRegions()
+        self.parent.scalableTimeline.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
-            self.parent.timeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
+            self.parent.scalableTimeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.clipsHasRendered = True
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
@@ -185,7 +185,7 @@ class VideoClipsListWidget(QListWidget):
             listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
-            # self.parent.timeline.addRegion(videoClip.timeStart, videoClip.timeEnd, videoClip.visibility)
+            # self.parent.scalableTimeline.addRegion(videoClip.timeStart, videoClip.timeEnd, videoClip.visibility)
             self.parent.scalableTimeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
@@ -196,12 +196,12 @@ class VideoClipsListWidget(QListWidget):
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = -1
         else:
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = value
-        self.parent.timeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
+        self.parent.scalableTimeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
 
     def checkBoxStateChanged(self, state, clipIndex: int):
         indexVideo = self.parent.videoList.currentVideoIndex
         self.parent.videoList[indexVideo].clips[clipIndex].visibility = state
-        self.parent.timeline.setRegionVizivility(clipIndex, state)
+        self.parent.scalableTimeline.setClipVisibility(clipIndex, state)
 
     def timeStartChanged(self, time, clipIndex):
         videoIndex = self.parent.videoList.currentVideoIndex
@@ -228,7 +228,7 @@ class VideoClipsListWidget(QListWidget):
     def timeEndChanged(self, time, clipIndex):
         videoIndex = self.parent.videoList.currentVideoIndex
         self.parent.videoList[videoIndex].clips[clipIndex].timeEnd = time
-        self.parent.timeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
+        self.parent.scalableTimeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
 
     # def showProgress(self, steps: int) -> None:
     #     for row in range(self.count()):

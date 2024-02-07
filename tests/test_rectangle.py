@@ -73,8 +73,8 @@ class MyWidget(QWidget):
         return 0
 
     def mousePressEvent(self, event):
-        side = self.cursor_on_side(event.pos())
-        self.dragPosition = event.pos()
+        side = self.cursor_on_side(event.position())
+        self.dragPosition = event.position()
         if side == CURSOR_ON_BEGIN_SIDE:
             self.state = BEGIN_SIDE_EDIT
         elif side == CURSOR_ON_END_SIDE:
@@ -83,13 +83,13 @@ class MyWidget(QWidget):
             self.state = INSIDE_EDIT
         else:
             self.state = BUILDING_SQUARE
-            self.begin = event.pos()
-            self.end = event.pos()
+            self.begin = event.position()
+            self.end = event.position()
             self.update()
 
     def apply_event(self, event):
         if self.state == BUILDING_SQUARE:
-            self.end = event.pos()
+            self.end = event.position()
         elif self.state == BEGIN_SIDE_EDIT:
             self.begin.setX(event.x())
         elif self.state == END_SIDE_EDIT:
@@ -97,7 +97,7 @@ class MyWidget(QWidget):
 
     def mouseMoveEvent(self, event):
         if self.state == FREE_STATE:
-            self.free_cursor_on_side = self.cursor_on_side(event.pos())
+            self.free_cursor_on_side = self.cursor_on_side(event.position())
             if self.free_cursor_on_side:
                 self.setCursor(Qt.SizeHorCursor)
             else:

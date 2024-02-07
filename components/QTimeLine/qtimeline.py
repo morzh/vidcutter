@@ -153,7 +153,7 @@ class QTimeLine(QWidget):
 
     # Mouse movement
     def mouseMoveEvent(self, e):
-        self.pos = e.pos()
+        self.pos = e.position()
 
         # if mouse is being pressed, update pointer
         if self.clicking:
@@ -169,7 +169,7 @@ class QTimeLine(QWidget):
     # Mouse pressed
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
-            x = e.pos().x()
+            x = e.position().x()
             self.pointerPos = x
             self.positionChanged.emit(x)
             self.pointerTimePos = self.pointerPos * self.getScale()
