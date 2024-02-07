@@ -108,6 +108,32 @@ class TimeLine(QWidget):
         self.clipsVisibility_.append(visibility)
         self.update()
 
+    def setClipVisibility(self, index: int, state):
+        if len(self.clipsVisibility_) > 0:
+            self.clipsVisibility_[index] = state
+            self.repaint()
+
+    def repaint(self):
+        self.pointerPixelPosition = self._secondsToPixelPosition(self.pointerSecondsPosition)
+        super().repaint()
+
+    def paintEvent(self, event):
+        opt = QStyleOptionSlider()
+        painter = QPainter()
+        painter.begin(self)
+        # painter.setRenderHint(QPainter.Antialiasing)
+        self._drawFrame(painter)
+        if self.isEnabled():
+            painter.setFont(self.font)
+            self._drawTicks(painter)
+            self._drawSlider(painter)
+            self._drawClips(painter, opt)
+            if not self.freeCursorOnSide:
+                return
+            self._drawCLipsEditMode_(painter)
+
+        painter.end()
+
     def _drawTicks(self, painter: QStylePainter):
         scale = self.getScale()
         y = self.rect().top() + self.sliderAreaTopOffset + self.sliderAreaHeight + 8
@@ -245,32 +271,6 @@ class TimeLine(QWidget):
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
             painter.drawRoundedRect(self.clipsRectangles_[self.currentRectangleIndex], 2, 2)
 
-    def repaint(self):
-        self.pointerPixelPosition = self._secondsToPixelPosition(self.pointerSecondsPosition)
-        super().repaint()
-
-    def paintEvent(self, event):
-        opt = QStyleOptionSlider()
-        painter = QPainter()
-        painter.begin(self)
-        # painter.setRenderHint(QPainter.Antialiasing)
-        self._drawFrame(painter)
-        if self.isEnabled():
-            painter.setFont(self.font)
-            self._drawTicks(painter)
-            self._drawSlider(painter)
-            self._drawClips(painter, opt)
-            if not self.freeCursorOnSide:
-                return
-            self._drawCLipsEditMode_(painter)
-
-        painter.end()
-
-    def setClipVisibility(self, index: int, state):
-        if len(self.clipsVisibility_) > 0:
-            self.clipsVisibility_[index] = state
-            self.repaint()
-
     # Mouse movement
     def _pixelPositionToSeconds(self, pixelPosition: int) -> float:
         return (pixelPosition - self.sliderAreaHorizontalOffset) * self.getScale()
@@ -308,14 +308,26 @@ class TimeLine(QWidget):
         self.update()
     # Mouse release
 
-    def _mousePressControlEvent(self):
+    def _mousePressControlEvent(self, event: QMouseEvent):
+        self.dragPosition = event.pos()
+        self.dragRectPosition = self.clipsRectangles_[self.currentRectangleIndex].topLeft()
+        side = self.mouseCursorState(event.pos())
+        if side == self.CursorStates.cursorOnBeginSide:
+            self.state = self.RectangleEditState.beginSideEdit
+        elif side == self.CursorStates.cursorOnEndSide:
+            self.state = self.RectangleEditState.endSideEdit
+        elif side == self.CursorStates.cursorIsInside:
+            self.state = self.RectangleEditState.rectangleMove
+
+        self.clicking = False
+
+    def _mousePressAltEvent(self, event: QMouseEvent):
         pass
 
-    def _mousePressAltEvent(self):
-        pass
-
-    def _mousePressLeftButtonEvent(self):
-        pass
+    def _mousePressLeftButtonEvent(self, event: QMouseEvent):
+        new_position = self._pixelPositionToSeconds(event.x())
+        self.parent.parent.setPosition(new_position)
+        self.parent.parent.parent.mousePressEvent(event)
 
     def mousePressEvent(self, event: QMouseEvent):
         if not self.isIn:
@@ -324,7 +336,7 @@ class TimeLine(QWidget):
 
         modifierPressed = QApplication.keyboardModifiers()
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
-            # event.accept()re
+            self._mousePressControlEvent(event)
             self.clicking = False
         elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
             index = self.mouseCursorClipIndex(event.pos())

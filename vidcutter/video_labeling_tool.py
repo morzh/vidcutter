@@ -349,6 +349,7 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot()
     def toolbarMinus(self):
         self.scalableTimeline.factor -= 1
+        self.scalableTimeline.repaint()
         self.timelineFactorLabel.setText(str(self.scalableTimeline.factor))
         if self.parent.isEnabled() and self.mediaAvailable:
             self.renderSliderVideoClips()
@@ -356,6 +357,7 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot()
     def toolbarPlus(self):
         self.scalableTimeline.factor += 1
+        self.scalableTimeline.repaint()
         self.timelineFactorLabel.setText(str(self.scalableTimeline.factor))
 
 
@@ -754,9 +756,9 @@ class VideoLabelingTool(QWidget):
             self.videoService.setMedia(self.currentMedia)
 
             self.scalableTimeline.setEnabled(True)
+            self.scalableTimeline.factor = 1
             self.scalableTimeline.currentRectangleIndex = -1
             self.scalableTimeline.setFocus()
-            self.scalableTimeline.factor = 1
 
             self.mediaAvailable = True
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")

@@ -59,7 +59,7 @@ class ScalableTimeLine(QScrollArea):
         self.factor_ = TimeLine.clip(value, 1, self.maximumFactor_)
         self.timeline.setFixedWidth(self.factor_ * self.baseWidth_ - 2)
         self.timeline.updateClips()
-        self.timeline.repaint()
+        # self.repaint()
 
     @property
     def maximumFactor(self) -> int:
@@ -98,6 +98,10 @@ class ScalableTimeLine(QScrollArea):
     def update(self) -> None:
         self.timeline.update()
         super().update()
+
+    def repaint(self):
+        self.timeline.repaint()
+        super().repaint()
 
     def renderVideoClips(self, clips: list[VideoItemClip]) -> None:
         self.timeline.clearRegions()
