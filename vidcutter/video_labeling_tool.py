@@ -618,22 +618,8 @@ class VideoLabelingTool(QWidget):
     def itemMenu(self, pos: QPoint) -> None:
         globalPos = self.videoClipsList.mapToGlobal(pos)
         self.initRemoveMenu()
-        index = self.videoClipsList.currentRow()
-        # if index != -1:
-        #     if len(self.videoClipsList.selectedItems()):
-        #         self.editChapterAction.setEnabled(self.createChapters)
-        #     if not self.inCut:
-        #         if index > 0:
-        #             self.moveItemUpAction.setEnabled(True)
-        #         if index < self.videoClipsList.count() - 1:
-        #             self.moveItemDownAction.setEnabled(True)
         self.clipIndexContextmenu.exec_(globalPos)
 
-    def videoListDoubleClick(self) -> None:
-        index = self.videoClipsList.currentRow()
-        modifierPressed = QApplication.keyboardModifiers()
-        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-            self.setPosition(self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeEnd.msecsSinceStartOfDay())
 
     def on_editChapter(self, index: int, timeStart: QTime, timeEnd: QTime, clipName: str) -> None:
         if timeEnd < timeStart:
@@ -740,7 +726,7 @@ class VideoLabelingTool(QWidget):
         filepath = os.path.join(self._dataFolder, self._dataFilename)
         with open(filepath, 'rb') as f:
             self.videoList = pickle.load(f)
-            self.scalableTimeline.timeline.videoList = self.videoList
+            self.scalableTimeline.timeline.videoListRef = self.videoList
 
         self.scalableTimeline.setUpdatesEnabled(True)
         self.videoClipsList.clear()
@@ -874,7 +860,8 @@ class VideoLabelingTool(QWidget):
         playstate = self.mpvWidget.property('pause')
         self.clipIsPlaying = True
         self.clipIsPlayingIndex = index
-        self.setPosition(self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeStart.msecsSinceStartOfDay())
+        clipStartSeconds = 1e-3 * self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeStart.msecsSinceStartOfDay()
+        self.setPosition(clipStartSeconds)
         if playstate:
             self.setPlayButton(True)
             self.taskbar.setState(True)
@@ -905,6 +892,9 @@ class VideoLabelingTool(QWidget):
 
     @pyqtSlot(float)
     def setPosition(self, position: float) -> None:
+        '''
+        set time position in seconds
+        '''
         # print('setPosition', position)
         if position >= self.scalableTimeline.restrictValue:
             self.mpvWidget.seek(position)
@@ -957,10 +947,7 @@ class VideoLabelingTool(QWidget):
         if self.videoClipsList.clipsHasRendered:
             itemIndex = self.videoClipsList.row(item)
             itemState = item.checkState()
-
-            # self.clipTimes[itemIndex][5] = itemState
             self.videoList.videos[self.videoList.currentVideoIndex].clips[itemIndex].visibility = itemState
-
             self.scalableTimeline.setRegionVizivility(itemIndex, itemState)
             self.scalableTimeline.update()
 
@@ -971,7 +958,9 @@ class VideoLabelingTool(QWidget):
             modifierPressed = QApplication.keyboardModifiers()
             row = self.videoClipsList.currentRow()
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-                self.setPosition(self.videoList.videos[self.videoList.currentVideoIndex].clips[row].timeStart.msecsSinceStartOfDay())
+                clipQTimeStart = self.videoList.videos[self.videoList.currentVideoIndex].clips[row].timeStart
+                clipStartSeconds = 1e-3 * clipQTimeStart.msecsSinceStartOfDay()
+                self.setPosition(clipStartSeconds)
             elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
                 self.playMediaTimeClip(row)
             else:
@@ -979,6 +968,14 @@ class VideoLabelingTool(QWidget):
                 self.scalableTimeline.selectRegion(row)
         except:
             self.doPass()
+
+    def videoListDoubleClick(self) -> None:
+        indexRow = self.videoClipsList.currentRow()
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            clipQTimeEnd = self.videoList.videos[self.videoList.currentVideoIndex].clips[indexRow].timeEnd
+            clipEndSeconds = 1e-3 * clipQTimeEnd.msecsSinceStartOfDay()
+            self.setPosition(clipEndSeconds)
 
     def muteAudio(self) -> None:
         if self.mpvWidget.property('mute'):

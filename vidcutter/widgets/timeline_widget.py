@@ -217,7 +217,7 @@ class TimelineWidget(QSlider):
         # opt = QStyleOptionSlider()
         opt.subControls = QStyle.SC_SliderGroove
         painter.drawComplexControl(QStyle.CC_Slider, opt)
-        videoIndex = self.parent.videoList.currentVideoIndex
+        videoIndex = self.parent.videoListRef.currentVideoIndex
         if not len(self._progressbars):
             if len(self._regions) == len(self._regionsVisibility):  # should always be true
                 visible_region = self.visibleRegion().boundingRect()
@@ -236,11 +236,11 @@ class TimelineWidget(QSlider):
                     painter.setPen(Qt.black if self.theme == 'dark' else Qt.white)
                     rectClass = rectClass.intersected(visible_region)
                     rectClass = rectClass.adjusted(5, 0, -5, 0)
-                    actionClassIndex = self.parent.videoList[videoIndex].clips[index].actionClassIndex
+                    actionClassIndex = self.parent.videoListRef[videoIndex].clips[index].actionClassIndex
                     if actionClassIndex == -1:
-                        actionClassLabel = copy(self.parent.videoList.actionClassUnknownLabel)
+                        actionClassLabel = copy(self.parent.videoListRef.actionClassUnknownLabel)
                     else:
-                        actionClassLabel = copy(self.parent.videoList.actionClassesLabels[actionClassIndex])
+                        actionClassLabel = copy(self.parent.videoListRef.actionClassesLabels[actionClassIndex])
                     painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
         opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         painter.drawComplexControl(QStyle.CC_Slider, opt)
@@ -441,16 +441,16 @@ class TimelineWidget(QSlider):
             self._regions[self.currentRectangleIndex].setLeft(rectangle_left_value)
             value_begin = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
             time_start = self.parent.delta2QTime(value_begin)
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
             # self.parent.videoList.videos.pop(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipStartTime(time_start)
+            self.parent.videoListRef.setCurrentVideoClipStartTime(time_start)
         elif self.state == self.RectangleEditState.endSideEdit:
             rectangle_right_value = min(event.x(), self.width() - 1)
             self._regions[self.currentRectangleIndex].setRight(rectangle_right_value)
             value = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
             time = self.parent.delta2QTime(value)
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipEndTime(time)
+            self.parent.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoListRef.setCurrentVideoClipEndTime(time)
         elif self.state == self.RectangleEditState.rectangleMove:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
@@ -459,9 +459,9 @@ class TimelineWidget(QSlider):
             rectangle_right_value = min(self._regions[self.currentRectangleIndex].right(), self.width() - 1)
             value_begin = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_left_value - self.offset, self.width() - (self.offset * 2))
             value_end = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangle_right_value - self.offset, self.width() - (self.offset * 2))
-            self.parent.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.parent.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
-            self.parent.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
+            self.parent.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.parent.videoListRef.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
+            self.parent.videoListRef.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
 
     def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
         modifierPressed = QApplication.keyboardModifiers()
@@ -469,17 +469,17 @@ class TimelineWidget(QSlider):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            if len(self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips) == 0:
+            if len(self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips) == 0:
                 return False
 
             # print('self.currentRectangleIndex', self.currentRectangleIndex)
-            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            thumbnail = self.parent.captureImage(self.parent.currentMedia, self.parent.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
+            self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
 
-            clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[self.currentRectangleIndex]
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.pop(self.currentRectangleIndex)
-            self.currentRectangleIndex = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.bisect_right(clip)
-            self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips.add(clip)
+            clip = self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips[self.currentRectangleIndex]
+            self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips.pop(self.currentRectangleIndex)
+            self.currentRectangleIndex = self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips.bisect_right(clip)
+            self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips.add(clip)
 
             self.parent.renderVideoClips()
             self.state = self.RectangleEditState.freeState
@@ -501,7 +501,7 @@ class TimelineWidget(QSlider):
                 new_position = self.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
                 # new_position = int(event.x() / self.width() * (self.maximum() - self.minimum()))
                 self.setValue(new_position)
-                self.parent.setPosition(new_position)
+                self.parent.setPositionFromSeconds(new_position)
                 self.parent.parent.mousePressEvent(event)
 
         elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress:
@@ -532,7 +532,7 @@ class TimelineWidget(QSlider):
             return
         elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
             index = self.mouseCursorRegionIndex(event)
-            clip = self.parent.videoList.videos[self.parent.videoList.currentVideoIndex].clips[index]
+            clip = self.parent.videoListRef.videos[self.parent.videoListRef.currentVideoIndex].clips[index]
             self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())
             self.parent.playMediaTimeClip(index)
             # event.accept()

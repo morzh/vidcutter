@@ -150,7 +150,7 @@ class VideoClipsListWidget(QListWidget):
         self.parent.timeline.clearRegions()
 
         for itemIndex, videoClip in enumerate(videoClipItems):
-            self.parent.timeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
+            self.parent.timeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.clipsHasRendered = True
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
@@ -186,7 +186,7 @@ class VideoClipsListWidget(QListWidget):
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
             # self.parent.timeline.addRegion(videoClip.timeStart, videoClip.timeEnd, videoClip.visibility)
-            self.parent.scalableTimeline.addRegion(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
+            self.parent.scalableTimeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 
@@ -196,7 +196,7 @@ class VideoClipsListWidget(QListWidget):
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = -1
         else:
             self.parent.videoList[videoIndex].clips[clipIndex].actionClassIndex = value
-        self.parent.timeline.renderVideoSegments(self.parent.videoList[videoIndex].clips)
+        self.parent.timeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
 
     def checkBoxStateChanged(self, state, clipIndex: int):
         indexVideo = self.parent.videoList.currentVideoIndex
@@ -228,7 +228,7 @@ class VideoClipsListWidget(QListWidget):
     def timeEndChanged(self, time, clipIndex):
         videoIndex = self.parent.videoList.currentVideoIndex
         self.parent.videoList[videoIndex].clips[clipIndex].timeEnd = time
-        self.parent.timeline.renderVideoSegments(self.parent.videoList[videoIndex].clips)
+        self.parent.timeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
 
     # def showProgress(self, steps: int) -> None:
     #     for row in range(self.count()):

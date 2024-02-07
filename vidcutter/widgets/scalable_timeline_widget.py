@@ -71,7 +71,7 @@ class TimeLine(QWidget):
         self.end = QPoint()
         self.numberGradientSteps = 50
         self.regionOutlineWidth = 4
-        self.videoList = None
+        self.videoListRef = None
 
         self.progressbars_ = []
         self.clipsRectangles_ = []
@@ -88,7 +88,7 @@ class TimeLine(QWidget):
         palette.setColor(QPalette.Background, self.backgroundColor)
         self.setPalette(palette)
 
-    def drawTicks_(self, painter: QStylePainter):
+    def _drawTicks(self, painter: QStylePainter):
         scale = self.getScale()
         y = self.rect().top() + self.sliderAreaTopOffset + self.sliderAreaHeight + 8
         tickStep = 20
@@ -112,7 +112,7 @@ class TimeLine(QWidget):
             painter.setPen(pen)
             painter.drawLine(x, y, x, y + h)
 
-    def drawSlider_(self, painter):
+    def _drawSlider(self, painter):
         # print('self.pointerPixelPosition', self.pointerPixelPosition)
         if self.pos is not None and self.is_in:
             x = self.clip(self.pos.x(), self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
@@ -134,7 +134,7 @@ class TimeLine(QWidget):
         painter.drawPolygon(sliderHandle)
         painter.drawLine(line)
 
-    def drawFrame_(self, painter):
+    def _drawFrame(self, painter):
         if self.isEnabled():
             painter.setPen(self.textColor)
         else:
@@ -144,11 +144,11 @@ class TimeLine(QWidget):
                                 self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight,
                                 3, 3)
 
-    def drawClips_(self, painter: QStylePainter, opt: QStyleOptionSlider):
+    def _drawClips(self, painter: QStylePainter, opt: QStyleOptionSlider):
         # opt = QStyleOptionSlider()
         # opt.subControls = QStyle.SC_CustomBase
         # painter.drawComplexControl(QStyle.CC_Slider, opt)
-        videoIndex = self.videoList.currentVideoIndex
+        videoIndex = self.videoListRef.currentVideoIndex
         if not len(self.progressbars_):
             if len(self.clipsRectangles_) == len(self.clipsVisibility_):  # should always be true
                 visible_region = self.visibleRegion().boundingRect()
@@ -167,16 +167,16 @@ class TimeLine(QWidget):
                     painter.setPen(Qt.black if self.parent.theme == 'dark' else Qt.white)
                     rectClass = rectClass.intersected(visible_region)
                     rectClass = rectClass.adjusted(5, 0, -5, 0)
-                    actionClassIndex = self.videoList[videoIndex].clips[index].actionClassIndex
+                    actionClassIndex = self.videoListRef[videoIndex].clips[index].actionClassIndex
                     if actionClassIndex == -1:
                         actionClassLabel = copy(self.parent.videoList.actionClassUnknownLabel)
                     else:
-                        actionClassLabel = copy(self.videoList.actionClassesLabels[actionClassIndex])
+                        actionClassLabel = copy(self.videoListRef.actionClassesLabels[actionClassIndex])
                     painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
         # opt.activeSubControls = opt.subControls = QStyle.SC_SliderHandle
         # painter.drawComplexControl(QStyle.CC_Slider, opt)
 
-    def drawCLipsEditMode_(self, painter: QStylePainter):
+    def _drawCLipsEditMode_(self, painter: QStylePainter):
         glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
         glowColor = QColor(255, 255, 255, glowAlpha)
@@ -233,15 +233,15 @@ class TimeLine(QWidget):
         painter = QPainter()
         painter.begin(self)
         # painter.setRenderHint(QPainter.Antialiasing)
-        self.drawFrame_(painter)
+        self._drawFrame(painter)
         if self.isEnabled():
             painter.setFont(self.font)
-            self.drawTicks_(painter)
-            self.drawSlider_(painter)
-            self.drawClips_(painter, opt)
+            self._drawTicks(painter)
+            self._drawSlider(painter)
+            self._drawClips(painter, opt)
             if not self.freeCursorOnSide:
                 return
-            self.drawCLipsEditMode_(painter)
+            self._drawCLipsEditMode_(painter)
 
         painter.end()
 
@@ -265,7 +265,18 @@ class TimeLine(QWidget):
         return time
     # Mouse pressed
 
-    def mouseMoveEvent(self, event):
+    def _secondsToPixelPosition(self, seconds: float) -> int:
+        return round(seconds / self.getScale() + self.sliderAreaHorizontalOffset)
+
+    def setPositionFromQTime(self):
+        pass
+
+    def setPositionFromSeconds(self, seconds: float) -> None:
+        self.pointerPixelPosition = self._secondsToPixelPosition(seconds)
+        self.pointerTimePosition = seconds
+        # self.update()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
         self.pos = event.pos()
         x = event.pos().x()
         # if mouse is being pressed, update pointer
@@ -276,31 +287,34 @@ class TimeLine(QWidget):
         self.update()
     # Mouse release
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent):
         modifierPressed = QApplication.keyboardModifiers()
 
         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
-            # event.accept()
+            # event.accept()re
             self.clicking = False
         elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
-            index = self.mouseCursorRegionIndex(event)
-            clip = self.videoList.videos[self.videoList.currentVideoIndex].clips[index]
-            self.setSliderPosition(clip.timeStart.msecsSinceStartOfDay())
-            self.parent.parent.playMediaTimeClip(index)
-            # event.accept()
+            index = self.mouseCursorClipIndex(event.pos())
+            if index != -1:
+                clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
+                clipStartSeconds = 1e-3 * clip.timeStart.msecsSinceStartOfDay()
+                self.setPositionFromSeconds(clipStartSeconds)
+                self.parent.parent.playMediaTimeClip(index)
+                self.clicking = False
+                # event.accept()
         elif event.button() == Qt.LeftButton:
             self.clicking = True
 
         super().mousePressEvent(event)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton and self.clicking:
             x = event.pos().x()
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             self.pointerTimePosition = self._pixelsToSeconds(self.pointerPixelPosition)
-            self.sliderMoved.emit(self.pointerTimePosition)
-            self.update()
-            self.clicking = False  # Set clicking check to false
+        self.sliderMoved.emit(self.pointerTimePosition)
+        self.clicking = False  # Set clicking check to false
+        self.update()
 
     def mouseCursorState(self, e_pos) -> CursorStates:
         if len(self.clipsRectangles_) > 0:
@@ -319,33 +333,31 @@ class TimeLine(QWidget):
                             return self.CursorStates.cursorIsInside
         return 0
 
-    def mouseCursorRegionIndex(self, e_pos):
+    def mouseCursorClipIndex(self, e_pos) -> int:
         if len(self.clipsRectangles_) > 0:
-            for region_idx in range(len(self.clipsRectangles_)):
-                self.begin = self.clipsRectangles_[region_idx].topLeft()
-                self.end = self.clipsRectangles_[region_idx].bottomRight()
+            for clipIndex in range(len(self.clipsRectangles_)):
+                self.begin = self.clipsRectangles_[clipIndex].topLeft()
+                self.end = self.clipsRectangles_[clipIndex].bottomRight()
                 y1, y2 = sorted([self.begin.y(), self.end.y()])
                 if y1 <= e_pos.y() <= y2 and self.begin.x() < e_pos.x() < self.end.x():
-                    return region_idx
+                    return clipIndex
+        return -1
 
     def applyEvent(self, event):
         if self.state == self.RectangleEditState.beginSideEdit:
             rectangleLeftValue = max(event.x(), 0)
             self.clipsRectangles_[self.currentRectangleIndex].setLeft(rectangleLeftValue)
-            # value_begin = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangleLeftValue - self.offset, self.width() - (self.offset * 2))
-            # timeStart = self.parent.delta2QTime(value_begin)
             timeStart = self._pixelsToQTime(rectangleLeftValue)
-            self.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            # self.parent.videoList.videos.pop(self.currentRectangleIndex)
-            self.videoList.setCurrentVideoClipStartTime(timeStart)
+            self.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.videoListRef.setCurrentVideoClipStartTime(timeStart)
+
         elif self.state == self.RectangleEditState.endSideEdit:
             rectangleRightValue = min(event.x(), self.width() - 1)
             self.clipsRectangles_[self.currentRectangleIndex].setRight(rectangleRightValue)
-            # value = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangleRightValue - self.offset, self.width() - (self.offset * 2))
-            # timeEnd = self.parent.delta2QTime(value)
             timeEnd = self._pixelsToQTime(rectangleRightValue)
-            self.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.videoList.setCurrentVideoClipEndTime(timeEnd)
+            self.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
+
         elif self.state == self.RectangleEditState.rectangleMove:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
@@ -353,17 +365,12 @@ class TimeLine(QWidget):
 
             rectangleLeftValue = max(self.clipsRectangles_[self.currentRectangleIndex].left(), 0)
             rectangleRightValue = min(self.clipsRectangles_[self.currentRectangleIndex].right(), self.width() - 1)
-
-            # value_begin = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangleLeftValue - self.offset, self.width() - (self.offset * 2))
-            # value_end = self.sliderValueFromPosition(self.minimum(), self.maximum(), rectangleRightValue - self.offset, self.width() - (self.offset * 2))
             timeStart = self._pixelsToQTime(rectangleLeftValue)
             timeEnd = self._pixelsToQTime(rectangleRightValue)
 
-            self.videoList.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.videoList.setCurrentVideoClipStartTime(timeStart)
-            self.videoList.setCurrentVideoClipEndTime(timeEnd)
-            # self.videoList.setCurrentVideoClipStartTime(self.parent.delta2QTime(value_begin))
-            # self.videoList.setCurrentVideoClipEndTime(self.parent.delta2QTime(value_end))
+            self.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
+            self.videoListRef.setCurrentVideoClipStartTime(timeStart)
+            self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
 
     def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
         modifierPressed = QApplication.keyboardModifiers()
@@ -371,18 +378,17 @@ class TimeLine(QWidget):
             if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
                 self.applyEvent(event)
                 self.unsetCursor()
-            if len(self.videoList.videos[self.videoList.currentVideoIndex].clips) == 0:
+            if len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
                 return False
 
-            # print('self.currentRectangleIndex', self.currentRectangleIndex)
-            currentVideoIndex = self.videoList.currentVideoIndex
-            thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoList.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.videoList.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            currentVideoIndex = self.videoListRef.currentVideoIndex
+            thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
+            self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
 
-            clip = self.videoList.videos[currentVideoIndex].clips[self.currentRectangleIndex]
-            self.videoList.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
-            self.currentRectangleIndex = self.videoList.videos[currentVideoIndex].clips.bisect_right(clip)
-            self.videoList.videos[currentVideoIndex].clips.add(clip)
+            clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
+            self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
+            self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
+            self.videoListRef.videos[currentVideoIndex].clips.add(clip)
 
             self.parent.parent.renderVideoClips()
             self.state = self.RectangleEditState.freeState
@@ -400,6 +406,8 @@ class TimeLine(QWidget):
                     self.state = self.RectangleEditState.endSideEdit
                 elif side == self.CursorStates.cursorIsInside:
                     self.state = self.RectangleEditState.rectangleMove
+            elif self.parent.parent.mediaAvailable and self.isEnabled() and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+                pass
             elif self.parent.parent.mediaAvailable and self.isEnabled():
                 new_position = self._pixelsToSeconds(event.x())
                 # new_position = self.sliderValueFromPosition(self.minimum(), self.maximum(), event.x() - self.offset, self.width() - (self.offset * 2))
@@ -424,8 +432,8 @@ class TimeLine(QWidget):
                 self.unsetCursor()
             self.repaint()
 
-        elif event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
-            self.mouseCursorRegionIndex(event)
+        # elif event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+        #     self.mouseCursorClipIndex(event)
 
         return super().eventFilter(obj, event)
 
@@ -533,15 +541,11 @@ class ScalableTimeLine(QScrollArea):
     def setDuration(self, duration) -> None:
         self.timeline.duration = duration
 
-    def secondsToPixelPosition(self, seconds: float) -> int:
-        return round(seconds / self.timeline.getScale() + self.timeline.sliderAreaHorizontalOffset)
-
     def setValue(self, seconds: str | float) -> None:
         try:
             seconds = float(seconds)
-            self.timeline.pointerPixelPosition = self.secondsToPixelPosition(seconds)
-            self.timeline.pointerTimePosition = seconds
-            self.timeline.update()
+            self.timeline.setPositionFromSeconds(seconds)
+            self.timeline.repaint()
         except ValueError('seconds should be in the float number format'):
             return
 
@@ -556,27 +560,27 @@ class ScalableTimeLine(QScrollArea):
         self.timeline.update()
         super().update()
 
-    def renderVideoSegments(self, clips: list[VideoItemClip]):
+    def renderVideoClips(self, clips: list[VideoItemClip]):
         self.timeline.clearRegions()
         for videoClip in clips:
             clipStart = videoClip.timeStart.msecsSinceStartOfDay()
             clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
             clipVisibility = videoClip.visibility
-            self.addRegion(clipStart.msecsSinceStartOfDay() * 1e-3, clipEnd.msecsSinceStartOfDay() * 1e-3, clipVisibility)
+            self.addClip(clipStart.msecsSinceStartOfDay() * 1e-3, clipEnd.msecsSinceStartOfDay() * 1e-3, clipVisibility)
         self.update()
 
-    def addRegion(self, start: float, end: float, visibility=2) -> None:
+    def addClip(self, start: float, end: float, visibility=2) -> None:
 
-        regionStart = self.secondsToPixelPosition(start)
-        regionEnd = self.secondsToPixelPosition(end)
+        startPixelPosition = self.timeline._secondsToPixelPosition(start)
+        endPixelPosition = self.timeline._secondsToPixelPosition(end)
 
-        # regionStart = self.sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
-        # regionEnd = self.sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
+        # startPixelPosition = self.sliderPositionFromValue(self.minimum(), self.maximum(), start - self.offset, self.width() - (self.offset * 2))
+        # endPixelPosition = self.sliderPositionFromValue(self.minimum(), self.maximum(), end - self.offset, self.width() - (self.offset * 2))
 
-        width = regionEnd - regionStart
+        width = endPixelPosition - startPixelPosition
         y = int((self.height() - self.timeline.regionHeight_) / 2)
         height = self.timeline.regionHeight_
-        self.timeline.clipsRectangles_.append(QRect(regionStart, y, width, height))
+        self.timeline.clipsRectangles_.append(QRect(startPixelPosition, y, width, height))
         self.timeline.clipsVisibility_.append(visibility)
         self.update()
 
