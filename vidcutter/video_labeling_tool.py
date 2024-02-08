@@ -68,9 +68,9 @@ class VideoLabelingTool(QWidget):
         self._dataFilename = 'data.pickle'
         self._dataFilenameTemp = 'data.pickle.tmp'
         self.folderOpened = False
-        self.factor = 1
-        self.factor_minimum = 1
-        self.factor_maximum = 18
+        # self.factor = 1
+        # self.factor_minimum = 1
+        # self.factor_maximum = 18
         self.duration = 0
 
         self.initTheme()
@@ -328,7 +328,7 @@ class VideoLabelingTool(QWidget):
 
     def setTimelineSize(self):
         windowSize = self.parent.size()
-        self.scalableTimeline.setFixedWidth(self.factor * windowSize.width() - 20)
+        self.scalableTimeline.setFixedWidth(windowSize.width() - 20)
         self.scalableTimeline.setFixedHeight(101)
 
     def clip(self, val, min_, max_):
@@ -756,7 +756,7 @@ class VideoLabelingTool(QWidget):
             self.videoService.setMedia(self.currentMedia)
 
             self.scalableTimeline.setEnabled(True)
-            self.scalableTimeline.factor = 1
+
             self.scalableTimeline.currentRectangleIndex = -1
             self.scalableTimeline.setFocus()
 
@@ -766,7 +766,7 @@ class VideoLabelingTool(QWidget):
             self.timelineMinusButton.button.setEnabled(True)
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
-            self.setPosition(0.0)
+
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
             self.initMediaControls(False)
@@ -872,9 +872,10 @@ class VideoLabelingTool(QWidget):
 
     @pyqtSlot(float)
     def setPosition(self, position: float) -> None:
-        '''
+        """
         set time position in seconds
-        '''
+        @param position time position in seconds
+        """
         # print('setPosition', position)
         if position >= self.scalableTimeline.restrictValue:
             self.mpvWidget.seek(position)
@@ -901,10 +902,8 @@ class VideoLabelingTool(QWidget):
     def on_durationChanged(self, duration: float, frames: int) -> None:
         self.duration = duration
         self.scalableTimeline.setDuration(duration)
-        # self.videoSlider.baseMaximum = int(duration)
-        # print('on_durationChanged', duration)
-        # print('on_durationChanged, maximum', self.timeline.maximum())
-        # self.videoSlider.setMaximum(10 * int(duration))
+        self.scalableTimeline.factor = 1
+        self.setPosition(0.0)
         self.timeCounter.setDuration(self.delta2QTime(round(duration * 1000)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
         self.renderVideoClips()
@@ -915,7 +914,6 @@ class VideoLabelingTool(QWidget):
         try:
             itemIndex = self.videoClipsList.row(item)
             itemState = item.checkState()
-            # self.clipTimes[idingtemIndex][5] = itemState
             self.videoList.videos[self.videoList.currentVideoIndex].clips[itemIndex].visibility = itemState
             self.renderVideoClips()
         except Exception:
@@ -1053,6 +1051,7 @@ class VideoLabelingTool(QWidget):
         self.toolbarEnd.setEnabled(True)
 
         self.scalableTimeline.setRestrictValue(self.scalableTimeline.value(), True)
+        self.scalableTimeline.setClipCutStart(self.scalableTimeline.value())
         self.inCut = True
 
         # sorted(self.videoList.videos[self.videoList.currentVideoIndex].clips)

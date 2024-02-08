@@ -55,6 +55,7 @@ class TimeLine(QWidget):
         self.position = None
         self.pointerPixelPosition = self.sliderAreaHorizontalOffset
         self.pointerSecondsPosition = 0.0
+        self.clipCutStartPosition = 0.0
         self.selectedSample = None
         self.clicking = False  # Check if mouse left button is being pressed
         self.isIn = False  # check if user is in the widget
@@ -113,6 +114,9 @@ class TimeLine(QWidget):
             self.clipsVisibility_[index] = state
             self.repaint()
 
+    def setClipCutStart(self, seconds: float) -> None:
+        self.clipCutStartPosition = seconds
+
     def repaint(self):
         self.pointerPixelPosition = self._secondsToPixelPosition(self.pointerSecondsPosition)
         super().repaint()
@@ -125,6 +129,7 @@ class TimeLine(QWidget):
         self._drawFrame(painter)
         if self.isEnabled():
             painter.setFont(self.font)
+            self._drawCutSegment(painter)
             self._drawTicks(painter)
             self._drawSlider(painter)
             self._drawClips(painter, opt)
@@ -133,6 +138,15 @@ class TimeLine(QWidget):
             self._drawCLipsEditMode_(painter)
 
         painter.end()
+
+    def _drawCutSegment(self, painter):
+        if self.parent.parent.inCut:
+            cutStartInPixels = self._secondsToPixelPosition(self.clipCutStartPosition)
+            cutEndInPixels = self.pointerPixelPosition
+            cutWidthPixels = cutEndInPixels - cutStartInPixels
+            painter.setPen(QColor(190, 85, 200, 100))
+            painter.setBrush(QColor(190, 85, 200, 100))
+            painter.drawRect(cutStartInPixels,  self.sliderAreaTopOffset, cutWidthPixels, self.sliderAreaHeight)
 
     def _drawTicks(self, painter: QStylePainter):
         scale = self.getScale()

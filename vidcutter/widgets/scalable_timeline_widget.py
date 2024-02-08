@@ -95,6 +95,9 @@ class ScalableTimeLine(QScrollArea):
     def setRestrictValue(self, value, force=False) -> None:
         self.restrictValue = value
 
+    def setClipCutStart(self, flag: float) -> None:
+        self.timeline.setClipCutStart(flag)
+
     def update(self) -> None:
         self.timeline.update()
         super().update()
