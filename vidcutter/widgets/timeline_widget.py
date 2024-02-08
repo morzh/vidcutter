@@ -212,7 +212,7 @@ class TimeLine(QWidget):
                     rectClass = rectClass.adjusted(5, 0, -5, 0)
                     actionClassIndex = self.videoListRef[videoIndex].clips[index].actionClassIndex
                     if actionClassIndex == -1:
-                        actionClassLabel = copy(self.parent.videoList.actionClassUnknownLabel)
+                        actionClassLabel = copy(self.videoListRef.actionClassUnknownLabel)
                     else:
                         actionClassLabel = copy(self.videoListRef.actionClassesLabels[actionClassIndex])
                     painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
@@ -284,6 +284,7 @@ class TimeLine(QWidget):
         hours = int(minutes / 60)
         time = QTime(hours, minutes, seconds, milliseconds)
         return time
+
     # Mouse pressed
 
     def _secondsToPixelPosition(self, seconds: float) -> int:
@@ -298,15 +299,28 @@ class TimeLine(QWidget):
         # self.update()
 
     def mouseMoveEvent(self, event: QMouseEvent):
+        modifierPressed = QApplication.keyboardModifiers()
         self.position = event.pos()
         x = event.pos().x()
-        # if mouse is being pressed, update pointer
         if self.clicking and x:
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset,
                                                   self.width() - self.sliderAreaHorizontalOffset)
-            # self.sliderMoved.emit(self.pointerPixelPosition)
-        self.update()
-    # Mouse release
+
+        if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier and self.isIn:
+            if self.state == self.RectangleEditState.freeState:
+                self.freeCursorOnSide = self.mouseCursorState(event.pos())
+                if self.freeCursorOnSide:
+                    self.setCursor(Qt.SizeHorCursor)
+                else:
+                    self.unsetCursor()
+            else:
+                self.applyEvent(event)
+        else:
+            self.state = self.RectangleEditState.freeState
+            self.freeCursorOnSide = 0
+            self.unsetCursor()
+
+        self.repaint()
 
     def _mousePressControlEvent(self, event: QMouseEvent):
         self.dragPosition = event.pos()
@@ -322,47 +336,65 @@ class TimeLine(QWidget):
         self.clicking = False
 
     def _mousePressAltEvent(self, event: QMouseEvent):
-        pass
+        index = self.mouseCursorClipIndex(event.pos())
+        if index != -1:
+            clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
+            clipStartSeconds = 1e-3 * clip.timeStart.msecsSinceStartOfDay()
+            self.setPositionFromSeconds(clipStartSeconds)
+            self.parent.parent.playMediaTimeClip(index)
+            self.clicking = False
 
     def _mousePressLeftButtonEvent(self, event: QMouseEvent):
         new_position = self._pixelPositionToSeconds(event.x())
         self.parent.parent.setPosition(new_position)
-        self.parent.parent.parent.mousePressEvent(event)
+        self.clicking = True
 
     def mousePressEvent(self, event: QMouseEvent):
-        if not self.isIn:
+        if not self.parent.parent.mediaAvailable or not self.isIn or not self.isEnabled():
             super().mousePressEvent(event)
             return
 
         modifierPressed = QApplication.keyboardModifiers()
-        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier and event.button() == Qt.LeftButton:
+        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self._mousePressControlEvent(event)
-            self.clicking = False
-        elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier and event.button() == Qt.LeftButton:
-            index = self.mouseCursorClipIndex(event.pos())
-            if index != -1:
-                clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
-                clipStartSeconds = 1e-3 * clip.timeStart.msecsSinceStartOfDay()
-                self.setPositionFromSeconds(clipStartSeconds)
-                self.parent.parent.playMediaTimeClip(index)
-                self.clicking = False
-                # event.accept()
-        elif event.button() == Qt.LeftButton:
-            self.clicking = True
+        elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+            self._mousePressAltEvent(event)
+        else:
+            self._mousePressLeftButtonEvent(event)
 
         super().mousePressEvent(event)
 
-    def mouseReleaseEvent(self, event: QMouseEvent):
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         if not self.isIn:
             return
 
+        modifierPressed = QApplication.keyboardModifiers()
         if event.button() == Qt.LeftButton and self.clicking:
             x = event.pos().x()
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             self.pointerSecondsPosition = self._pixelPositionToSeconds(self.pointerPixelPosition)
+        elif (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            self.applyEvent(event)
+            self.unsetCursor()
+        elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
+            return
+
+        currentVideoIndex = self.videoListRef.currentVideoIndex
+        thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
+        self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+
+        clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
+        self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
+        self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
+        self.videoListRef.videos[currentVideoIndex].clips.add(clip)
+
+        self.parent.parent.renderVideoClips()
+        self.state = self.RectangleEditState.freeState
+        self.freeCursorOnSide = 0
+
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
-        self.update()
+        self.repaint()
 
     def mouseCursorState(self, e_pos) -> CursorStates:
         if len(self.clipsRectangles_) > 0:
@@ -420,67 +452,67 @@ class TimeLine(QWidget):
             self.videoListRef.setCurrentVideoClipStartTime(timeStart)
             self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
 
-    def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
-        modifierPressed = QApplication.keyboardModifiers()
-        if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton and self.isIn:
-            if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-                self.applyEvent(event)
-                self.unsetCursor()
-            if len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
-                return False
-
-            currentVideoIndex = self.videoListRef.currentVideoIndex
-            thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
-
-            clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
-            self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
-            self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
-            self.videoListRef.videos[currentVideoIndex].clips.add(clip)
-
-            self.parent.parent.renderVideoClips()
-            self.state = self.RectangleEditState.freeState
-            self.freeCursorOnSide = 0
-            self.repaint()
-
-        elif event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton and self.isIn:
-            if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
-                self.dragPosition = event.pos()
-                self.dragRectPosition = self.clipsRectangles_[self.currentRectangleIndex].topLeft()
-                side = self.mouseCursorState(event.pos())
-                if side == self.CursorStates.cursorOnBeginSide:
-                    self.state = self.RectangleEditState.beginSideEdit
-                elif side == self.CursorStates.cursorOnEndSide:
-                    self.state = self.RectangleEditState.endSideEdit
-                elif side == self.CursorStates.cursorIsInside:
-                    self.state = self.RectangleEditState.rectangleMove
-            elif self.parent.parent.mediaAvailable and self.isEnabled() and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
-                pass
-            elif self.parent.parent.mediaAvailable and self.isEnabled():
-                new_position = self._pixelPositionToSeconds(event.x())
-                self.parent.parent.setPosition(new_position)
-                self.parent.parent.parent.mousePressEvent(event)
-
-        elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress and self.isIn:
-            if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
-                if self.state == self.RectangleEditState.freeState:
-                    self.freeCursorOnSide = self.mouseCursorState(event.pos())
-                    if self.freeCursorOnSide:
-                        self.setCursor(Qt.SizeHorCursor)
-                    else:
-                        self.unsetCursor()
-                else:
-                    self.applyEvent(event)
-            else:
-                self.state = self.RectangleEditState.freeState
-                self.freeCursorOnSide = 0
-                self.unsetCursor()
-            self.repaint()
-
-        # elif event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
-        #     self.mouseCursorClipIndex(event)
-
-        return super().eventFilter(obj, event)
+    # def eventFilter(self, obj: QObject, event: QMouseEvent) -> bool:
+    #     modifierPressed = QApplication.keyboardModifiers()
+    #     if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton and self.isIn:
+    #         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+    #             self.applyEvent(event)
+    #             self.unsetCursor()
+    #         if len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
+    #             return False
+    #
+    #         currentVideoIndex = self.videoListRef.currentVideoIndex
+    #         thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
+    #         self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+    #
+    #         clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
+    #         self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
+    #         self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
+    #         self.videoListRef.videos[currentVideoIndex].clips.add(clip)
+    #
+    #         self.parent.parent.renderVideoClips()
+    #         self.state = self.RectangleEditState.freeState
+    #         self.freeCursorOnSide = 0
+    #         self.repaint()
+    #
+    #     elif event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton and self.isIn:
+    #         if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+    #             self.dragPosition = event.pos()
+    #             self.dragRectPosition = self.clipsRectangles_[self.currentRectangleIndex].topLeft()
+    #             side = self.mouseCursorState(event.pos())
+    #             if side == self.CursorStates.cursorOnBeginSide:
+    #                 self.state = self.RectangleEditState.beginSideEdit
+    #             elif side == self.CursorStates.cursorOnEndSide:
+    #                 self.state = self.RectangleEditState.endSideEdit
+    #             elif side == self.CursorStates.cursorIsInside:
+    #                 self.state = self.RectangleEditState.rectangleMove
+    #         elif self.parent.parent.mediaAvailable and self.isEnabled() and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+    #             pass
+    #         elif self.parent.parent.mediaAvailable and self.isEnabled():
+    #             new_position = self._pixelPositionToSeconds(event.x())
+    #             self.parent.parent.setPosition(new_position)
+    #             self.parent.parent.parent.mousePressEvent(event)
+    #
+    #     elif event.type() == QEvent.MouseMove and event.type() != QEvent.MouseButtonPress and self.isIn:
+    #         if (int(modifierPressed) & Qt.ControlModifier) == Qt.ControlModifier:
+    #             if self.state == self.RectangleEditState.freeState:
+    #                 self.freeCursorOnSide = self.mouseCursorState(event.pos())
+    #                 if self.freeCursorOnSide:
+    #                     self.setCursor(Qt.SizeHorCursor)
+    #                 else:
+    #                     self.unsetCursor()
+    #             else:
+    #                 self.applyEvent(event)
+    #         else:
+    #             self.state = self.RectangleEditState.freeState
+    #             self.freeCursorOnSide = 0
+    #             self.unsetCursor()
+    #         self.repaint()
+    #
+    #     elif event.type() == QEvent.MouseButtonPress and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+    #         self.mouseCursorClipIndex(event)
+    #
+    #     return super().eventFilter(obj, event)
 
     # Enter
     def enterEvent(self, event):

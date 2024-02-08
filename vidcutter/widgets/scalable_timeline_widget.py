@@ -174,5 +174,5 @@ class ScalableTimeLine(QScrollArea):
             self._handleHover = False
         # self.initStyle()
 
-    def eventFilter(self, object: QObject, event: QEvent):
-        return self.timeline.eventFilter(object, event)
+    # def eventFilter(self, object: QObject, event: QEvent):
+    #     return self.timeline.eventFilter(object, event)
