@@ -1342,12 +1342,11 @@ class VideoLabelingTool(QWidget):
                 return
 
             if event.key() == Qt.Key_Home:
-                self.setPosition(self.scalableTimeline.minimum())
+                self.setPosition(0.0)
                 return
 
             if event.key() == Qt.Key_End:
-                print('Qt.Key_End', 'self.videoSlider.width():', self.scalableTimeline.width(), 'self.videoSlider.maximum()', self.scalableTimeline.maximum())
-                self.setPosition(self.scalableTimeline.maximum())
+                self.setPosition(self.scalableTimeline.timeline.duration)
                 return
 
             if event.key() == Qt.Key_Left:
