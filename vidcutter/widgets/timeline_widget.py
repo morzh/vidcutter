@@ -88,6 +88,7 @@ class TimeLine(QWidget):
         palette = QPalette()
         palette.setColor(QPalette.Background, self.backgroundColor)
         self.setPalette(palette)
+        self.setFocusPolicy(Qt.NoFocus)
 
     def clearClips(self):
         self.clipsRectangles_.clear()
@@ -519,3 +520,6 @@ class TimeLine(QWidget):
 
     def setTextFont(self, font):
         self.font = font
+
+    # def keyPressEvent(self, a0):
+    #     self.parent.keyPressEvent(a0)

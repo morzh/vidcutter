@@ -223,7 +223,6 @@ class mpvWidget(QOpenGLWidget):
         if os.path.isfile(filepath):
             self.mpv.command('loadfile', filepath, 'replace')
 
-
     def frameStep(self) -> None:
         self.mpv.command('frame-step')
 

@@ -14,8 +14,8 @@ from sortedcontainers import SortedList
 import sip
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget, QScrollArea)
+from PyQt5.QtWidgets import (QGraphicsScene, QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
+                             QVBoxLayout, QWidget, QScrollArea, QGraphicsView)
 
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
@@ -68,9 +68,6 @@ class VideoLabelingTool(QWidget):
         self._dataFilename = 'data.pickle'
         self._dataFilenameTemp = 'data.pickle.tmp'
         self.folderOpened = False
-        # self.factor = 1
-        # self.factor_minimum = 1
-        # self.factor_maximum = 18
         self.duration = 0
 
         self.initTheme()
@@ -174,11 +171,17 @@ class VideoLabelingTool(QWidget):
         self.clipIsPlaying = False
         self.clipIsPlayingIndex = -1
 
+        # self.mpvWidget.setAttribute(Qt.WA_TranslucentBackground, True)
+        # self._graphicsScene = QGraphicsScene(self)
+        # self._graphicsView = QGraphicsView(self._graphicsScene)
+        # self._graphicsScene.addWidget(self.mpvWidget)
+
         self.videoplayerLayout = QVBoxLayout()
         self.videoplayerLayout.setSpacing(0)
         self.videoplayerLayout.setContentsMargins(0, 0, 0, 0)
         self.videoplayerLayout.addWidget(self.mpvWidget)
         self.videoplayerLayout.addWidget(countersWidget)
+        # self.videoplayerLayout.addWidget(self._graphicsView)
 
         self.videoPlayerWidget = QFrame(self)
         self.videoPlayerWidget.setObjectName('videoplayer')
@@ -756,9 +759,8 @@ class VideoLabelingTool(QWidget):
             self.videoService.setMedia(self.currentMedia)
 
             self.scalableTimeline.setEnabled(True)
-
             self.scalableTimeline.currentRectangleIndex = -1
-            self.scalableTimeline.setFocus()
+            # self.scalableTimeline.timeline.setFocus()
 
             self.mediaAvailable = True
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
@@ -1331,72 +1333,58 @@ class VideoLabelingTool(QWidget):
         if self.mediaAvailable:
             if event.key() == Qt.Key_Space:
                 self.playMedia()
-                return
 
-            if event.key() == Qt.Key_Escape and self.isFullScreen():
+            elif event.key() == Qt.Key_Escape and self.isFullScreen():
                 self.toggleFullscreen()
-                return
 
-            if event.key() == Qt.Key_F:
+            elif event.key() == Qt.Key_F:
                 self.toggleFullscreen()
-                return
 
-            if event.key() == Qt.Key_Home:
+            elif event.key() == Qt.Key_Home:
                 self.setPosition(0.0)
-                return
 
-            if event.key() == Qt.Key_End:
+            elif event.key() == Qt.Key_End:
                 self.setPosition(self.scalableTimeline.timeline.duration)
-                return
 
-            if event.key() == Qt.Key_Left:
+            elif event.key() == Qt.Key_Left:
                 self.mpvWidget.frameBackStep()
                 self.setPlayButton(False)
-                return
 
-            if event.key() == Qt.Key_Down:
+            elif event.key() == Qt.Key_Down:
                 if qApp.queryKeyboardModifiers() == Qt.ShiftModifier:
                     self.mpvWidget.seek(-self.level2Seek, 'relative+exact')
                 else:
                     self.mpvWidget.seek(-self.level1Seek, 'relative+exact')
-                return
 
-            if event.key() == Qt.Key_Right:
+            elif event.key() == Qt.Key_Right:
                 self.mpvWidget.frameStep()
                 self.setPlayButton(False)
-                return
 
-            if event.key() == Qt.Key_Up:
+            elif event.key() == Qt.Key_Up:
                 if qApp.queryKeyboardModifiers() == Qt.ShiftModifier:
                     self.mpvWidget.seek(self.level2Seek, 'relative+exact')
                 else:
                     self.mpvWidget.seek(self.level1Seek, 'relative+exact')
-                return
 
             # if event.key() in {Qt.Key_Return, Qt.Key_Enter, Qt.Key_C} and \
-            if event.key() in {Qt.Key_C} and \
+            elif event.key() in {Qt.Key_C} and \
                     (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 if self.toolbarStart.isEnabled():
                     self.clipStart()
                 elif self.toolbarEnd.isEnabled():
                     self.clipEnd()
-                return
 
-            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  # and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+            elif event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  # and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 self.toolbarPlus()
-                return
 
-            if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  # and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
+            elif event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.ControlModifier:  # and  (not self.timeCounter.hasFocus() and not self.frameCounter.hasFocus()):
                 self.toolbarMinus()
-                return
 
-            if event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
+            elif event.key() == Qt.Key_Plus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
                 self.speedUp()
-                return
 
-            if event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
+            elif event.key() == Qt.Key_Minus and qApp.queryKeyboardModifiers() == Qt.AltModifier:
                 self.speedDown()
-                return
 
         super(VideoLabelingTool, self).keyPressEvent(event)
 

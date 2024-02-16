@@ -39,6 +39,7 @@ class ScalableTimeLine(QScrollArea):
 
     def initAttributes(self) -> None:
         self.setEnabled(False)
+        self.setFocusPolicy(Qt.NoFocus)
         self.timeline.setEnabled(False)
 
     @property
@@ -176,3 +177,6 @@ class ScalableTimeLine(QScrollArea):
             self._cutStarted = False
             self._handleHover = False
         # self.initStyle()
+
+    # def keyPressEvent(self, a0):
+    #     self.parent.keyPressEvent(a0)
