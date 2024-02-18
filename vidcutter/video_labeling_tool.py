@@ -39,7 +39,6 @@ from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMe
 
 from vidcutter.VideoItemClip import VideoItemClip
 
-from vidcutter.widgets.timeline_widget__ import TimelineWidget
 from vidcutter.widgets.video_list_widget import VideoListWidget
 from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine
 from vidcutter.QPixmapPickle import QPixmapPickle
@@ -136,7 +135,6 @@ class VideoLabelingTool(QWidget):
         self.videoClipsList.model().rowsInserted.connect(self.setProjectDirty)
         self.videoClipsList.model().rowsRemoved.connect(self.setProjectDirty)
         self.videoClipsList.model().rowsMoved.connect(self.setProjectDirty)
-        # self.videoClipsList.model().rowsMoved.connect(self.syncClipList)
 
         self.videoLayout = QHBoxLayout()
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
@@ -202,9 +200,6 @@ class VideoLabelingTool(QWidget):
         # noinspection PyArgumentList
         self.volSlider = VCVolumeSlider(orientation=Qt.Horizontal, toolTip='Volume', statusTip='Adjust volume level', cursor=Qt.PointingHandCursor, value=self.parent.startupvol, minimum=0,
                                         maximum=130, minimumHeight=22, sliderMoved=self.setVolume)
-        # noinspection PyArgumentList
-        # self.fullscreenButton = QPushButton(objectName='fullscreenButton', icon=self.fullscreenIcon, flat=True, toolTip='Toggle fullscreen', statusTip='Switch to fullscreen video',
-        #                                     iconSize=QSize(14, 14), clicked=self.toggleFullscreen, cursor=Qt.PointingHandCursor, enabled=False)
         self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True, objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
         self.menuButton.setFixedSize(QSize(33, 32))
 
@@ -213,8 +208,6 @@ class VideoLabelingTool(QWidget):
         audioLayout.addWidget(self.muteButton)
         audioLayout.addSpacing(0)
         audioLayout.addWidget(self.volSlider)
-        # audioLayout.addSpacing(5)
-        # audioLayout.addWidget(self.fullscreenButton)
 
         self.toolbarOpen = VCToolBarButton('Open', 'Open and load a media file to begin', parent=self)
         self.toolbarOpen.clicked.connect(self.openFolder)

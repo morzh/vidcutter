@@ -21,7 +21,7 @@ class TimeLine(QWidget):
     sliderMoved = pyqtSignal(float)
 
     class CursorStates(Enum):
-        cursorOutside = 0
+        cursorIsOutside = 0
         cursorOnBeginSide = 1
         cursorOnEndSide = 2
         cursorIsInside = 3
@@ -291,9 +291,14 @@ class TimeLine(QWidget):
         seconds = self._pixelPositionToSeconds(pixelPosition)
 
         milliseconds = int(round(1e3 * (seconds - int(seconds))))
-        seconds = int(seconds)
-        minutes = int(seconds / 60)
-        hours = int(minutes / 60)
+        hours = int(seconds / 3600)
+        minutes = int((seconds % 3600) / 60)
+        seconds = int((seconds % 3600) % 60)
+
+        # minutes = int(int(seconds) / 60)
+        # hours = int(minutes / 60)
+        # minutes -= minutes * 1
+        # seconds -= minutes * 60
         time = QTime(hours, minutes, seconds, milliseconds)
         return time
 
@@ -412,7 +417,7 @@ class TimeLine(QWidget):
 
         self.parent.parent.renderVideoClips()
         self.state = self.RectangleEditState.freeState
-        self.freeCursorOnSide = 0
+        self.freeCursorOnSide = self.CursorStates.cursorIsOutside
 
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
@@ -433,7 +438,7 @@ class TimeLine(QWidget):
                             return self.CursorStates.cursorOnEndSide
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return self.CursorStates.cursorIsInside
-        return self.CursorStates.cursorOutside
+        return self.CursorStates.cursorIsOutside
 
     def mouseCursorClipIndex(self, e_pos) -> int:
         if len(self.clipsRectangles_) > 0:
