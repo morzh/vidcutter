@@ -230,12 +230,6 @@ class VideoClipsListWidget(QListWidget):
         self.parent.videoList[videoIndex].clips[clipIndex].timeEnd = time
         self.parent.scalableTimeline.renderVideoClips(self.parent.videoList[videoIndex].clips)
 
-    # def showProgress(self, steps: int) -> None:
-    #     for row in range(self.count()):
-    #         item = self.item(row)
-    #         progress = ListProgress(steps, self.visualItemRect(item), self)
-    #         self._progressBars.append(progress)
-
     @pyqtSlot()
     @pyqtSlot(int)
     def updateProgress(self, item: int = None) -> None:
@@ -245,12 +239,12 @@ class VideoClipsListWidget(QListWidget):
             else:
                 self._progressBars[item].setValue(self._progressBars[item].value() + 1)
 
-    @pyqtSlot()
-    def clearProgress(self) -> None:
-        for progress in self._progressBars:
-            progress.hide()
-            progress.deleteLater()
-        self._progressBars.clear()
+    # @pyqtSlot()
+    # def clearProgress(self) -> None:
+    #     for progress in self._progressBars:
+    #         progress.hide()
+    #         progress.deleteLater()
+    #     self._progressBars.clear()
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self.count() > 0:

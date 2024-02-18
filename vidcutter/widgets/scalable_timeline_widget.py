@@ -108,12 +108,12 @@ class ScalableTimeLine(QScrollArea):
         super().repaint()
 
     def renderVideoClips(self, clips: list[VideoItemClip]) -> None:
-        self.timeline.clearRegions()
+        self.timeline.clearClips()
         for videoClip in clips:
             clipStart = videoClip.timeStart.msecsSinceStartOfDay()
             clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
             clipVisibility = videoClip.visibility
-            self.addClip(clipStart.msecsSinceStartOfDay() * 1e-3, clipEnd.msecsSinceStartOfDay() * 1e-3, clipVisibility)
+            self.addClip(clipStart * 1e-3, clipEnd * 1e-3, clipVisibility)
         self.update()
 
     def setClipVisibility(self, index: int, state) -> None:
@@ -134,10 +134,7 @@ class ScalableTimeLine(QScrollArea):
         self.update()
 
     def clearRegions(self) -> None:
-        self.timeline.clipsRectangles_.clear()
-        self.timeline.clipsVisibility_.clear()
-        self.timeline.regionSelected_ = -1
-        self.update()
+        self.timeline.clearClips()
 
     def updateProgress(self, region: int = None) -> None:
         pass

@@ -93,6 +93,8 @@ class TimeLine(QWidget):
     def clearClips(self):
         self.clipsRectangles_.clear()
         self.clipsVisibility_.clear()
+        self.regionSelected_ = -1
+        self.update()
 
     def updateClips(self):
         self.clearClips()

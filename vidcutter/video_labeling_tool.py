@@ -755,12 +755,15 @@ class VideoLabelingTool(QWidget):
             self.scalableTimeline.currentRectangleIndex = -1
             # self.scalableTimeline.timeline.setFocus()
 
+            self.videoList.currentVideoIndex = 0
+
             self.mediaAvailable = True
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelineMinusButton.button.setEnabled(True)
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
+            self.timelineFactorLabel.setText('1')
 
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
