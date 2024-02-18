@@ -9,8 +9,8 @@ from sortedcontainers import SortedList
 class VideoList:
     def __init__(self, video_issues: list[str] = (), actionLabels: list[str] = ()):
         self._description: str = ''
-        self._currentVideoIndex: int = 0
         self.videos: list[VideoItem] = []
+        self._currentVideoIndex: int = 0
         self._videoIssuesClasses = video_issues
         self.actionClassesLabels: list[str] = actionLabels
         self.actionClassUnknownLabel = 'Other'

@@ -128,8 +128,8 @@ class VideoLabelingTool(QWidget):
         self._initNoVideo()
 
         self.videoClipsList = VideoClipsListWidget(parent=self)
-        self.videoClipsList.clicked.connect(self.videoListSingleClick)
-        self.videoClipsList.doubleClicked.connect(self.videoListDoubleClick)
+        self.videoClipsList.clicked.connect(self.videoClipsListSingleClick)
+        self.videoClipsList.doubleClicked.connect(self.videoClipsListDoubleClick)
         self.videoClipsList.customContextMenuRequested.connect(self.itemMenu)
         self.videoClipsList.itemChanged.connect(self.videosVisibility)
         self.videoClipsList.model().rowsInserted.connect(self.setProjectDirty)
@@ -719,7 +719,6 @@ class VideoLabelingTool(QWidget):
 
         if self._dataFolder is not None:
             self.lastFolder = QFileInfo(self._dataFolder).absolutePath()
-            # print('lastFolder', self.lastFolder)
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
@@ -929,11 +928,11 @@ class VideoLabelingTool(QWidget):
 
     @pyqtSlot()
     @pyqtSlot(QListWidgetItem)
-    def videoListSingleClick(self) -> None:
+    def videoClipsListSingleClick(self) -> None:
         try:
             modifierPressed = QApplication.keyboardModifiers()
             row = self.videoClipsList.currentRow()
-            if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            if (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
                 clipQTimeStart = self.videoList.videos[self.videoList.currentVideoIndex].clips[row].timeStart
                 clipStartSeconds = 1e-3 * clipQTimeStart.msecsSinceStartOfDay()
                 self.setPosition(clipStartSeconds)
@@ -944,10 +943,10 @@ class VideoLabelingTool(QWidget):
         except:
             self.doPass()
 
-    def videoListDoubleClick(self) -> None:
+    def videoClipsListDoubleClick(self) -> None:
         indexRow = self.videoClipsList.currentRow()
         modifierPressed = QApplication.keyboardModifiers()
-        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+        if (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
             clipQTimeEnd = self.videoList.videos[self.videoList.currentVideoIndex].clips[indexRow].timeEnd
             clipEndSeconds = 1e-3 * clipQTimeEnd.msecsSinceStartOfDay()
             self.setPosition(clipEndSeconds)

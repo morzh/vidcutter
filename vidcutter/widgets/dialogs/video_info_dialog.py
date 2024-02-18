@@ -81,7 +81,7 @@ class VideoDescriptionDialog(QDialog):
                 self.checkedIssuesList.append(rowIndex)
         self.parent.projectSaved = False
         self.parent.saveProjectAction.setEnabled(True)
-        self.parent.toolbar_save.setEnabled(True)
+        self.parent.toolbarSave.setEnabled(True)
 
     def getQTableWidgetSize(self):
         w = self.issuesTable.verticalHeader().width() + 4  # +4 seems to be needed

@@ -68,9 +68,8 @@ class Widget(QtWidgets.QWidget):
         )
         self._player.setVideoOutput(self._videoitem)
         file = os.path.join(os.path.dirname(__file__), "file_example_MP4_640_3MG.mp4")  # video.mp4 is under the same dirctory
-        print(file)
         self._player.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(file)))
-        print(f"self._videoitem::{self._videoitem.size()}")
+        # print(f"self._videoitem::{self._videoitem.size()}")
 
         # get eye tracker
         eyetrackers = tr.find_all_eyetrackers()

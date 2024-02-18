@@ -309,7 +309,6 @@ class VCFrameCounter(QWidget):
         self.currentframe.setValue(frame)
 
     def setFrameCount(self, count: int) -> None:
-        # print('frame count', count)
         self.framecount.setText(str(count))
         self.setMaximum(count)
 

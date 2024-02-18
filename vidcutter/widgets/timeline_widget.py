@@ -138,7 +138,8 @@ class TimeLine(QWidget):
             self._drawClips(painter, opt)
             if not self.freeCursorOnSide:
                 return
-            self._drawCLipsEditMode_(painter)
+            if self.currentRectangleIndex != -1:
+                self._drawCLipsEditMode_(painter)
         painter.end()
 
     def _drawCutSegment(self, painter):
@@ -364,13 +365,20 @@ class TimeLine(QWidget):
         self.clicking = False
 
     def _mousePressAltEvent(self, event: QMouseEvent):
-        index = self.mouseCursorClipIndex(event.pos())
+        index = self.mousePositionToClipIndex(event.pos())
         if index != -1:
             clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
             clipStartSeconds = 1e-3 * clip.timeStart.msecsSinceStartOfDay()
             self.setPositionFromSeconds(clipStartSeconds)
             self.parent.parent.playMediaTimeClip(index)
             self.clicking = False
+
+    def _mousePressShiftEvent(self, event: QMouseEvent):
+        index = self.mousePositionToClipIndex(event.pos())
+        if index != -1:
+            clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
+            clipStartSeconds = 1e-3 * clip.timeStart.msecsSinceStartOfDay()
+            self.setPositionFromSeconds(clipStartSeconds)
 
     def _mousePressLeftButtonEvent(self, event: QMouseEvent):
         x = event.pos().x()
@@ -388,6 +396,8 @@ class TimeLine(QWidget):
             self._mousePressControlEvent(event)
         elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
             self._mousePressAltEvent(event)
+        elif (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
+            self._mousePressShiftEvent(event)
         else:
             self._mousePressLeftButtonEvent(event)
 
@@ -405,25 +415,39 @@ class TimeLine(QWidget):
         elif (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self.applyEvent(event)
             self.unsetCursor()
+            currentVideoIndex = self.videoListRef.currentVideoIndex
+            thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
+            self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+
+            clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
+            self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
+            self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
+            self.videoListRef.videos[currentVideoIndex].clips.add(clip)
+
+            self.parent.parent.renderVideoClips()
+            self.state = self.RectangleEditState.freeState
+            self.freeCursorOnSide = self.CursorStates.cursorIsOutside
         elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
             return
 
-        currentVideoIndex = self.videoListRef.currentVideoIndex
-        thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
-        self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
-
-        clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
-        self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
-        self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
-        self.videoListRef.videos[currentVideoIndex].clips.add(clip)
-
-        self.parent.parent.renderVideoClips()
-        self.state = self.RectangleEditState.freeState
-        self.freeCursorOnSide = self.CursorStates.cursorIsOutside
 
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
         self.repaint()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if not self.parent.parent.mediaAvailable or not self.isIn or not self.isEnabled():
+            super().mousePressEvent(event)
+            return
+
+        modifierPressed = QApplication.keyboardModifiers()
+        if (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
+            index = self.mousePositionToClipIndex(event.pos())
+            if index != -1:
+                clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
+                clipEndSeconds = 1e-3 * clip.timeEnd.msecsSinceStartOfDay()
+                self.setPositionFromSeconds(clipEndSeconds)
+
 
     def mouseCursorState(self, e_pos) -> CursorStates:
         if len(self.clipsRectangles_) > 0:
@@ -451,7 +475,7 @@ class TimeLine(QWidget):
             self.parent.parent.setPlayButton(False)
             event.accept()
 
-    def mouseCursorClipIndex(self, e_pos) -> int:
+    def mousePositionToClipIndex(self, e_pos) -> int:
         if len(self.clipsRectangles_) > 0:
             for clipIndex in range(len(self.clipsRectangles_)):
                 self.begin = self.clipsRectangles_[clipIndex].topLeft()
