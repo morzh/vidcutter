@@ -9,9 +9,9 @@ from enum import Enum
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, QPoint, QLine, QRect, QRectF, pyqtSignal, QEvent, QObject, QTime
-from PyQt5.QtGui import QPainter, QMouseEvent, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath, QPixmap
-from PyQt5.QtWidgets import QStyle, QStylePainter, QWidget, QStyleOptionSlider, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt, QPoint, QLine, QRect, pyqtSignal, QEvent, QObject, QTime
+from PyQt5.QtGui import QPainter, QMouseEvent, QWheelEvent, QColor, QFont, QBrush, QPalette, QPen, QPolygon
+from PyQt5.QtWidgets import QStyle, QStylePainter, QWidget, QStyleOptionSlider
 
 from vidcutter.VideoItemClip import VideoItemClip
 from vidcutter.VideoList import VideoList
@@ -441,6 +441,15 @@ class TimeLine(QWidget):
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return self.CursorStates.cursorIsInside
         return self.CursorStates.cursorIsOutside
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        if self.parent.parent.mediaAvailable:
+            if event.angleDelta().y() > 0:
+                self.parent.parent.mpvWidget.frameBackStep()
+            else:
+                self.parent.parent.mpvWidget.frameStep()
+            self.parent.parent.setPlayButton(False)
+            event.accept()
 
     def mouseCursorClipIndex(self, e_pos) -> int:
         if len(self.clipsRectangles_) > 0:

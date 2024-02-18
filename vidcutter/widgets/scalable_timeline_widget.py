@@ -9,9 +9,9 @@ from enum import Enum
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, QPoint, QLine, QRect, QRectF, pyqtSignal, QEvent, QObject, QTime
-from PyQt5.QtGui import QPainter, QMouseEvent, QColor, QFont, QBrush, QPalette, QPen, QPolygon, QPainterPath, QPixmap
-from PyQt5.QtWidgets import QStyle, QStylePainter, QWidget, QStyleOptionSlider, QScrollArea, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QWheelEvent
+from PyQt5.QtWidgets import QScrollArea
 
 from vidcutter.VideoItemClip import VideoItemClip
 from vidcutter.VideoList import VideoList
@@ -174,6 +174,9 @@ class ScalableTimeLine(QScrollArea):
             self._cutStarted = False
             self._handleHover = False
         # self.initStyle()
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        self.timeline.wheelEvent(event)
 
     # def keyPressEvent(self, a0):
     #     self.parent.keyPressEvent(a0)
