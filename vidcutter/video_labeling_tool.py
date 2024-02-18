@@ -755,7 +755,7 @@ class VideoLabelingTool(QWidget):
             self.scalableTimeline.currentRectangleIndex = -1
             # self.scalableTimeline.timeline.setFocus()
 
-            self.videoList.currentVideoIndex = 0
+            # self.videoList.currentVideoIndex = 0  # causes incorrect rendering in timeline
 
             self.mediaAvailable = True
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
