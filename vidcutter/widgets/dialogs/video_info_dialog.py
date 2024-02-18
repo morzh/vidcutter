@@ -83,6 +83,16 @@ class VideoDescriptionDialog(QDialog):
         self.parent.saveProjectAction.setEnabled(True)
         self.parent.toolbarSave.setEnabled(True)
 
+    def accept(self) -> None:
+        currentVideoIndex = self.parent.videoList.currentVideoIndex
+        self.parent.videoListWidget.setCurrentRow(currentVideoIndex)
+        super().accept()
+
+    def reject(self) -> None:
+        currentVideoIndex = self.parent.videoList.currentVideoIndex
+        self.parent.videoListWidget.setCurrentRow(currentVideoIndex)
+        super().reject()
+
     def getQTableWidgetSize(self):
         w = self.issuesTable.verticalHeader().width() + 4  # +4 seems to be needed
         for i in range(self.issuesTable.columnCount()):
