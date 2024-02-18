@@ -762,6 +762,7 @@ class VideoLabelingTool(QWidget):
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
             self.timelineFactorLabel.setText('1')
+            self.clipIsPlayingIndex = -1
             self.mediaAvailable = True
 
         except InvalidMediaException:
@@ -884,12 +885,10 @@ class VideoLabelingTool(QWidget):
         # print('on_positionChanged::progress', progress)
         progress *= 1000
         if self.scalableTimeline.restrictValue < progress or progress == 0:
-            # print('on_positionChanged.progress:', progress)
             self.scalableTimeline.setValue(progress / 1e3)
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
-            if self.clipIsPlayingIndex >= 0 and self.videoList.currentVideoIndex >= 0 and self.mediaAvailable:
-                # print(self.clipIsPlayingIndex, self.videoList.currentVideoIndex)
+            if self.clipIsPlayingIndex >= 0:
                 currentClipEnd = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
                 if progress > currentClipEnd:
                     self.playMedia()
@@ -904,7 +903,6 @@ class VideoLabelingTool(QWidget):
         self.setPosition(0.0)
         self.timeCounter.setDuration(self.delta2QTime(round(duration * 1000)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
-        # self.mediaAvailable = True
         self.renderVideoClips()
 
     @pyqtSlot()
