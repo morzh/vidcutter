@@ -144,8 +144,11 @@ class VideoLabelingTool(QWidget):
 
         self.timeCounter = VCTimeCounter(self)
         self.timeCounter.timeChanged.connect(lambda newtime: self.setPosition(newtime.msecsSinceStartOfDay()))
+        self.timeCounter.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
         self.frameCounter = VCFrameCounter(self)
         self.frameCounter.setReadOnly(True)
+        self.frameCounter.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         countersLayout = QHBoxLayout()
         countersLayout.setContentsMargins(0, 0, 0, 0)
@@ -752,17 +755,14 @@ class VideoLabelingTool(QWidget):
 
             self.scalableTimeline.setEnabled(True)
             self.scalableTimeline.currentRectangleIndex = -1
-            # self.scalableTimeline.timeline.setFocus()
 
-            # self.videoList.currentVideoIndex = 0  # causes incorrect rendering in timeline
-
-            self.mediaAvailable = True
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: light grey")
             self.timelineFactorLabel.setStyleSheet("font-weight: bold; color: {}".format('light grey' if self.theme == 'dark' else 'black'))
             self.timelineMinusButton.button.setEnabled(True)
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
             self.timelineFactorLabel.setText('1')
+            self.mediaAvailable = True
 
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -834,16 +834,16 @@ class VideoLabelingTool(QWidget):
     def playMediaTimeClip(self, index) -> None:
         if not len(self.videoList.videos[self.videoList.currentVideoIndex]):
             return
-        playstate = self.mpvWidget.property('pause')
+        playState = self.mpvWidget.property('pause')
         self.clipIsPlaying = True
         self.clipIsPlayingIndex = index
         clipStartSeconds = 1e-3 * self.videoList.videos[self.videoList.currentVideoIndex].clips[index].timeStart.msecsSinceStartOfDay()
         self.setPosition(clipStartSeconds)
-        if playstate:
+        if playState:
             self.setPlayButton(True)
             self.taskbar.setState(True)
-            self.timeCounter.clearFocus()
-            self.frameCounter.clearFocus()
+            # self.timeCounter.clearFocus()
+            # self.frameCounter.clearFocus()
             self.mpvWidget.pause()
 
     def showText(self, text: str, duration: int = 3, override: bool = False) -> None:
@@ -888,7 +888,8 @@ class VideoLabelingTool(QWidget):
             self.scalableTimeline.setValue(progress / 1e3)
             self.timeCounter.setTime(self.delta2QTime(round(progress)).toString(self.timeformat))
             self.frameCounter.setFrame(frame)
-            if self.clipIsPlayingIndex >= 0:
+            if self.clipIsPlayingIndex >= 0 and self.videoList.currentVideoIndex >= 0 and self.mediaAvailable:
+                # print(self.clipIsPlayingIndex, self.videoList.currentVideoIndex)
                 currentClipEnd = QTime(0, 0, 0).msecsTo(self.videoList.videos[self.videoList.currentVideoIndex].clips[self.clipIsPlayingIndex].timeEnd)
                 if progress > currentClipEnd:
                     self.playMedia()
@@ -903,6 +904,7 @@ class VideoLabelingTool(QWidget):
         self.setPosition(0.0)
         self.timeCounter.setDuration(self.delta2QTime(round(duration * 1000)).toString(self.timeformat))
         self.frameCounter.setFrameCount(frames)
+        # self.mediaAvailable = True
         self.renderVideoClips()
 
     @pyqtSlot()

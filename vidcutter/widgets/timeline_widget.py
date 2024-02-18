@@ -138,7 +138,7 @@ class TimeLine(QWidget):
             self._drawClips(painter, opt)
             if not self.freeCursorOnSide:
                 return
-            if self.currentRectangleIndex != -1:
+            if self.currentRectangleIndex != -1 and self.parent.parent.mediaAvailable:
                 self._drawCLipsEditMode_(painter)
         painter.end()
 
