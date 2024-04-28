@@ -7,6 +7,7 @@ from moviepy.editor import *
 from vidcutter.data_structures.video_list import VideoList as video_list
 from vidcutter.data_structures.video_item import VideoItem as video_item
 from vidcutter.data_structures.video_item_clip import VideoItemClip as video_item_clip
+from vidcutter.data_structures.video_item_clip import BoundingBox as bounding_box
 from sortedcontainers import SortedList
 
 ci_build_and_not_headless = False
@@ -22,7 +23,7 @@ if sys.platform.startswith("linux") and ci_and_not_headless:
     os.environ.pop("QT_QPA_FONTDIR")
 
 
-videos_list_path = '/home/anton/work/fitMate/datasets/squats_2022/old_pickle/'
+videos_list_path = '/home/anton/work/fitMate/datasets/squats_2022/'
 videos_list_path_timestamps = '/home/anton/work/fitMate/datasets/squats_2022/new_pickle/'
 
 image_size = 128
@@ -65,7 +66,7 @@ for video in videoList:
 
         video_item_clip_.description = clip.description
         video_item_clip_.actionClassIndex = clip.actionClassIndex
-        video_item_clip_.boundingBox = clip.boundingBox
+        video_item_clip_.boundingBox = bounding_box()
 
         video_item_clips.append(video_item_clip_)
 
