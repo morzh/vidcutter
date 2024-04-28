@@ -2,8 +2,9 @@
 
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
-from vidcutter.data_structures.video_item_clip import VideoItemClip
 from sortedcontainers import SortedList
+
+from vidcutter.data_structures.video_item_clip import VideoItemClip
 from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle
 
 
