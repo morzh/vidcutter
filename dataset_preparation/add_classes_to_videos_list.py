@@ -4,7 +4,7 @@ import pickle
 from PyQt5.QtWidgets import QApplication
 from moviepy.editor import *
 
-from vidcutter.VideoList import VideoList
+from vidcutter.data_structures.video_list import VideoList
 
 ci_build_and_not_headless = False
 try:

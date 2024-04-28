@@ -4,7 +4,7 @@ import sys
 
 from PyQt5.QtCore import (QDir)
 from PyQt5.QtWidgets import (QWidget, QMessageBox, QApplication, QVBoxLayout, QPushButton, QFileDialog)
-from vidcutter.VideoList import VideoList
+from vidcutter.data_structures.video_list import VideoList
 from vidcutter.widgets.video_list_widget import VideoListWidget
 
 

@@ -1,20 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import tempfile
-from base64 import b64encode
 
 import sys
 from copy import copy
 from enum import Enum
 
-from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, QPoint, QLine, QRect, pyqtSignal, QEvent, QObject, QTime
+from PyQt5.QtCore import Qt, QPoint, QLine, QRect, pyqtSignal, QTime
 from PyQt5.QtGui import QPainter, QMouseEvent, QWheelEvent, QColor, QFont, QBrush, QPalette, QPen, QPolygon
-from PyQt5.QtWidgets import QStyle, QStylePainter, QWidget, QStyleOptionSlider
-
-from vidcutter.VideoItemClip import VideoItemClip
-from vidcutter.VideoList import VideoList
+from PyQt5.QtWidgets import QStylePainter, QWidget, QStyleOptionSlider
 
 
 class TimeLine(QWidget):

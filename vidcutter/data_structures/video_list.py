@@ -18,10 +18,9 @@ class VideoList:
         print('video issues classes:', self._videoIssuesClasses)
         print('videos:')
         print('-' * 50)
-        for video_index, video in enumerate(self.videos):
-            print('Video index:', video_index)
+        for video in self.videos:
             print(video)
-            print('-' * 150)
+            print('-' * 50)
 
     def __getitem__(self, item):
         return self.videos[item]

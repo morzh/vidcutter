@@ -4,7 +4,7 @@ import pickle
 from PyQt5.QtWidgets import QApplication
 from moviepy.editor import *
 
-from vidcutter.VideoItem import VideoItemClip
+from vidcutter.data_structures.video_item import VideoItemClip
 
 ci_build_and_not_headless = False
 try:
@@ -46,7 +46,6 @@ for video_new in data_new_format.videos:
                 clip.thumbnail = video_old.clips[idx].thumbnail
                 clip.actionClassIndex = 2
                 video_new.clips.add(clip)
-
 
 
 with open(os.path.join(videos_list_new_path, 'data.pickle'), 'wb') as f:

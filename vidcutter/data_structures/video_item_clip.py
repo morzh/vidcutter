@@ -72,7 +72,6 @@ class VideoItemClip:
             self._timeEnd = QTime()
             self._thumbnail = QPixmapPickle()
             self._visibility = 2
-            self._name = ''
         elif len(args) == 5:
             self._timeStart = args[0]
             self._timeEnd = args[1]
@@ -86,8 +85,7 @@ class VideoItemClip:
         self.clip_timestamps: list[VideoClipTimestamps] = []
 
     def __str__(self):
-        return f'start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
-        # return f'name:  {self._name}, start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
+        return f'name:  {self._name}, start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
 
     def __lt__(self, other):
         return self.timeStart < other.timeStart

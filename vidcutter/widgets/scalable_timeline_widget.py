@@ -1,20 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import tempfile
-from base64 import b64encode
 
-import sys
-from copy import copy
-from enum import Enum
-
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QWheelEvent
 from PyQt5.QtWidgets import QScrollArea
 
-from vidcutter.VideoItemClip import VideoItemClip
-from vidcutter.VideoList import VideoList
+from vidcutter.data_structures.video_item_clip import VideoItemClip
 
 from vidcutter.widgets.timeline_widget import TimeLine
 

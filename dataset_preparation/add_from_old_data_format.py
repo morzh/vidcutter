@@ -1,18 +1,11 @@
-import json
-import os
 import pickle
-import shutil
-import sys
 
 # import matplotlib.pyplot as plt
-import moviepy
-import numpy as np
-from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QApplication
 from moviepy.editor import *
 
-from vidcutter.QPixmapPickle import QPixmapPickle
-from vidcutter.VideoItem import VideoItem, VideoItemClip
+from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle
+from vidcutter.data_structures.video_item import VideoItem, VideoItemClip
 
 ci_build_and_not_headless = False
 try:

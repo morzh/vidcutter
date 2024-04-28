@@ -1,14 +1,9 @@
-import os
 import sys
-import copy
-from typing import List
 
-from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime, QPoint, QTime
-from PyQt5.QtGui import QColor, QFont, QIcon, QMouseEvent, QPainter, QPalette, QPen, QResizeEvent, QContextMenuEvent, QPixmap, QPainterPath
-from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QWidget, QSizePolicy, QStyle, QComboBox, QHBoxLayout, QVBoxLayout, QTimeEdit, QCheckBox,
-                             QLabel, QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QLayout)
+from PyQt5.QtCore import Qt, QModelIndex, QSize
+from PyQt5.QtGui import QColor, QFont, QIcon, QPainter, QPen, QPixmap, QPainterPath
+from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QListWidgetItem, QSizePolicy, QStyle, QStyledItemDelegate, QStyleOptionViewItem)
 
-from vidcutter import VideoItem
 # import PyQt5.QtCore.
 
 from vidcutter.libs.graphicseffects import OpacityEffect

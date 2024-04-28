@@ -4,14 +4,14 @@
 import copy
 
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QModelIndex, QRect, QSize, QTime
-from PyQt5.QtGui import QColor, QFont, QMouseEvent, QPainter, QPalette, QPixmap, QPainterPath
-from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QProgressBar, QSizePolicy, QStyle, QWidget, QComboBox, QListWidgetItem, QHBoxLayout, QVBoxLayout, QTimeEdit, QAbstractSpinBox,
-                             QStyledItemDelegate, QStyleFactory, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QLabel, QLayout)
+from PyQt5.QtGui import QColor, QFont, QMouseEvent, QPainter, QPixmap, QPainterPath
+from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QSizePolicy, QStyle, QWidget, QComboBox, QListWidgetItem, QHBoxLayout, QVBoxLayout, QTimeEdit, QAbstractSpinBox,
+                             QStyledItemDelegate, QStyleOptionViewItem, QCheckBox, QStyleOptionButton, QApplication, QLabel, QLayout)
 
 # from PySide2 import QtGui, QtCore, QtWidgets
 
 from vidcutter.libs.graphicseffects import OpacityEffect
-from vidcutter.VideoItemClip import VideoItemClip
+from vidcutter.data_structures.video_item_clip import VideoItemClip
 
 
 class ClipsListWidgetItem(QWidget):

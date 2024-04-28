@@ -64,7 +64,7 @@ class QBDelegate(QItemDelegate):
         title = 'Just title'  # index.data(TitleRole)
         icon = QIcon('../checker.png')  # index.data(IconRole)
 
-        # value, _ = index.data_model().data(index).toStr()
+        # value, _ = index.data_structures().data(index).toStr()
         optionComboBox = QStyleOptionComboBox()
         optionComboBox.QStyleOption = option
         optionComboBox.rect = rectangle.adjusted(3, 3, -60, -50)

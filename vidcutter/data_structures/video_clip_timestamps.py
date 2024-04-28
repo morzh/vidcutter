@@ -2,7 +2,7 @@ from enum import Enum
 from PyQt5.QtCore import QTime
 
 
-class ClipTimestamps:
+class VideoClipTimestamps:
     class TimestampType(Enum):
         LEFT = 1
         RIGHT = 2
@@ -26,4 +26,4 @@ class ClipTimestamps:
 
     @timestamp_type.setter
     def timestamp_type(self, timestamp_type: TimestampType):
-        self.timestamp_type_ = type
+        self.timestamp_type_ = timestamp_type

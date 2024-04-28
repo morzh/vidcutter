@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import copy
 import logging
 import os
 import sys
@@ -12,14 +11,13 @@ from typing import Callable, List, Optional, Union
 from sortedcontainers import SortedList
 
 import sip
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QModelIndex, QPoint, QSize, Qt, QTime, QTimer, QUrl)
+from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QBuffer, QByteArray, QDir, QFile, QFileInfo, QPoint, QSize, Qt, QTime, QTimer, QUrl)
 from PyQt5.QtGui import QDesktopServices, QFont, QFontDatabase, QIcon, QKeyEvent, QPixmap, QShowEvent
-from PyQt5.QtWidgets import (QGraphicsScene, QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
-                             QVBoxLayout, QWidget, QScrollArea, QGraphicsView)
+from PyQt5.QtWidgets import (QAction, qApp, QApplication, QDialog, QFileDialog, QFrame, QGroupBox, QHBoxLayout, QLabel, QListWidgetItem, QMainWindow, QMenu, QMessageBox, QPushButton, QSizePolicy, QStyleFactory,
+                             QVBoxLayout, QWidget, QScrollArea)
 
 # noinspection PyUnresolvedReferences
 from vidcutter import resources
-from vidcutter.VideoList import VideoList
 from vidcutter.widgets.dialogs.about import About
 from vidcutter.widgets.dialogs.change_log import Changelog
 from vidcutter.widgets.dialogs.media_info import MediaInfo
@@ -27,7 +25,7 @@ from vidcutter.media_stream import StreamSelector
 from vidcutter.widgets.dialogs.settings import SettingsDialog
 from vidcutter.widgets.dialogs.updater import Updater
 from vidcutter.widgets.video_clips_list_widget import VideoClipsListWidget
-from vidcutter.VideoStyle import VideoStyleDark, VideoStyleLight
+from vidcutter.data_structures.video_style import VideoStyleDark, VideoStyleLight
 
 from vidcutter.libs.config import Config, InvalidMediaException, VideoFilter
 from vidcutter.libs.mpvwidget import mpvWidget
@@ -37,11 +35,11 @@ from vidcutter.libs.videoservice import VideoService
 from vidcutter.libs.widgets import (VCBlinkText, VCDoubleInputDialog, VCFilterMenuAction, VCFrameCounter, VCMessageBox,
                                     VCProgressDialog, VCTimeCounter, VCToolBarButton, VCToolBarComboBox, VCVolumeSlider, VCConfirmDialog)
 
-from vidcutter.VideoItemClip import VideoItemClip
+from vidcutter.data_structures.video_item_clip import VideoItemClip
 
 from vidcutter.widgets.video_list_widget import VideoListWidget
 from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine
-from vidcutter.QPixmapPickle import QPixmapPickle
+from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle
 from vidcutter.widgets.dialogs.video_info_dialog import VideoDescriptionDialog
 
 
