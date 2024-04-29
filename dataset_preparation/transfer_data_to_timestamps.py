@@ -8,6 +8,7 @@ from vidcutter.data_structures.video_list import VideoList as video_list
 from vidcutter.data_structures.video_item import VideoItem as video_item
 from vidcutter.data_structures.video_item_clip import VideoItemClip as video_item_clip
 from vidcutter.data_structures.video_item_clip import BoundingBox as bounding_box
+from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle as qpixmap_pickle
 from sortedcontainers import SortedList
 
 ci_build_and_not_headless = False
@@ -46,7 +47,9 @@ video_list_.actionClassUnknownLabel = videoList.actionClassUnknownLabel
 for video in videoList:
     video_item_ = video_item()
 
-    video_item_.thumbnail = video.thumbnail
+    # video_item_.thumbnail = qpixmap_pickle()
+    video_item_.thumbnail = qpixmap_pickle(video.thumbnail.copy())
+    # video_item_.thumbnail = video.thumbnail
     video_item_.duration = video.duration
     video_item_.currentCLipIndex = video._currentCLipIndex
 
@@ -61,7 +64,8 @@ for video in videoList:
 
         video_item_clip_.timeStart = clip.timeStart
         video_item_clip_.timeEnd = clip.timeEnd
-        video_item_clip_.thumbnail = clip.thumbnail
+        video_item_clip_.thumbnail = qpixmap_pickle(clip.thumbnail.copy())
+        # video_item_clip_.thumbnail.fromImage(clip.thumbnail.toImage())
         video_item_clip_.visibility = clip.visibility
 
         video_item_clip_.description = clip.description
