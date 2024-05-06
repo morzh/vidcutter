@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QListWidget, QSizePolicy, QStyle
 
 from vidcutter.libs.graphicseffects import OpacityEffect
 from vidcutter.data_structures.video_item_clip import VideoItemClip
+from vidcutter.widgets.timeline_widget import TimeLine
 
 
 class ClipsListWidgetItem(QWidget):
@@ -149,8 +150,8 @@ class VideoClipsListWidget(QListWidget):
         self.clipsHasRendered = False
         self.parent.scalableTimeline.clearRegions()
 
-        for itemIndex, videoClip in enumerate(videoClipItems):
-            self.parent.scalableTimeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
+        for videoClip in videoClipItems:
+            self.parent.scalableTimeline.addClip(videoClip)
         self.clipsHasRendered = True
 
     def renderClips(self, videoClipItems: list[VideoItemClip]) -> None:
@@ -185,7 +186,7 @@ class VideoClipsListWidget(QListWidget):
             listItem.timeEnd.timeChanged.connect(lambda time, index=itemIndex: self.timeEndChanged(time, index))
             self.addItem(listItem.item)
             self.setItemWidget(listItem.item, listItem.widget)
-            self.parent.scalableTimeline.addClip(videoClip.timeStart.msecsSinceStartOfDay() * 1e-3, videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3, videoClip.visibility)
+            self.parent.scalableTimeline.addClip(videoClip)
         self.verticalScrollBar().setValue(scrollBarValue)
         self.clipsHasRendered = True
 

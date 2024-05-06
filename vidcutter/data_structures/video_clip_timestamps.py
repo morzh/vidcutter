@@ -8,7 +8,7 @@ class VideoClipTimestamps:
         RIGHT = 2
         DOUBLE_SIDED = 3
 
-    def __init__(self, timestamp: QTime, timestamp_type: TimestampType):
+    def __init__(self, timestamp: QTime, timestamp_type: TimestampType = TimestampType.DOUBLE_SIDED):
         self.timestamp_ = timestamp
         self.timestamp_type_ = timestamp_type
 

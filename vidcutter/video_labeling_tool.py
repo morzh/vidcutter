@@ -747,7 +747,7 @@ class VideoLabelingTool(QWidget):
         # self.parent.setWindowTitle('{0} - {1}'.format(str(item_index), os.path.basename(self.currentMedia)))
 
         try:
-            self.videoList.videos[self.videoList.currentVideoIndex].clips = SortedList(self.videoList.videos[self.videoList.currentVideoIndex].clips)
+            # self.videoList.videos[self.videoList.currentVideoIndex].clips = SortedList(self.videoList.videos[self.videoList.currentVideoIndex].clips)
             self.mpvWidget.setEnabled(True)
             self.mpvWidget.play(self.currentMedia)
             self.videoService.setMedia(self.currentMedia)
@@ -1080,16 +1080,6 @@ class VideoLabelingTool(QWidget):
     def setProjectDirty(self, dirty: bool = True) -> None:
         # print('setProjectDirty')
         self.projectDirty = dirty
-
-    # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
-    # @pyqtSlot(QModelIndex, int, int, QModelIndex, int)
-    # def syncClipList(self, parent: QModelIndex, start: int, end: int, destination: QModelIndex, row: int) -> None: #should replace syncClipList
-    #     index = row - 1 if start < row else row
-    #     clip = self.videoList.videos[self.videoList.currentVideoIndex].clips.pop(start)
-    #     self.videoList.videos[self.videoList.currentVideoIndex].clips.insert(index, clip)
-    #     if not len(clip.visibility):
-    #         self.timeline.switchRegions(start, index)
-    #     self.renderVideoClips()
 
     def renderSliderVideoClips(self) -> None:
         if not self.mediaAvailable:

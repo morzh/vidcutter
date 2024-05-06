@@ -25,8 +25,8 @@ class ScalableTimeLine(QScrollArea):
         self.setAlignment(Qt.AlignVCenter)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.setObjectName('scalable_timeline')
-        self._cutStarted = False
-        self._handleHover = False
+        # self._cutStarted = False
+        # self._handleHover = False
 
     def initAttributes(self) -> None:
         self.setEnabled(False)
@@ -100,25 +100,15 @@ class ScalableTimeLine(QScrollArea):
 
     def renderVideoClips(self, clips: list[VideoItemClip]) -> None:
         self.timeline.clearClips()
-        for videoClip in clips:
-            clipStart = videoClip.timeStart.msecsSinceStartOfDay()
-            clipEnd = videoClip.timeEnd.msecsSinceStartOfDay()
-            clipVisibility = videoClip.visibility
-            self.addClip(clipStart * 1e-3, clipEnd * 1e-3, clipVisibility)
+        for clip in clips:
+            self.addClip(clip)
         self.update()
 
     def setClipVisibility(self, index: int, state) -> None:
         self.timeline.setClipVisibility(index, state)
 
-    def addClip(self, start: float, end: float, visibility=2) -> None:
-        self.timeline.addClip(start, end, visibility)
-
-    def switchRegions(self, index1: int, index2: int) -> None:
-        region = self.timeline.clipsRectangles_.pop(index1)
-        regionVisibility = self.timeline.clipsVisibility_.pop(index1)
-        self.timeline.clipsRectangles_.insert(index2, region)
-        self.timeline.clipsVisibility_.insert(index2, regionVisibility)
-        self.update()
+    def addClip(self, clip: VideoItemClip) -> None:
+        self.timeline.addClip(clip)
 
     def selectRegion(self, clipIndex: int) -> None:
         self.timeline.regionSelected_ = clipIndex
@@ -128,9 +118,6 @@ class ScalableTimeLine(QScrollArea):
         self.timeline.clearClips()
 
     def updateProgress(self, region: int = None) -> None:
-        pass
-
-    def clearProgress(self):
         pass
 
     def minimum(self):
@@ -153,9 +140,11 @@ class ScalableTimeLine(QScrollArea):
         super().setFixedHeight(height)
         self.timeline.setFixedHeight(height - 16)
 
-    def sliderPositionFromValue(self, minimum: int, maximum: int, logicalValue: int, span: int) -> int:
+    @staticmethod
+    def sliderPositionFromValue(minimum: int, maximum: int, logicalValue: int, span: int) -> int:
         return int(float(logicalValue) / float(maximum - minimum) * span)
 
+    '''
     def setRestrictValue(self, value: int = 0, force: bool = False) -> None:
         self.restrictValue = value
         if value > 0 or force:
@@ -165,6 +154,7 @@ class ScalableTimeLine(QScrollArea):
             self._cutStarted = False
             self._handleHover = False
         # self.initStyle()
+    '''
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         self.timeline.wheelEvent(event)
