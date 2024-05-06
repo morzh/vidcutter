@@ -106,24 +106,23 @@ class TimeLine(QWidget):
 
     def addClip(self, videoClip: VideoItemClip) -> None:
 
-        clipTimeStart = videoClip.timeStart.msecsSinceStartOfDay() * 1e-3
-        clipTimeEnd = videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3
-        clipVisibility = videoClip.visibility
+        videoClipTimeStart = videoClip.timeStart.msecsSinceStartOfDay() * 1e-3
+        videoClipTimeEnd = videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3
+        videoClipVisibility = videoClip.visibility
 
-        startPixelPosition = self._secondsToPixelPosition(clipTimeStart)
-        endPixelPosition = self._secondsToPixelPosition(clipTimeEnd)
+        timelineClipPixelStart = self._secondsToPixelPosition(videoClipTimeStart)
+        timelineClipPixelEnd = self._secondsToPixelPosition(videoClipTimeEnd)
 
-        width = endPixelPosition - startPixelPosition
+        timelineClipPixelWidth = timelineClipPixelEnd - timelineClipPixelStart
         y = int((self.height() - self.regionHeight_) / 2)
-        height = self.regionHeight_
-        clipRectangle = QRect(startPixelPosition, y, width, height)
+        timelineClipRectangle = QRect(timelineClipPixelStart, y, timelineClipPixelWidth, self.regionHeight_)
 
-        timeline_clip = TimeLine.Clip(clipRectangle, clipVisibility)
+        timelineClip = TimeLine.Clip(timelineClipRectangle, videoClipVisibility)
         for timestamp in videoClip.clip_timestamps:
-            currentTimestampPixelPosition = startPixelPosition + self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3)
-            timeline_clip.timestamps.append(currentTimestampPixelPosition)
+            currentTimestampPixelPosition = timelineClipPixelStart + self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3)
+            timelineClip.timestamps.append(currentTimestampPixelPosition)
 
-        self.clips.append(timeline_clip)
+        self.clips.append(timelineClip)
         self.update()
 
     def setClipVisibility(self, index: int, state):
