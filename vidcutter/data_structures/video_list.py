@@ -1,6 +1,8 @@
 import os
 from PyQt5.QtCore import QTime
 from PyQt5.QtGui import QPixmap
+
+from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle
 from vidcutter.data_structures.video_item import VideoItem
 
 
@@ -24,6 +26,11 @@ class VideoList:
 
     def __getitem__(self, item):
         return self.videos[item]
+
+    def deleteCurrentVideoClipsThumbs(self):
+        clips = self.videos[self._currentVideoIndex].clips
+        for clip in clips:
+            clip.thumbnail = QPixmapPickle()
 
     def currentVideoClipTimeStart(self, clip_index: int) -> QTime:
         return self.videos[self._currentVideoIndex].clips[clip_index].timeStart

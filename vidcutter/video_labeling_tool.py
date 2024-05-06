@@ -723,7 +723,8 @@ class VideoLabelingTool(QWidget):
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
-        self.videoList.setCurrentVideoIndex(item_index)
+        # self.videoList.deleteCurrentVideoClipsThumbs()
+        self.videoList.currentVideoIndex = item_index
         if not self.folderOpened:
             self.videoLayout.replaceWidget(self.novideoWidget, self.videoPlayerWidget)
             self.frameCounter.show()
@@ -762,6 +763,7 @@ class VideoLabelingTool(QWidget):
             self.timelineFactorLabel.setText('1')
             self.clipIsPlayingIndex = -1
             self.mediaAvailable = True
+            # self.buildClipsThumbnails(self.videoList.videos[self.videoList.currentVideoIndex].clips)
 
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -775,6 +777,10 @@ class VideoLabelingTool(QWidget):
                                  'and the version of VidCutter you are currently using.</p>')
 
         # self.mpvWidget.mpv.playbackSpeed(4.0)
+
+    def buildClipsThumbnails(self, clips: SortedList[VideoItemClip]):
+        for clip in clips:
+            clip.thumbnail = self.captureImage(self.currentMedia, clip.timeStart)
 
     def saveProject(self, reboot: bool = False) -> None:
         if self.projectSaved:
@@ -1128,7 +1134,8 @@ class VideoLabelingTool(QWidget):
             return '%f' % (td.days * 86400 + td.seconds + td.microseconds / 1000000.)
 
     def captureImage(self, source: str, frametime: QTime, external: bool = False) -> QPixmapPickle:
-        thumbnail = VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat), external=external)
+        thumbnail = VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat),
+                                              external=external, thumbsize=QSize(64, 64))
         return QPixmapPickle(thumbnail)
 
     def complete(self, rename: bool = True, filename: str = None) -> None:
