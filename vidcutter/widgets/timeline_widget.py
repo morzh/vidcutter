@@ -83,6 +83,7 @@ class TimeLine(QWidget):
 
         self.regionSelected_ = -1
         self.regionHeight_ = 20
+        self.clipRectangleOffset = 6
 
     def initAttributes(self):
         self.setFixedWidth(self.length)
@@ -105,7 +106,6 @@ class TimeLine(QWidget):
             self.addClip(videoClip)
 
     def addClip(self, videoClip: VideoItemClip) -> None:
-
         videoClipTimeStart = videoClip.timeStart.msecsSinceStartOfDay() * 1e-3
         videoClipTimeEnd = videoClip.timeEnd.msecsSinceStartOfDay() * 1e-3
         videoClipVisibility = videoClip.visibility
@@ -141,7 +141,7 @@ class TimeLine(QWidget):
         opt = QStyleOptionSlider()
         painter = QPainter()
         painter.begin(self)
-        # painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.Antialiasing)
         self._drawFrame(painter)
         if self.isEnabled():
             painter.setFont(self.font)
@@ -225,15 +225,12 @@ class TimeLine(QWidget):
         if not len(self.progressbars_):
             visible_region = self.visibleRegion().boundingRect()
             for index, clip in enumerate(self.clips):
+                currentClipAlpha = 150 if clip.visibility else 30
                 currentClipRectangle = clip.rectangle
-
-                if clip.visibility == 0:
-                    continue
-
-                currentClipRectangle.setY(int((self.height() - self.regionHeight_) / 2) - 13)
+                currentClipRectangle.setY(int((self.height() - self.regionHeight_) / 2) - 2 * self.clipRectangleOffset - 1)
                 currentClipRectangle.setHeight(self.regionHeight_)
                 rectClass = currentClipRectangle.adjusted(0, 0, 0, 0)
-                brushColor = QColor(150, 190, 78, 150) if index == self.regionSelected_ else QColor(237, 242, 255, 150)
+                brushColor = QColor(150, 190, 78, currentClipAlpha) if index == self.regionSelected_ else QColor(237, 242, 255, currentClipAlpha)
                 painter.setBrush(brushColor)
                 painter.setPen(QColor(50, 50, 50, 170))
                 painter.setRenderHints(QPainter.HighQualityAntialiasing)
@@ -252,12 +249,24 @@ class TimeLine(QWidget):
                 self._draw_videoClipTimestamps(clip, painter)
 
     def _draw_videoClipTimestamps(self, clip: Clip, painter: QStylePainter) -> None:
-        # brushColor = QColor(30, 30, 30, 220)
-        # painter.setBrush(brushColor)
+        penColor = QColor(50, 50, 50, 180)
         for timestamp in clip.timestamps:
-            # print('sacscsd', timestamp)
-            painter.setPen(QPen(QColor(50, 50, 50, 220), 2, Qt.SolidLine))
-            painter.drawLine(timestamp, self.sliderAreaTopOffset, timestamp, self.sliderAreaTopOffset + self.sliderAreaHeight)
+            painter.setPen(QPen(QColor(50, 50, 50, 220), 1, Qt.SolidLine))
+            painter.drawLine(timestamp, self.sliderAreaTopOffset + self.clipRectangleOffset, timestamp, self.sliderAreaTopOffset + self.sliderAreaHeight - self.clipRectangleOffset)
+            self._drawIsoscelesTriangle(painter, timestamp, 3, 6, True, penColor, penColor)
+            self._drawIsoscelesTriangle(painter, timestamp, 3, 6, False, penColor, penColor)
+
+    def _drawIsoscelesTriangle(self, painter: QStylePainter, timestamp: int, height: int, half_width: int, triangleBaseAtTop: bool, penColor: QColor, brushColor: QColor):
+        painter.setRenderHint(QPainter.Antialiasing)
+        baseYCoordinate = self.sliderAreaTopOffset + self.clipRectangleOffset - 2 if triangleBaseAtTop else self.sliderAreaTopOffset + self.clipRectangleOffset + self.regionHeight_ - 2
+        apexYCoordinate = self.sliderAreaTopOffset + height + self.clipRectangleOffset if triangleBaseAtTop else self.sliderAreaTopOffset + self.sliderAreaHeight - self.clipRectangleOffset - height
+        pointBase1 = QPoint(timestamp - half_width, baseYCoordinate)
+        pointBase2 = QPoint(timestamp + half_width, baseYCoordinate)
+        pointApex = QPoint(timestamp, apexYCoordinate)
+
+        painter.setPen(penColor)
+        painter.setBrush(brushColor)
+        painter.drawPolygon(pointBase1, pointBase2, pointApex)
 
     def _drawCLipsEditMode_(self, painter: QStylePainter):
         glowAlpha = 150
