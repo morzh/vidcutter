@@ -250,11 +250,13 @@ class TimeLine(QWidget):
 
     def _draw_videoClipTimestamps(self, clip: Clip, painter: QStylePainter) -> None:
         penColor = QColor(50, 50, 50, 180)
+        triangleHeight = 3
+        triangleHalfWidth = 7
         for timestamp in clip.timestamps:
             painter.setPen(QPen(QColor(50, 50, 50, 220), 1, Qt.SolidLine))
-            painter.drawLine(timestamp, self.sliderAreaTopOffset + self.clipRectangleOffset, timestamp, self.sliderAreaTopOffset + self.sliderAreaHeight - self.clipRectangleOffset)
-            self._drawIsoscelesTriangle(painter, timestamp, 3, 6, True, penColor, penColor)
-            self._drawIsoscelesTriangle(painter, timestamp, 3, 6, False, penColor, penColor)
+            painter.drawLine(timestamp, self.sliderAreaTopOffset + self.clipRectangleOffset + triangleHeight, timestamp, self.sliderAreaTopOffset + self.sliderAreaHeight - self.clipRectangleOffset + triangleHeight)
+            self._drawIsoscelesTriangle(painter, timestamp, triangleHeight, triangleHalfWidth, True, penColor, penColor)
+            self._drawIsoscelesTriangle(painter, timestamp, triangleHeight, triangleHalfWidth, False, penColor, penColor)
 
     def _drawIsoscelesTriangle(self, painter: QStylePainter, timestamp: int, height: int, half_width: int, triangleBaseAtTop: bool, penColor: QColor, brushColor: QColor):
         painter.setRenderHint(QPainter.Antialiasing)
