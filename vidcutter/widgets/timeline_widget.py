@@ -254,7 +254,9 @@ class TimeLine(QWidget):
         triangleHalfWidth = 7
         for timestamp in clip.timestamps:
             painter.setPen(QPen(QColor(50, 50, 50, 220), 1, Qt.SolidLine))
-            painter.drawLine(timestamp, self.sliderAreaTopOffset + self.clipRectangleOffset + triangleHeight, timestamp, self.sliderAreaTopOffset + self.sliderAreaHeight - self.clipRectangleOffset + triangleHeight)
+            lineYTop = self.sliderAreaTopOffset + self.clipRectangleOffset + triangleHeight
+            lineYBottom = self.sliderAreaTopOffset + self.sliderAreaHeight - self.clipRectangleOffset + triangleHeight
+            painter.drawLine(timestamp, lineYTop, timestamp, lineYBottom)
             self._drawIsoscelesTriangle(painter, timestamp, triangleHeight, triangleHalfWidth, True, penColor, penColor)
             self._drawIsoscelesTriangle(painter, timestamp, triangleHeight, triangleHalfWidth, False, penColor, penColor)
 
@@ -492,9 +494,14 @@ class TimeLine(QWidget):
                     y1, y2 = sorted([self.begin.y(), self.end.y()])
                     if y1 <= e_pos.y() <= y2:
                         self.currentRectangleIndex = region_idx
-                        if abs(self.begin.x() - e_pos.x()) <= 5:
+                        distance_mouse_begin = abs(self.begin.x() - e_pos.x())
+                        distance_mouse_end = abs(self.end.x() - e_pos.x())
+                        distance_begin_end = abs(self.begin.x() - self.end.x())
+                        if distance_begin_end <= 10:
+                            return self.CursorStates.cursorOnBeginSide if distance_mouse_begin < distance_mouse_end else self.CursorStates.cursorOnEndSide
+                        elif distance_mouse_begin <= 5:
                             return self.CursorStates.cursorOnBeginSide
-                        elif abs(self.end.x() - e_pos.x()) <= 5:
+                        elif distance_mouse_end <= 5:
                             return self.CursorStates.cursorOnEndSide
                         elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
                             return self.CursorStates.cursorIsInside
