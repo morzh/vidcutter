@@ -27,7 +27,7 @@ class CustomTitleBar(QWidget):
         self.open_button = QToolButton(self)
         self.open_button.setIcon(open_icon)
 
-        save_icon = QIcon("save2.svg")
+        save_icon = QIcon("save.svg")
         self.save_button = QToolButton(self)
         self.save_button.setIcon(save_icon)
 
@@ -86,8 +86,8 @@ class CustomTitleBar(QWidget):
         self.setFixedHeight(height)
         for button in buttons:
             button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-            button.setFixedSize(QSize(int(0.95 * height), int(0.95 * height)))
-            button.setIconSize(QSize(int(0.9 * height), int(0.9 * height)))
+            button.setFixedSize(QSize(int(0.9 * height), int(0.9 * height)))
+            button.setIconSize(QSize(int(0.5 * height), int(0.5 * height)))
             button.setStyleSheet(
                 """QToolButton {
                     border: none;
@@ -121,18 +121,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Custom Title Bar")
         self.setMinimumSize(400, 200)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         central_widget = QWidget()
-        # This container holds the window contents, so we can style it.
         central_widget.setObjectName("Container")
-        # central_widget.setStyleSheet(
-        #     """#Container {
-        #     background: qlineargradient(x1:0 y1:0, x2:1 y2:1, stop:0 #051c2a stop:1 #44315f);
-        #     border-radius: 5px;
-        # }"""
-        # )
-        self.title_bar = CustomTitleBar(self, 32)
-        # self.title_bar.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.title_bar = CustomTitleBar(self, 36)
 
         work_space_layout = QVBoxLayout()
         work_space_layout.setContentsMargins(11, 11, 11, 11)
@@ -152,10 +143,6 @@ class MainWindow(QMainWindow):
             self.title_bar.window_state_changed(self.windowState())
         super().changeEvent(event)
         event.accept()
-
-    def window_state_changed(self, state):
-        self.normal_button.setVisible(state == Qt.WindowState.WindowMaximized)
-        self.max_button.setVisible(state != Qt.WindowState.WindowMaximized)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
