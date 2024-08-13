@@ -16,7 +16,7 @@ class BoundingBox:
         self._confidence = 1.0
 
     @staticmethod
-    def clamp_(self, value, minimum, maximum):
+    def clamp_(value, minimum, maximum):
         if value < minimum:
             return minimum
         elif value > maximum:

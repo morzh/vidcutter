@@ -23,11 +23,14 @@ class TimeLine(QWidget):
             self.visibility = visibility
             self.timestamps: list[int] = []
 
+    # class ClipTimestamps(Enum):
+
     class CursorStates(Enum):
         cursorIsOutside = 0
         cursorOnBeginSide = 1
         cursorOnEndSide = 2
         cursorIsInside = 3
+        cursorIsOnTimestamp = 4
 
     class RectangleEditState(Enum):
         freeState = 1

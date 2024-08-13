@@ -7,6 +7,9 @@ class VideoClipTimestamps:
         LEFT = 1
         RIGHT = 2
         DOUBLE_SIDED = 3
+        COMPOUND_LEFT = 4
+        COMPOUND_RIGHT = 5
+        COMPOUND_DOUBLE_SIDED = 6
 
     def __init__(self, timestamp: QTime, timestamp_type: TimestampType = TimestampType.DOUBLE_SIDED):
         self.timestamp_ = timestamp
