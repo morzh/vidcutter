@@ -104,6 +104,7 @@ class TimeLine(QWidget):
 
     def updateClip(self, clip_index: int, timeStart: QTime | None = None, timeEnd: QTime | None = None) -> None:
         clip = self.clips[clip_index]
+        self.videoListRef.setCurrentVideoClipIndex(clip_index)
 
         if timeStart is not None:
             self.videoListRef.setCurrentVideoClipStartTime(timeStart)
@@ -142,8 +143,6 @@ class TimeLine(QWidget):
         timelineClip = TimeLine.Clip(timelineClipRectangle, videoClipVisibility)
         for timestamp in videoClip.clip_timestamps:
             currentTimestampPixelPosition = timelineClipPixelStart + self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3)
-            # print(timestamp.timestamp)
-            # print(self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3))
             timelineClip.timestamps.append(currentTimestampPixelPosition)
 
         self.clips.append(timelineClip)
