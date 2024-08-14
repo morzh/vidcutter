@@ -123,7 +123,9 @@ class TimeLine(QWidget):
             clip.rectangle.setRight(pixelPositionEnd)
 
     def updateClips(self):
+        # print('updateClips')
         self.clearClips()
+        self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
         videoClipsList = self.videoListRef[self.videoListRef.currentVideoIndex].clips
         for videoClip in videoClipsList:
             self.addClip(videoClip)
@@ -481,11 +483,13 @@ class TimeLine(QWidget):
             self.parent.parent.renderVideoClips()
             self.state = self.RectangleEditState.freeState
             self.freeCursorOnSide = self.CursorStates.cursorIsOutside
-        elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
-            return
+        # elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
+        #     return
 
+        # self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
+        self.update()
         self.repaint()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
@@ -563,6 +567,8 @@ class TimeLine(QWidget):
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
             self.updateClip(self.currentRectangleIndex, timeStart=timeStart, timeEnd=timeEnd)
+
+        self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
 
     def enterEvent(self, event):
         self.isIn = True

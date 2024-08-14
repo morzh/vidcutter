@@ -104,6 +104,13 @@ class VideoItemClip:
     def __ge__(self, other):
         return self.timeStart >= other.timeStart
 
+    def cleanTimestamps(self):
+        clip_duration = self._timeEnd.msecsSinceStartOfDay() - self._timeStart.msecsSinceStartOfDay()
+        for index in reversed(range(len(self.clip_timestamps))):
+            if self.clip_timestamps[index].timestamp.msecsSinceStartOfDay() > clip_duration:
+                del self.clip_timestamps[index]
+
+
     @property
     def timeStart(self) -> QTime:
         return self._timeStart
