@@ -85,8 +85,12 @@ class VideoItemClip:
         self.clip_timestamps: list[VideoClipTimestamps] = []
 
     def __str__(self):
-        return f'start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
-        # return f'name:  {self._name}, start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
+        clip_string = f'Start time, {self._timeStart},  time end:, {self._timeEnd}, visibility:  {self._visibility}, description:  {self._description} \n'
+        clip_timestamps_string = 'Clip timestamps: '
+        for clip in self.clip_timestamps:
+            clip_timestamps_string += f'{clip.timestamp}, '
+
+        return clip_string + clip_timestamps_string
 
     def __lt__(self, other):
         return self.timeStart < other.timeStart

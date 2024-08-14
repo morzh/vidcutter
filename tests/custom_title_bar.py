@@ -121,6 +121,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Custom Title Bar")
         self.setMinimumSize(400, 200)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+
         central_widget = QWidget()
         central_widget.setObjectName("Container")
         self.title_bar = CustomTitleBar(self, 36)
@@ -132,6 +133,7 @@ class MainWindow(QMainWindow):
         central_widget_layout = QVBoxLayout()
         central_widget_layout.setContentsMargins(0, 0, 0, 0)
         central_widget_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
         central_widget_layout.addWidget(self.title_bar)
         central_widget_layout.addLayout(work_space_layout)
 

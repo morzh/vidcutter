@@ -102,6 +102,25 @@ class TimeLine(QWidget):
         self.regionSelected_ = -1
         self.update()
 
+    def updateClip(self, clip_index: int, timeStart: QTime | None = None, timeEnd: QTime | None = None) -> None:
+        clip = self.clips[clip_index]
+
+        if timeStart is not None:
+            self.videoListRef.setCurrentVideoClipStartTime(timeStart)
+            pixelPositionStart = int(round(self._secondsToPixelPosition(timeStart.msecsSinceStartOfDay() * 1e-3)))
+            clip.rectangle.setLeft(pixelPositionStart)
+
+            number_timestamps = len(clip.timestamps)
+            for index_timestamp in range(number_timestamps):
+                current_timestamp = self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps[index_timestamp].timestamp
+                current_timestamp_pixels = pixelPositionStart + self._secondsToPixelPosition(current_timestamp.msecsSinceStartOfDay() * 1e-3)
+                clip.timestamps[index_timestamp] = current_timestamp_pixels
+
+        if timeEnd is not None:
+            self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
+            pixelPositionEnd = int(round(self._secondsToPixelPosition(timeEnd.msecsSinceStartOfDay() * 1e-3)))
+            clip.rectangle.setRight(pixelPositionEnd)
+
     def updateClips(self):
         self.clearClips()
         videoClipsList = self.videoListRef[self.videoListRef.currentVideoIndex].clips
@@ -123,6 +142,8 @@ class TimeLine(QWidget):
         timelineClip = TimeLine.Clip(timelineClipRectangle, videoClipVisibility)
         for timestamp in videoClip.clip_timestamps:
             currentTimestampPixelPosition = timelineClipPixelStart + self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3)
+            # print(timestamp.timestamp)
+            # print(self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3))
             timelineClip.timestamps.append(currentTimestampPixelPosition)
 
         self.clips.append(timelineClip)
@@ -141,7 +162,6 @@ class TimeLine(QWidget):
         super().repaint()
 
     def paintEvent(self, event):
-        opt = QStyleOptionSlider()
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -151,11 +171,9 @@ class TimeLine(QWidget):
             self._drawCutSegment(painter)
             self._drawTicks(painter)
             self._drawSlider(painter)
-            self._drawVideoClips(painter, opt)
-            if not self.freeCursorOnSide:
-                return
-            if self.currentRectangleIndex != -1 and self.parent.parent.mediaAvailable:
-                self._drawCLipsEditMode_(painter)
+            self._drawVideoClips(painter)
+            if self.currentRectangleIndex != -1 and self.freeCursorOnSide:
+                self._drawVideoClipsEditMode_(painter)
         painter.end()
 
     def _drawCutSegment(self, painter):
@@ -223,7 +241,7 @@ class TimeLine(QWidget):
                                 self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight,
                                 3, 3)
 
-    def _drawVideoClips(self, painter: QStylePainter, opt: QStyleOptionSlider) -> None:
+    def _drawVideoClips(self, painter: QStylePainter) -> None:
         videoIndex = self.videoListRef.currentVideoIndex
         if not len(self.progressbars_):
             visible_region = self.visibleRegion().boundingRect()
@@ -275,11 +293,12 @@ class TimeLine(QWidget):
         painter.setBrush(brushColor)
         painter.drawPolygon(pointBase1, pointBase2, pointApex)
 
-    def _drawCLipsEditMode_(self, painter: QStylePainter):
+    def _drawVideoClipsEditMode_(self, painter: QStylePainter):
         glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
         glowColor = QColor(255, 255, 255, glowAlpha)
-        maximumGradientSteps = copy(self.clips[self.currentRectangleIndex].rectangle.width())
+        currentClipRectangle = self.clips[self.currentRectangleIndex].rectangle
+        maximumGradientSteps = copy(currentClipRectangle.width())
         maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
@@ -297,14 +316,14 @@ class TimeLine(QWidget):
                 painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
                 painter.drawLine(begin, end)
 
-            begin = self.clips[self.currentRectangleIndex].rectangle.topLeft()
-            end = self.clips[self.currentRectangleIndex].rectangle.bottomLeft()
+            begin = currentClipRectangle.topLeft()
+            end = currentClipRectangle.bottomLeft()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
 
         elif self.freeCursorOnSide == self.CursorStates.cursorOnEndSide:
-            begin = copy(self.clips[self.currentRectangleIndex].rectangle.topRight())
-            end = copy(self.clips[self.currentRectangleIndex].rectangle.bottomRight())
+            begin = copy(currentClipRectangle.topRight())
+            end = copy(currentClipRectangle.bottomRight())
             coordinateX = end.x()
             begin.setX(coordinateX - self.regionOutlineWidth)
             end.setX(coordinateX - self.regionOutlineWidth)
@@ -316,8 +335,8 @@ class TimeLine(QWidget):
                 painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
                 painter.drawLine(begin, end)
 
-            begin = self.clips[self.currentRectangleIndex].rectangle.topRight()
-            end = self.clips[self.currentRectangleIndex].rectangle.bottomRight()
+            begin = currentClipRectangle.topRight()
+            end = currentClipRectangle.bottomRight()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
         elif self.freeCursorOnSide == self.CursorStates.cursorIsInside:
@@ -325,7 +344,7 @@ class TimeLine(QWidget):
             brushColor = QColor(237, 242, 255, 150)
             painter.setBrush(brushColor)
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
-            painter.drawRoundedRect(self.clips[self.currentRectangleIndex].rectangle, 2, 2)
+            painter.drawRoundedRect(currentClipRectangle, 2, 2)
 
     # Mouse movement
     def _pixelPositionToSeconds(self, pixelPosition: int) -> float:
@@ -338,11 +357,6 @@ class TimeLine(QWidget):
         hours = int(seconds / 3600)
         minutes = int((seconds % 3600) / 60)
         seconds = int((seconds % 3600) % 60)
-
-        # minutes = int(int(seconds) / 60)
-        # hours = int(minutes / 60)
-        # minutes -= minutes * 1
-        # seconds -= minutes * 60
         time = QTime(hours, minutes, seconds, milliseconds)
         return time
 
@@ -532,17 +546,13 @@ class TimeLine(QWidget):
     def applyEvent(self, event):
         if self.state == self.RectangleEditState.beginSideEdit:
             rectangleLeftValue = max(event.x(), 0)
-            self.clips[self.currentRectangleIndex].rectangle.setLeft(rectangleLeftValue)
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
-            self.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.videoListRef.setCurrentVideoClipStartTime(timeStart)
+            self.updateClip(self.currentRectangleIndex, timeStart=timeStart)
 
         elif self.state == self.RectangleEditState.endSideEdit:
             rectangleRightValue = min(event.x(), self.width() - 1)
-            self.clips[self.currentRectangleIndex].rectangle.setRight(rectangleRightValue)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
-            self.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
+            self.updateClip(self.currentRectangleIndex, timeEnd=timeEnd)
 
         elif self.state == self.RectangleEditState.rectangleMove:
             delta_value = event.x() - self.dragPosition.x()
@@ -553,10 +563,7 @@ class TimeLine(QWidget):
             rectangleRightValue = min(self.clips[self.currentRectangleIndex].rectangle.right(), self.width() - 1)
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
-
-            self.videoListRef.setCurrentVideoClipIndex(self.currentRectangleIndex)
-            self.videoListRef.setCurrentVideoClipStartTime(timeStart)
-            self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
+            self.updateClip(self.currentRectangleIndex, timeStart=timeStart, timeEnd=timeEnd)
 
     def enterEvent(self, event):
         self.isIn = True
