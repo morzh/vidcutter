@@ -75,7 +75,7 @@ class TimeLine(QWidget):
 
         self.currentClipIndex = -1
         self.currentTimestampIndex = -1
-        self.freeCursorOnSide = 0
+        self.freeCursorState = 0
         self.state = self.RectangleEditState.freeState
         self.clip_rectangle_begin = QPoint()
         self.clip_rectangle_end = QPoint()
@@ -175,8 +175,10 @@ class TimeLine(QWidget):
             self._drawTicks(painter)
             self._drawSlider(painter)
             self._drawVideoClips(painter)
-            if self.currentClipIndex != -1 and self.freeCursorOnSide:
+            if self.currentClipIndex != -1 and self.freeCursorState:
                 self._drawVideoClipsEditMode_(painter)
+            # if self.currentClipIndex != -1 and self.freeCursorOnTimestamp:
+            #     self._drawVideoClipsTimestampsEditMode_(painter)
         painter.end()
 
     def _drawCutSegment(self, painter):
@@ -240,9 +242,7 @@ class TimeLine(QWidget):
         else:
             painter.setPen(QColor(60, 60, 60))
 
-        painter.drawRoundedRect(self.sliderAreaHorizontalOffset, self.sliderAreaTopOffset,
-                                self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight,
-                                3, 3)
+        painter.drawRoundedRect(self.sliderAreaHorizontalOffset, self.sliderAreaTopOffset, self.width() - 2 * self.sliderAreaHorizontalOffset, self.sliderAreaHeight, 3, 3)
 
     def _drawVideoClips(self, painter: QStylePainter) -> None:
         videoIndex = self.videoListRef.currentVideoIndex
@@ -296,6 +296,9 @@ class TimeLine(QWidget):
         painter.setBrush(brushColor)
         painter.drawPolygon(pointBase1, pointBase2, pointApex)
 
+    def _drawVideoClipsTimestampsEditMode_(self, painter: QStylePainter):
+        pass
+
     def _drawVideoClipsEditMode_(self, painter: QStylePainter):
         glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
@@ -305,7 +308,7 @@ class TimeLine(QWidget):
         maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
-        if self.freeCursorOnSide == self.CursorStates.cursorIsAtClipStart:
+        if self.freeCursorState == self.CursorStates.cursorIsAtClipStart:
             begin = copy(self.clips[self.currentClipIndex].rectangle.topLeft())
             end = copy(self.clips[self.currentClipIndex].rectangle.bottomLeft())
             coordinateX = begin.x()
@@ -324,7 +327,7 @@ class TimeLine(QWidget):
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
 
-        elif self.freeCursorOnSide == self.CursorStates.cursorIsAtClipEnd:
+        elif self.freeCursorState == self.CursorStates.cursorIsAtClipEnd:
             begin = copy(currentClipRectangle.topRight())
             end = copy(currentClipRectangle.bottomRight())
             coordinateX = end.x()
@@ -342,12 +345,41 @@ class TimeLine(QWidget):
             end = currentClipRectangle.bottomRight()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
-        elif self.freeCursorOnSide == self.CursorStates.cursorIsInsideClip:
+        elif self.freeCursorState == self.CursorStates.cursorIsInsideClip:
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             brushColor = QColor(237, 242, 255, 150)
             painter.setBrush(brushColor)
             painter.setRenderHints(QPainter.HighQualityAntialiasing)
             painter.drawRoundedRect(currentClipRectangle, 2, 2)
+        elif self.freeCursorState == self.CursorStates.cursorIsAtTimestamp:
+            begin = copy(currentClipRectangle.topRight())
+            end = copy(currentClipRectangle.bottomRight())
+            step = int(glowAlpha / numberGradientSteps)
+
+            begin.setX(self.clips[self.currentClipIndex].timestamps[self.currentTimestampIndex])
+            end.setX(self.clips[self.currentClipIndex].timestamps[self.currentTimestampIndex])
+            coordinateX = end.x()
+            for index_step in range(numberGradientSteps):
+                begin.setX(coordinateX - index_step)
+                end.setX(coordinateX - index_step)
+                glowColor.setAlpha(glowAlpha - step * index_step)
+                painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
+                painter.drawLine(begin, end)
+
+            begin.setX(self.clips[self.currentClipIndex].timestamps[self.currentTimestampIndex])
+            end.setX(self.clips[self.currentClipIndex].timestamps[self.currentTimestampIndex])
+            coordinateX = end.x()
+            for index_step in range(numberGradientSteps):
+                begin.setX(coordinateX + index_step)
+                end.setX(coordinateX + index_step)
+                glowColor.setAlpha(glowAlpha - step * index_step)
+                painter.setPen(QPen(glowColor, 1, Qt.SolidLine))
+                painter.drawLine(begin, end)
+
+            begin.setX(self.clips[self.currentClipIndex].timestamps[self.currentTimestampIndex])
+            end.setX(self.clips[self.currentClipIndex].timestamps[self.currentTimestampIndex])
+            painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
+            painter.drawLine(begin, end)
 
     # Mouse movement
     def _pixelPositionToSeconds(self, pixelPosition: int) -> float:
@@ -388,8 +420,8 @@ class TimeLine(QWidget):
 
         if (int(keyPressed) & Qt.ControlModifier) == Qt.ControlModifier and self.isIn:
             if self.state == self.RectangleEditState.freeState:
-                self.freeCursorOnSide = self.mouseCursorState(event.pos())
-                if self.freeCursorOnSide:
+                self.freeCursorState = self.mouseCursorState(event.pos())
+                if self.freeCursorState:
                     self.setCursor(Qt.SizeHorCursor)
                 else:
                     self.unsetCursor()
@@ -400,11 +432,11 @@ class TimeLine(QWidget):
             self.pointerSecondsPosition = self._pixelPositionToSeconds(self.pointerPixelPosition)
             self.sliderMoved.emit(self.pointerSecondsPosition)
             self.state = self.RectangleEditState.freeState
-            self.freeCursorOnSide = 0
+            self.freeCursorState = 0
             self.unsetCursor()
         else:
             self.state = self.RectangleEditState.freeState
-            self.freeCursorOnSide = 0
+            self.freeCursorState = 0
             self.unsetCursor()
 
         self.repaint()
@@ -484,7 +516,7 @@ class TimeLine(QWidget):
 
             self.parent.parent.renderVideoClips()
             self.state = self.RectangleEditState.freeState
-            self.freeCursorOnSide = self.CursorStates.cursorIsOutsideClip
+            self.freeCursorState = self.CursorStates.cursorIsOutsideClip
         # elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
         #     return
 
