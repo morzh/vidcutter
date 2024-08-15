@@ -32,12 +32,13 @@ class TimeLine(QWidget):
         cursorIsInsideClip = 3
         cursorIsAtTimestamp = 4
 
-    class RectangleEditState(Enum):
+    class ClipEditMode(Enum):
         freeState = 1
-        buildingSquare = 2
-        beginSideEdit = 3
-        endSideEdit = 4
-        rectangleMove = 5
+        clipCreating = 2
+        clipStart = 3
+        clipEnd = 4
+        clipRectangle = 5
+        clipTimestamp = 6
 
     def __init__(self, parent=None):
         super().__init__()
@@ -76,7 +77,7 @@ class TimeLine(QWidget):
         self.currentClipIndex = -1
         self.currentTimestampIndex = -1
         self.freeCursorState = 0
-        self.state = self.RectangleEditState.freeState
+        self.state = self.ClipEditMode.freeState
         self.clip_rectangle_begin = QPoint()
         self.clip_rectangle_end = QPoint()
         self.numberGradientSteps: int = 50
@@ -110,13 +111,14 @@ class TimeLine(QWidget):
 
         if timeStart is not None:
             self.videoListRef.setCurrentVideoClipStartTime(timeStart)
-            pixelPositionStart = int(round(self._secondsToPixelPosition(timeStart.msecsSinceStartOfDay() * 1e-3)))
+            time_start_seconds = timeStart.msecsSinceStartOfDay() * 1e-3
+            pixelPositionStart = int(round(self._secondsToPixelPosition(time_start_seconds)))
             clip.rectangle.setLeft(pixelPositionStart)
 
             number_timestamps = len(clip.timestamps)
             for index_timestamp in range(number_timestamps):
                 current_timestamp = self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps[index_timestamp].timestamp
-                current_timestamp_pixels = pixelPositionStart + self._secondsToPixelPosition(current_timestamp.msecsSinceStartOfDay() * 1e-3)
+                current_timestamp_pixels = self._secondsToPixelPosition(time_start_seconds + current_timestamp.msecsSinceStartOfDay() * 1e-3)
                 clip.timestamps[index_timestamp] = current_timestamp_pixels
 
         if timeEnd is not None:
@@ -124,10 +126,28 @@ class TimeLine(QWidget):
             pixelPositionEnd = int(round(self._secondsToPixelPosition(timeEnd.msecsSinceStartOfDay() * 1e-3)))
             clip.rectangle.setRight(pixelPositionEnd)
 
+    def updateClipTimestamp(self, clip_index: int, timestamp_index: int, timestamp: QTime) -> None:
+        self.videoListRef.setCurrentVideoClipIndex(clip_index)
+        # print(f'{self.videoListRef.currentVideoIndex=}, {clip_index=}, {timestamp_index=}, {timestamp=}')
+        # print(f'{len(self.videoListRef.videos)}, {len(self.videoListRef[self.videoListRef.currentVideoIndex].clips)}')
+        # print(f'{len(self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps)}')
+
+        timestampPixelPosition = int(round(self._secondsToPixelPosition(timestamp.msecsSinceStartOfDay() * 1e-3)))
+        self.clips[clip_index].timestamps[timestamp_index] = timestampPixelPosition
+
+        clip_start_time = self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].timeStart
+        relative_timestamp_milliseconds = timestamp.msecsSinceStartOfDay() - clip_start_time.msecsSinceStartOfDay()
+
+        seconds = int(relative_timestamp_milliseconds * 1e-3)
+        milliseconds = relative_timestamp_milliseconds - int(1e3 * seconds)
+        hours = int(seconds / 3600)
+        minutes = int((seconds % 3600) / 60)
+        seconds = int((seconds % 3600) % 60)
+        timestamp = QTime(hours, minutes, seconds, milliseconds)
+        self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps[timestamp_index].timestamp = timestamp
+
     def updateClips(self):
-        # print('updateClips')
         self.clearClips()
-        self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
         videoClipsList = self.videoListRef[self.videoListRef.currentVideoIndex].clips
         for videoClip in videoClipsList:
             self.addClip(videoClip)
@@ -146,7 +166,7 @@ class TimeLine(QWidget):
 
         timelineClip = TimeLine.Clip(timelineClipRectangle, videoClipVisibility)
         for timestamp in videoClip.clip_timestamps:
-            currentTimestampPixelPosition = timelineClipPixelStart + self._secondsToPixelPosition(timestamp.timestamp.msecsSinceStartOfDay() * 1e-3)
+            currentTimestampPixelPosition = self._secondsToPixelPosition(videoClipTimeStart + timestamp.timestamp.msecsSinceStartOfDay() * 1e-3)
             timelineClip.timestamps.append(currentTimestampPixelPosition)
 
         self.clips.append(timelineClip)
@@ -177,8 +197,6 @@ class TimeLine(QWidget):
             self._drawVideoClips(painter)
             if self.currentClipIndex != -1 and self.freeCursorState:
                 self._drawVideoClipsEditMode_(painter)
-            # if self.currentClipIndex != -1 and self.freeCursorOnTimestamp:
-            #     self._drawVideoClipsTimestampsEditMode_(painter)
         painter.end()
 
     def _drawCutSegment(self, painter):
@@ -419,7 +437,7 @@ class TimeLine(QWidget):
             self.pointerPixelPosition = self._eventPositionToPointerPixelPosition(x)
 
         if (int(keyPressed) & Qt.ControlModifier) == Qt.ControlModifier and self.isIn:
-            if self.state == self.RectangleEditState.freeState:
+            if self.state == self.ClipEditMode.freeState:
                 self.freeCursorState = self.mouseCursorState(event.pos())
                 if self.freeCursorState:
                     self.setCursor(Qt.SizeHorCursor)
@@ -431,11 +449,11 @@ class TimeLine(QWidget):
             self.pointerPixelPosition = self._eventPositionToPointerPixelPosition(x)
             self.pointerSecondsPosition = self._pixelPositionToSeconds(self.pointerPixelPosition)
             self.sliderMoved.emit(self.pointerSecondsPosition)
-            self.state = self.RectangleEditState.freeState
+            self.state = self.ClipEditMode.freeState
             self.freeCursorState = 0
             self.unsetCursor()
         else:
-            self.state = self.RectangleEditState.freeState
+            self.state = self.ClipEditMode.freeState
             self.freeCursorState = 0
             self.unsetCursor()
 
@@ -444,13 +462,16 @@ class TimeLine(QWidget):
     def _mousePressControlEvent(self, event: QMouseEvent):
         self.dragPosition = event.pos()
         self.dragRectPosition = self.clips[self.currentClipIndex].rectangle.topLeft()
+
         side = self.mouseCursorState(event.pos())
         if side == self.CursorStates.cursorIsAtClipStart:
-            self.state = self.RectangleEditState.beginSideEdit
+            self.state = self.ClipEditMode.clipStart
         elif side == self.CursorStates.cursorIsAtClipEnd:
-            self.state = self.RectangleEditState.endSideEdit
+            self.state = self.ClipEditMode.clipEnd
         elif side == self.CursorStates.cursorIsInsideClip:
-            self.state = self.RectangleEditState.rectangleMove
+            self.state = self.ClipEditMode.clipRectangle
+        elif side == self.CursorStates.cursorIsAtTimestamp:
+            self.state = self.ClipEditMode.clipTimestamp
 
         self.clicking = False
 
@@ -515,7 +536,7 @@ class TimeLine(QWidget):
             self.videoListRef.videos[currentVideoIndex].clips.add(clip)
 
             self.parent.parent.renderVideoClips()
-            self.state = self.RectangleEditState.freeState
+            self.state = self.ClipEditMode.freeState
             self.freeCursorState = self.CursorStates.cursorIsOutsideClip
         # elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
         #     return
@@ -624,17 +645,17 @@ class TimeLine(QWidget):
         return -1
 
     def applyEvent(self, event):
-        if self.state == self.RectangleEditState.beginSideEdit:
+        if self.state == self.ClipEditMode.clipStart:
             rectangleLeftValue = max(event.x(), 0)
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
             self.updateClip(self.currentClipIndex, timeStart=timeStart)
 
-        elif self.state == self.RectangleEditState.endSideEdit:
+        elif self.state == self.ClipEditMode.clipEnd:
             rectangleRightValue = min(event.x(), self.width() - 1)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
             self.updateClip(self.currentClipIndex, timeEnd=timeEnd)
 
-        elif self.state == self.RectangleEditState.rectangleMove:
+        elif self.state == self.ClipEditMode.clipRectangle:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
             self.clips[self.currentClipIndex].rectangle.moveLeft(shift_value)
@@ -644,6 +665,11 @@ class TimeLine(QWidget):
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
             self.updateClip(self.currentClipIndex, timeStart=timeStart, timeEnd=timeEnd)
+
+        elif self.state == self.ClipEditMode.clipTimestamp:
+            absoluteTimestampPixelValue = max(event.x(), 0)
+            absolute_timestamp = self._pixelPositionToQTime(absoluteTimestampPixelValue)
+            self.updateClipTimestamp(self.currentClipIndex, self.currentTimestampIndex, absolute_timestamp)
 
         self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
 
@@ -662,7 +688,8 @@ class TimeLine(QWidget):
     def clip(value, minimum, maximum):
         return minimum if value < minimum else maximum if value > maximum else value
 
-    def getTimeString(self, seconds, return_milliseconds=False):
+    @staticmethod
+    def getTimeString(seconds, return_milliseconds=False):
         """Get time string from seconds"""
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)

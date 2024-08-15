@@ -110,7 +110,6 @@ class VideoItemClip:
             if self.clip_timestamps[index].timestamp.msecsSinceStartOfDay() > clip_duration:
                 del self.clip_timestamps[index]
 
-
     @property
     def timeStart(self) -> QTime:
         return self._timeStart
