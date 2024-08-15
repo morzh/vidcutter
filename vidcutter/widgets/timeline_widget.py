@@ -26,11 +26,11 @@ class TimeLine(QWidget):
     # class ClipTimestamps(Enum):
 
     class CursorStates(Enum):
-        cursorIsOutside = 0
-        cursorOnBeginSide = 1
-        cursorOnEndSide = 2
-        cursorIsInside = 3
-        cursorIsOnTimestamp = 4
+        cursorIsOutsideClip = 0
+        cursorIsAtClipStart = 1
+        cursorIsAtClipEnd = 2
+        cursorIsInsideClip = 3
+        cursorIsAtTimestamp = 4
 
     class RectangleEditState(Enum):
         freeState = 1
@@ -53,6 +53,7 @@ class TimeLine(QWidget):
         self.minorTicksHeight = 10
         self.timeLineHeight = 85
         self.setObjectName('timeline')
+        self.highlightPixelsThreshold = 5
 
         # Set variables
         self.backgroundColor = QColor('#1b2326') if self.parent.theme == 'dark' else QColor(187, 187, 187)
@@ -72,11 +73,12 @@ class TimeLine(QWidget):
         self.setAutoFillBackground(True)  # background
         self.initAttributes()
 
-        self.currentRectangleIndex = -1
+        self.currentClipIndex = -1
+        self.currentTimestampIndex = -1
         self.freeCursorOnSide = 0
         self.state = self.RectangleEditState.freeState
-        self.begin = QPoint()
-        self.end = QPoint()
+        self.clip_rectangle_begin = QPoint()
+        self.clip_rectangle_end = QPoint()
         self.numberGradientSteps: int = 50
         self.regionOutlineWidth = 4
         self.videoListRef = None
@@ -173,7 +175,7 @@ class TimeLine(QWidget):
             self._drawTicks(painter)
             self._drawSlider(painter)
             self._drawVideoClips(painter)
-            if self.currentRectangleIndex != -1 and self.freeCursorOnSide:
+            if self.currentClipIndex != -1 and self.freeCursorOnSide:
                 self._drawVideoClipsEditMode_(painter)
         painter.end()
 
@@ -298,14 +300,14 @@ class TimeLine(QWidget):
         glowAlpha = 150
         highlightColor = QColor(190, 85, 200, 255)
         glowColor = QColor(255, 255, 255, glowAlpha)
-        currentClipRectangle = self.clips[self.currentRectangleIndex].rectangle
+        currentClipRectangle = self.clips[self.currentClipIndex].rectangle
         maximumGradientSteps = copy(currentClipRectangle.width())
         maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
-        if self.freeCursorOnSide == self.CursorStates.cursorOnBeginSide:
-            begin = copy(self.clips[self.currentRectangleIndex].rectangle.topLeft())
-            end = copy(self.clips[self.currentRectangleIndex].rectangle.bottomLeft())
+        if self.freeCursorOnSide == self.CursorStates.cursorIsAtClipStart:
+            begin = copy(self.clips[self.currentClipIndex].rectangle.topLeft())
+            end = copy(self.clips[self.currentClipIndex].rectangle.bottomLeft())
             coordinateX = begin.x()
             begin.setX(coordinateX + self.regionOutlineWidth)
             end.setX(coordinateX + self.regionOutlineWidth)
@@ -322,7 +324,7 @@ class TimeLine(QWidget):
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
 
-        elif self.freeCursorOnSide == self.CursorStates.cursorOnEndSide:
+        elif self.freeCursorOnSide == self.CursorStates.cursorIsAtClipEnd:
             begin = copy(currentClipRectangle.topRight())
             end = copy(currentClipRectangle.bottomRight())
             coordinateX = end.x()
@@ -340,7 +342,7 @@ class TimeLine(QWidget):
             end = currentClipRectangle.bottomRight()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
-        elif self.freeCursorOnSide == self.CursorStates.cursorIsInside:
+        elif self.freeCursorOnSide == self.CursorStates.cursorIsInsideClip:
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             brushColor = QColor(237, 242, 255, 150)
             painter.setBrush(brushColor)
@@ -409,13 +411,13 @@ class TimeLine(QWidget):
 
     def _mousePressControlEvent(self, event: QMouseEvent):
         self.dragPosition = event.pos()
-        self.dragRectPosition = self.clips[self.currentRectangleIndex].rectangle.topLeft()
+        self.dragRectPosition = self.clips[self.currentClipIndex].rectangle.topLeft()
         side = self.mouseCursorState(event.pos())
-        if side == self.CursorStates.cursorOnBeginSide:
+        if side == self.CursorStates.cursorIsAtClipStart:
             self.state = self.RectangleEditState.beginSideEdit
-        elif side == self.CursorStates.cursorOnEndSide:
+        elif side == self.CursorStates.cursorIsAtClipEnd:
             self.state = self.RectangleEditState.endSideEdit
-        elif side == self.CursorStates.cursorIsInside:
+        elif side == self.CursorStates.cursorIsInsideClip:
             self.state = self.RectangleEditState.rectangleMove
 
         self.clicking = False
@@ -472,17 +474,17 @@ class TimeLine(QWidget):
             self.applyEvent(event)
             self.unsetCursor()
             currentVideoIndex = self.videoListRef.currentVideoIndex
-            thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentRectangleIndex))
-            self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex].thumbnail = thumbnail
+            thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentClipIndex))
+            self.videoListRef.videos[currentVideoIndex].clips[self.currentClipIndex].thumbnail = thumbnail
 
-            clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentRectangleIndex]
-            self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentRectangleIndex)
-            self.currentRectangleIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
+            clip = self.videoListRef.videos[currentVideoIndex].clips[self.currentClipIndex]
+            self.videoListRef.videos[currentVideoIndex].clips.pop(self.currentClipIndex)
+            self.currentClipIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
             self.videoListRef.videos[currentVideoIndex].clips.add(clip)
 
             self.parent.parent.renderVideoClips()
             self.state = self.RectangleEditState.freeState
-            self.freeCursorOnSide = self.CursorStates.cursorIsOutside
+            self.freeCursorOnSide = self.CursorStates.cursorIsOutsideClip
         # elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
         #     return
 
@@ -505,27 +507,70 @@ class TimeLine(QWidget):
                 clipEndSeconds = 1e-3 * clip.timeEnd.msecsSinceStartOfDay()
                 self.setPositionFromSeconds(clipEndSeconds)
 
-    def mouseCursorState(self, e_pos) -> CursorStates:
+    def mouseCursorState(self, mouse_position) -> CursorStates:
         if len(self.clips):
-            for region_idx in range(len(self.clips)):
-                if self.clips[region_idx].visibility:
-                    self.begin = self.clips[region_idx].rectangle.topLeft()
-                    self.end = self.clips[region_idx].rectangle.bottomRight()
-                    y1, y2 = sorted([self.begin.y(), self.end.y()])
-                    if y1 <= e_pos.y() <= y2:
-                        self.currentRectangleIndex = region_idx
-                        distance_mouse_begin = abs(self.begin.x() - e_pos.x())
-                        distance_mouse_end = abs(self.end.x() - e_pos.x())
-                        distance_begin_end = abs(self.begin.x() - self.end.x())
-                        if distance_begin_end <= 10:
-                            return self.CursorStates.cursorOnBeginSide if distance_mouse_begin < distance_mouse_end else self.CursorStates.cursorOnEndSide
-                        elif distance_mouse_begin <= 5:
-                            return self.CursorStates.cursorOnBeginSide
-                        elif distance_mouse_end <= 5:
-                            return self.CursorStates.cursorOnEndSide
-                        elif self.begin.x() + 5 < e_pos.x() < self.end.x() - 5:
-                            return self.CursorStates.cursorIsInside
-        return self.CursorStates.cursorIsOutside
+            mouse_horizontal_position = mouse_position.x()
+            mouse_vertical_position = mouse_position.y()
+            for clip_index in range(len(self.clips)):
+                if self.clips[clip_index].visibility:
+                    self.clip_rectangle_begin = self.clips[clip_index].rectangle.topLeft()
+                    self.clip_rectangle_end = self.clips[clip_index].rectangle.bottomRight()
+                    y1, y2 = sorted([self.clip_rectangle_begin.y(), self.clip_rectangle_end.y()])
+                    x1, x2 = sorted([self.clip_rectangle_begin.x(), self.clip_rectangle_end.x()])
+
+                    if y1 <= mouse_vertical_position <= y2 and x1 <= mouse_horizontal_position <= x2:
+                        self.currentClipIndex = clip_index
+
+                        rectangle_timestamps_data = [self.clips[clip_index].rectangle.left()]
+                        rectangle_timestamps_data.extend(self.clips[clip_index].timestamps)
+                        rectangle_timestamps_data.append(self.clips[clip_index].rectangle.right())
+                        # print(rectangle_timestamps_data)
+
+                        rectangle_timestamps_distances = [None] * len(rectangle_timestamps_data)
+                        indices_selection_threshold = []
+                        minimal_distance_index = -1
+                        minimal_distance = abs(self.clip_rectangle_begin.x() - self.clip_rectangle_end.x()) + 2
+
+                        for timestamp_index in range(len(rectangle_timestamps_data)):
+                            current_distance = abs(rectangle_timestamps_data[timestamp_index] - mouse_position.x())
+                            rectangle_timestamps_distances[timestamp_index] = current_distance
+                            if current_distance < self.highlightPixelsThreshold:
+                                indices_selection_threshold.append(timestamp_index)
+                            if current_distance < minimal_distance:
+                                minimal_distance = current_distance
+                                minimal_distance_index = timestamp_index
+
+                        if len(indices_selection_threshold) == 0:
+                            return self.CursorStates.cursorIsInsideClip
+                        elif len(indices_selection_threshold) == 1:
+                            if minimal_distance_index == 0:
+                                return self.CursorStates.cursorIsAtClipStart
+                            elif minimal_distance_index == len(rectangle_timestamps_data) - 1:
+                                return self.CursorStates.cursorIsAtClipEnd
+                            else:
+                                self.currentTimestampIndex = minimal_distance_index - 1
+                                return self.CursorStates.cursorIsAtTimestamp
+                        elif len(indices_selection_threshold) > 0:
+                            if minimal_distance_index == 0:
+                                return self.CursorStates.cursorIsAtClipStart
+                            elif minimal_distance_index == len(rectangle_timestamps_data) - 1:
+                                return self.CursorStates.cursorIsAtClipEnd
+                            else:
+                                self.currentTimestampIndex = minimal_distance_index - 1
+                                return self.CursorStates.cursorIsAtTimestamp
+
+                        # distance_mouse_begin = abs(self.clip_rectangle_begin.x() - mouse_position.x())
+                        # distance_mouse_end = abs(self.clip_rectangle_end.x() - mouse_position.x())
+                        # distance_begin_end = abs(self.clip_rectangle_begin.x() - self.clip_rectangle_end.x())
+                        # if distance_begin_end <= 10:
+                        #     return self.CursorStates.cursorIsAtClipStart if distance_mouse_begin < distance_mouse_end else self.CursorStates.cursorIsAtClipEnd
+                        # elif distance_mouse_begin <= 5:
+                        #     return self.CursorStates.cursorIsAtClipStart
+                        # elif distance_mouse_end <= 5:
+                        #     return self.CursorStates.cursorIsAtClipEnd
+                        # elif self.clip_rectangle_begin.x() + 5 < mouse_position.x() < self.clip_rectangle_end.x() - 5:
+                        #     return self.CursorStates.cursorIsInsideClip
+        return self.CursorStates.cursorIsOutsideClip
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         if self.parent.parent.mediaAvailable:
@@ -539,10 +584,10 @@ class TimeLine(QWidget):
     def mousePositionToClipIndex(self, e_pos) -> int:
         if len(self.clips):
             for clipIndex in range(len(self.clips)):
-                self.begin = self.clips[clipIndex].rectangle.topLeft()
-                self.end = self.clips[clipIndex].rectangle.bottomRight()
-                y1, y2 = sorted([self.begin.y(), self.end.y()])
-                if y1 <= e_pos.y() <= y2 and self.begin.x() < e_pos.x() < self.end.x():
+                self.clip_rectangle_begin = self.clips[clipIndex].rectangle.topLeft()
+                self.clip_rectangle_end = self.clips[clipIndex].rectangle.bottomRight()
+                y1, y2 = sorted([self.clip_rectangle_begin.y(), self.clip_rectangle_end.y()])
+                if y1 <= e_pos.y() <= y2 and self.clip_rectangle_begin.x() < e_pos.x() < self.clip_rectangle_end.x():
                     return clipIndex
         return -1
 
@@ -550,23 +595,23 @@ class TimeLine(QWidget):
         if self.state == self.RectangleEditState.beginSideEdit:
             rectangleLeftValue = max(event.x(), 0)
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
-            self.updateClip(self.currentRectangleIndex, timeStart=timeStart)
+            self.updateClip(self.currentClipIndex, timeStart=timeStart)
 
         elif self.state == self.RectangleEditState.endSideEdit:
             rectangleRightValue = min(event.x(), self.width() - 1)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
-            self.updateClip(self.currentRectangleIndex, timeEnd=timeEnd)
+            self.updateClip(self.currentClipIndex, timeEnd=timeEnd)
 
         elif self.state == self.RectangleEditState.rectangleMove:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
-            self.clips[self.currentRectangleIndex].rectangle.moveLeft(shift_value)
+            self.clips[self.currentClipIndex].rectangle.moveLeft(shift_value)
 
-            rectangleLeftValue = max(self.clips[self.currentRectangleIndex].rectangle.left(), 0)
-            rectangleRightValue = min(self.clips[self.currentRectangleIndex].rectangle.right(), self.width() - 1)
+            rectangleLeftValue = max(self.clips[self.currentClipIndex].rectangle.left(), 0)
+            rectangleRightValue = min(self.clips[self.currentClipIndex].rectangle.right(), self.width() - 1)
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
-            self.updateClip(self.currentRectangleIndex, timeStart=timeStart, timeEnd=timeEnd)
+            self.updateClip(self.currentClipIndex, timeStart=timeStart, timeEnd=timeEnd)
 
         self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
 
