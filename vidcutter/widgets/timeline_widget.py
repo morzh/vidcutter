@@ -555,7 +555,6 @@ class TimeLine(QWidget):
             self.state = self.ClipEditMode.freeState
             self.freeCursorState = self.CursorStates.cursorIsOutsideClip
 
-
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
         self.update()
@@ -655,6 +654,7 @@ class TimeLine(QWidget):
             timestamp = self._pixelPositionToQTime(mouse_position.x() - clip_start_pixels + self.sliderAreaHorizontalOffset)
             clip_timestamp = VideoClipTimestamps(timestamp)
             self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps.append(clip_timestamp)
+            self.clips[clip_index].timestamps.append(mouse_position.x())
 
     def applyEvent(self, event):
         if self.state == self.ClipEditMode.clipStart:
