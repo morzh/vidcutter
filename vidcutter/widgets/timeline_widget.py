@@ -666,10 +666,14 @@ class TimeLine(QWidget):
         elif self.state == self.ClipEditMode.clipRectangle:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
+            rectangle_left_value = self.clips[self.currentClipIndex].rectangle.left()
+            rectangle_width = self.clips[self.currentClipIndex].rectangle.width()
+            shift_value = self.clamp(shift_value, self.sliderAreaHorizontalOffset, self.width() - rectangle_width - self.sliderAreaHorizontalOffset)
             self.clips[self.currentClipIndex].rectangle.moveLeft(shift_value)
 
-            rectangleLeftValue = max(self.clips[self.currentClipIndex].rectangle.left(), 0)
-            rectangleRightValue = min(self.clips[self.currentClipIndex].rectangle.right(), self.width() - 1)
+            rectangleLeftValue = self.clips[self.currentClipIndex].rectangle.left()
+            rectangleRightValue = self.clips[self.currentClipIndex].rectangle.right()
+
             timeStart = self._pixelPositionToQTime(rectangleLeftValue)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
             self.updateClip(self.currentClipIndex, timeStart=timeStart, timeEnd=timeEnd)
@@ -679,7 +683,9 @@ class TimeLine(QWidget):
             absolute_timestamp = self._pixelPositionToQTime(absoluteTimestampPixelValue)
             self.updateClipTimestamp(self.currentClipIndex, self.currentTimestampIndex, absolute_timestamp)
 
-
+    @staticmethod
+    def clamp(value, smallest, largest):
+        return max(smallest, min(value, largest))
 
     def enterEvent(self, event):
         self.isIn = True
