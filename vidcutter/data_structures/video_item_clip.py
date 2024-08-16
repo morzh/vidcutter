@@ -107,7 +107,8 @@ class VideoItemClip:
     def cleanTimestamps(self):
         clip_duration = self._timeEnd.msecsSinceStartOfDay() - self._timeStart.msecsSinceStartOfDay()
         for index in reversed(range(len(self.clip_timestamps))):
-            if self.clip_timestamps[index].timestamp.msecsSinceStartOfDay() > clip_duration:
+            current_milliseconds = self.clip_timestamps[index].timestamp.msecsSinceStartOfDay()
+            if current_milliseconds > clip_duration or current_milliseconds == 0:
                 del self.clip_timestamps[index]
 
     @property

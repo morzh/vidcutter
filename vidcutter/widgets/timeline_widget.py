@@ -110,6 +110,10 @@ class TimeLine(QWidget):
         self.videoListRef.setCurrentVideoClipIndex(clip_index)
 
         if timeStart is not None:
+            time_end = self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].timeEnd
+            if time_end <= timeStart:
+                timeStart = time_end
+
             self.videoListRef.setCurrentVideoClipStartTime(timeStart)
             time_start_seconds = timeStart.msecsSinceStartOfDay() * 1e-3
             pixelPositionStart = int(round(self._secondsToPixelPosition(time_start_seconds)))
@@ -122,16 +126,16 @@ class TimeLine(QWidget):
                 clip.timestamps[index_timestamp] = current_timestamp_pixels
 
         if timeEnd is not None:
+            time_start = self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].timeStart
+            if timeEnd <= time_start:
+                timeEnd = time_start
+
             self.videoListRef.setCurrentVideoClipEndTime(timeEnd)
             pixelPositionEnd = int(round(self._secondsToPixelPosition(timeEnd.msecsSinceStartOfDay() * 1e-3)))
             clip.rectangle.setRight(pixelPositionEnd)
 
     def updateClipTimestamp(self, clip_index: int, timestamp_index: int, timestamp: QTime) -> None:
         self.videoListRef.setCurrentVideoClipIndex(clip_index)
-        # print(f'{self.videoListRef.currentVideoIndex=}, {clip_index=}, {timestamp_index=}, {timestamp=}')
-        # print(f'{len(self.videoListRef.videos)}, {len(self.videoListRef[self.videoListRef.currentVideoIndex].clips)}')
-        # print(f'{len(self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps)}')
-
         timestampPixelPosition = int(round(self._secondsToPixelPosition(timestamp.msecsSinceStartOfDay() * 1e-3)))
         self.clips[clip_index].timestamps[timestamp_index] = timestampPixelPosition
 
@@ -144,6 +148,7 @@ class TimeLine(QWidget):
         minutes = int((seconds % 3600) / 60)
         seconds = int((seconds % 3600) % 60)
         timestamp = QTime(hours, minutes, seconds, milliseconds)
+
         self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps[timestamp_index].timestamp = timestamp
 
     def updateClips(self):
@@ -322,8 +327,8 @@ class TimeLine(QWidget):
         highlightColor = QColor(190, 85, 200, 255)
         glowColor = QColor(255, 255, 255, glowAlpha)
         currentClipRectangle = self.clips[self.currentClipIndex].rectangle
-        maximumGradientSteps = copy(currentClipRectangle.width())
-        maximumGradientSteps = int(maximumGradientSteps)
+        maximumGradientSteps = max(copy(currentClipRectangle.width()), 1)
+        # maximumGradientSteps = int(maximumGradientSteps)
         numberGradientSteps = min(self.numberGradientSteps, maximumGradientSteps)
 
         if self.freeCursorState == self.CursorStates.cursorIsAtClipStart:
@@ -363,6 +368,7 @@ class TimeLine(QWidget):
             end = currentClipRectangle.bottomRight()
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             painter.drawLine(begin, end)
+
         elif self.freeCursorState == self.CursorStates.cursorIsInsideClip:
             painter.setPen(QPen(highlightColor, self.regionOutlineWidth, Qt.SolidLine))
             brushColor = QColor(237, 242, 255, 150)
@@ -511,7 +517,6 @@ class TimeLine(QWidget):
             self._mousePressShiftEvent(event)
         else:
             self._mousePressLeftButtonEvent(event)
-
         # super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
@@ -525,7 +530,9 @@ class TimeLine(QWidget):
             self.pointerSecondsPosition = self._pixelPositionToSeconds(self.pointerPixelPosition)
         elif (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self.applyEvent(event)
+            self.videoListRef[self.videoListRef.currentVideoIndex].cleanClipsTimestamps()
             self.unsetCursor()
+
             currentVideoIndex = self.videoListRef.currentVideoIndex
             thumbnail = self.parent.parent.captureImage(self.parent.parent.currentMedia, self.videoListRef.currentVideoClipTimeStart(self.currentClipIndex))
             self.videoListRef.videos[currentVideoIndex].clips[self.currentClipIndex].thumbnail = thumbnail
@@ -535,13 +542,14 @@ class TimeLine(QWidget):
             self.currentClipIndex = self.videoListRef.videos[currentVideoIndex].clips.bisect_right(clip)
             self.videoListRef.videos[currentVideoIndex].clips.add(clip)
 
+            self.videoListRef[self.videoListRef.currentVideoIndex].cleanClips()
+            if not len(self.videoListRef[self.videoListRef.currentVideoIndex]):
+                self.currentClipIndex = -1
+
             self.parent.parent.renderVideoClips()
             self.state = self.ClipEditMode.freeState
             self.freeCursorState = self.CursorStates.cursorIsOutsideClip
-        # elif len(self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips) == 0:
-        #     return
 
-        # self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
         self.update()
@@ -651,7 +659,7 @@ class TimeLine(QWidget):
             self.updateClip(self.currentClipIndex, timeStart=timeStart)
 
         elif self.state == self.ClipEditMode.clipEnd:
-            rectangleRightValue = min(event.x(), self.width() - 1)
+            rectangleRightValue = min(event.x(), self.width() - self.sliderAreaHorizontalOffset)
             timeEnd = self._pixelPositionToQTime(rectangleRightValue)
             self.updateClip(self.currentClipIndex, timeEnd=timeEnd)
 
@@ -671,7 +679,7 @@ class TimeLine(QWidget):
             absolute_timestamp = self._pixelPositionToQTime(absoluteTimestampPixelValue)
             self.updateClipTimestamp(self.currentClipIndex, self.currentTimestampIndex, absolute_timestamp)
 
-        self.videoListRef[self.videoListRef.currentVideoIndex].cleanTimestamps()
+
 
     def enterEvent(self, event):
         self.isIn = True

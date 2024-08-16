@@ -35,7 +35,12 @@ class VideoItem:
     def __len__(self):
         return len(self.clips)
 
-    def cleanTimestamps(self):
+    def cleanClips(self):
+        for clip_index in reversed(range(len(self.clips))):
+            if self.clips[clip_index].timeStart == self.clips[clip_index].timeEnd:
+                del self.clips[clip_index]
+
+    def cleanClipsTimestamps(self):
         for clip in self.clips:
             clip.cleanTimestamps()
 
