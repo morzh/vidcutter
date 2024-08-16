@@ -524,10 +524,15 @@ class TimeLine(QWidget):
             return
 
         modifierPressed = QApplication.keyboardModifiers()
+
         if event.button() == Qt.LeftButton and self.clicking:
             x = event.pos().x()
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             self.pointerSecondsPosition = self._pixelPositionToSeconds(self.pointerPixelPosition)
+
+        elif (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier and (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+            self.addTimestampToClip(event)
+
         elif (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self.applyEvent(event)
             self.videoListRef[self.videoListRef.currentVideoIndex].cleanClipsTimestamps()
@@ -549,6 +554,7 @@ class TimeLine(QWidget):
             self.parent.parent.renderVideoClips()
             self.state = self.ClipEditMode.freeState
             self.freeCursorState = self.CursorStates.cursorIsOutsideClip
+
 
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
@@ -620,17 +626,6 @@ class TimeLine(QWidget):
                                 self.currentTimestampIndex = minimal_distance_index - 1
                                 return self.CursorStates.cursorIsAtTimestamp
 
-                        # distance_mouse_begin = abs(self.clip_rectangle_begin.x() - mouse_position.x())
-                        # distance_mouse_end = abs(self.clip_rectangle_end.x() - mouse_position.x())
-                        # distance_begin_end = abs(self.clip_rectangle_begin.x() - self.clip_rectangle_end.x())
-                        # if distance_begin_end <= 10:
-                        #     return self.CursorStates.cursorIsAtClipStart if distance_mouse_begin < distance_mouse_end else self.CursorStates.cursorIsAtClipEnd
-                        # elif distance_mouse_begin <= 5:
-                        #     return self.CursorStates.cursorIsAtClipStart
-                        # elif distance_mouse_end <= 5:
-                        #     return self.CursorStates.cursorIsAtClipEnd
-                        # elif self.clip_rectangle_begin.x() + 5 < mouse_position.x() < self.clip_rectangle_end.x() - 5:
-                        #     return self.CursorStates.cursorIsInsideClip
         return self.CursorStates.cursorIsOutsideClip
 
     def wheelEvent(self, event: QWheelEvent) -> None:
@@ -652,6 +647,15 @@ class TimeLine(QWidget):
                     return clipIndex
         return -1
 
+    def addTimestampToClip(self, event):
+        mouse_position = event.pos()
+        clip_index = self.mousePositionToClipIndex(mouse_position)
+        if clip_index > -1:
+            clip_start_pixels = self.clips[clip_index].rectangle.left()
+            timestamp = self._pixelPositionToQTime(mouse_position.x() - clip_start_pixels + self.sliderAreaHorizontalOffset)
+            clip_timestamp = VideoClipTimestamps(timestamp)
+            self.videoListRef[self.videoListRef.currentVideoIndex].clips[clip_index].clip_timestamps.append(clip_timestamp)
+
     def applyEvent(self, event):
         if self.state == self.ClipEditMode.clipStart:
             rectangleLeftValue = max(event.x(), 0)
@@ -666,7 +670,7 @@ class TimeLine(QWidget):
         elif self.state == self.ClipEditMode.clipRectangle:
             delta_value = event.x() - self.dragPosition.x()
             shift_value = self.dragRectPosition.x() + delta_value
-            rectangle_left_value = self.clips[self.currentClipIndex].rectangle.left()
+            # rectangle_left_value = self.clips[self.currentClipIndex].rectangle.left()
             rectangle_width = self.clips[self.currentClipIndex].rectangle.width()
             shift_value = self.clamp(shift_value, self.sliderAreaHorizontalOffset, self.width() - rectangle_width - self.sliderAreaHorizontalOffset)
             self.clips[self.currentClipIndex].rectangle.moveLeft(shift_value)
