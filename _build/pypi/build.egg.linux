@@ -1,8 +1,0 @@
-#!/bin/bash
-
-cd ../..
-rm -rf build dist vidcutter.egg-info
-python3 setup.py bdist_egg sdist
-
-read -e -p "Upload to PyPi? [y/n] " choice
-[[ "$choice" == [Yy]* ]] && twine upload dist/*

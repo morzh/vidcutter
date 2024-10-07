@@ -38,7 +38,7 @@ from PyQt5.QtGui import (QCloseEvent, QContextMenuEvent, QDragEnterEvent, QDropE
 from PyQt5.QtWidgets import qApp, QMainWindow, QMessageBox, QSizePolicy
 
 from vidcutter.video_console import ConsoleHandler, ConsoleWidget, VideoLogger
-from vidcutter.video_labeling_tool import VideoLabelingTool
+from vidcutter.vidcutter import VideoLabelingTool
 
 from vidcutter.libs.singleapplication import SingleApplication
 from vidcutter.libs.widgets import VCMessageBox
