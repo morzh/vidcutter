@@ -272,7 +272,7 @@ class TimeLine(QWidget):
         if not len(self.progressbars_):
             visible_region = self.visibleRegion().boundingRect()
             for index, clip in enumerate(self.clips):
-                currentClipAlpha = 150 if clip.visibility else 30
+                currentClipAlpha = 150 if clip.visibility else 15
                 currentClipRectangle = clip.rectangle
                 currentClipRectangle.setY(int((self.height() - self.regionHeight_) / 2) - 2 * self.clipRectangleOffset - 1)
                 currentClipRectangle.setHeight(self.regionHeight_)
@@ -291,9 +291,10 @@ class TimeLine(QWidget):
                     actionClassLabel = copy(self.videoListRef.actionClassUnknownLabel)
                 else:
                     actionClassLabel = copy(self.videoListRef.actionClassesLabels[actionClassIndex])
-                painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
 
-                self._draw_videoClipTimestamps(clip, painter)
+                if clip.visibility == 2:
+                    painter.drawText(rectClass, Qt.AlignBottom | Qt.AlignLeft, actionClassLabel)
+                    self._draw_videoClipTimestamps(clip, painter)
 
     def _draw_videoClipTimestamps(self, clip: Clip, painter: QStylePainter) -> None:
         penColor = QColor(50, 50, 50, 180)
@@ -640,9 +641,11 @@ class TimeLine(QWidget):
 
     def mousePositionToClipIndex(self, e_pos) -> int:
         if len(self.clips):
-            for clipIndex in range(len(self.clips)):
-                self.clip_rectangle_begin = self.clips[clipIndex].rectangle.topLeft()
-                self.clip_rectangle_end = self.clips[clipIndex].rectangle.bottomRight()
+            for clipIndex, clip in enumerate(self.clips):
+                if clip.visibility == 0:
+                    continue
+                self.clip_rectangle_begin = clip.rectangle.topLeft()
+                self.clip_rectangle_end = clip.rectangle.bottomRight()
                 y1, y2 = sorted([self.clip_rectangle_begin.y(), self.clip_rectangle_end.y()])
                 if y1 <= e_pos.y() <= y2 and self.clip_rectangle_begin.x() < e_pos.x() < self.clip_rectangle_end.x():
                     return clipIndex

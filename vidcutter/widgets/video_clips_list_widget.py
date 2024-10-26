@@ -38,7 +38,7 @@ class ClipsListWidgetItem(QWidget):
         self.timeStart = QTimeEdit(self)
         self.timeStart.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.timeStart.setDisplayFormat('hh:mm:ss.zzz')
-        self.timeStart.setFixedWidth(95)
+        self.timeStart.setFixedWidth(120)
         self.timeStart.setToolTip('Start time of a clip')
         self.timeStart.wheelEvent = lambda event: None
 
@@ -46,7 +46,7 @@ class ClipsListWidgetItem(QWidget):
         self.timeEnd = QTimeEdit(self)
         self.timeEnd.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.timeEnd.setDisplayFormat('hh:mm:ss.zzz')
-        self.timeEnd.setFixedWidth(95)
+        self.timeEnd.setFixedWidth(120)
         self.timeEnd.setToolTip('End time of a clip')
         self.timeEnd.wheelEvent = lambda event: None
 
@@ -55,10 +55,11 @@ class ClipsListWidgetItem(QWidget):
         self.layoutTime = QVBoxLayout()
         self.layoutTime.addWidget(self.timeStart, 0, Qt.AlignLeft)
         self.layoutTime.addWidget(self.timeEnd, 0, Qt.AlignLeft)
-        self.layoutTime.addWidget(self.clipNumber, 0, Qt.AlignLeft)
+
 
         self.image_label = QLabel()
         self.image_label.setScaledContents(True)
+        self.image_label.setFixedSize(64, 64)
         # self.image_label.setStyleSheet("""border-radius: 10px; background-color: transparent;""")
 
         self.layout2 = QHBoxLayout()
@@ -66,6 +67,7 @@ class ClipsListWidgetItem(QWidget):
         self.layout2.addLayout(self.layoutTime)
 
         self.layoutGlobal = QVBoxLayout()
+        self.layoutGlobal.addWidget(self.clipNumber, 0, Qt.AlignLeft)
         self.layoutGlobal.addLayout(self.clipClassLayout)
         self.layoutGlobal.addLayout(self.layout2)
 
@@ -106,7 +108,7 @@ class ClipsListWidgetItem(QWidget):
         self.timeEnd.setTime(timeEnd)
 
     def setNumber(self, number: int):
-        self.clipNumber.setText('clip # ' + str(number))
+        self.clipNumber.setText('Clip # ' + str(number).zfill(2))
         currentFont = QFont("Arial", 11, QFont.Bold)
         self.clipNumber.setFont(currentFont)
 

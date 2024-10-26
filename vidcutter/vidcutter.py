@@ -1035,7 +1035,8 @@ class VideoLabelingTool(QWidget):
         clipsNumber = len(self.videoList.videos[self.videoList.currentVideoIndex].clips)
         defaultClipName = 'Other'
 
-        clip = VideoItemClip(startTime, QTime(), self.captureImage(self.currentMedia, startTime), defaultClipName, 0)
+
+        clip = VideoItemClip(startTime, self.delta2QTime(self.duration * 1e3), self.captureImage(self.currentMedia, startTime), defaultClipName, 0)
         bisect_index = self.videoList.videos[self.videoList.currentVideoIndex].clips.bisect_right(clip)
         self.videoList.videos[self.videoList.currentVideoIndex].bisect_index = bisect_index
         self.videoList.videos[self.videoList.currentVideoIndex].clips.add(clip)
