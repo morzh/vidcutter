@@ -42,6 +42,8 @@ from vidcutter.widgets.scalable_timeline_widget import ScalableTimeLine
 from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle
 from vidcutter.widgets.dialogs.video_info_dialog import VideoDescriptionDialog
 
+from vidcutter.data_structures.video_list import *
+
 
 class VideoLabelingTool(QWidget):
     errorOccurred = pyqtSignal(str)
@@ -61,7 +63,7 @@ class VideoLabelingTool(QWidget):
         self.projectDirty, self.projectSaved, self.debugOnStart = False, False, False
         self.notify = None
         self.fonts = []
-        self._dataFolder = ''
+        self._dataFilepath = ''
         self._dataFilename = 'data.pickle'
         self._dataFilenameTemp = 'data.pickle.tmp'
         self.folderOpened = False
@@ -170,11 +172,6 @@ class VideoLabelingTool(QWidget):
         self.clipIsPlaying = False
         self.clipIsPlayingIndex = -1
 
-        # self.mpvWidget.setAttribute(Qt.WA_TranslucentBackground, True)
-        # self._graphicsScene = QGraphicsScene(self)
-        # self._graphicsView = QGraphicsView(self._graphicsScene)
-        # self._graphicsScene.addWidget(self.mpvWidget)
-
         self.videoplayerLayout = QVBoxLayout()
         self.videoplayerLayout.setSpacing(0)
         self.videoplayerLayout.setContentsMargins(0, 0, 0, 0)
@@ -201,6 +198,7 @@ class VideoLabelingTool(QWidget):
         # noinspection PyArgumentList
         self.volSlider = VCVolumeSlider(orientation=Qt.Horizontal, toolTip='Volume', statusTip='Adjust volume level', cursor=Qt.PointingHandCursor, value=self.parent.startupvol, minimum=0,
                                         maximum=130, minimumHeight=22, sliderMoved=self.setVolume)
+        # noinspection PyArgumentList
         self.menuButton = QPushButton(self, toolTip='Menu', cursor=Qt.PointingHandCursor, flat=True, objectName='menuButton', clicked=self.showAppMenu, statusTip='View menu options')
         self.menuButton.setFixedSize(QSize(33, 32))
 
@@ -358,7 +356,7 @@ class VideoLabelingTool(QWidget):
         self.timelineFactorLabel.setText(str(self.scalableTimeline.factor))
 
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def showAppMenu(self) -> None:
         pos = self.menuButton.mapToGlobal(self.menuButton.rect().topLeft())
         pos.setX(pos.x() - self.applicationMenu.sizeHint().width() + 30)
@@ -456,16 +454,12 @@ class VideoLabelingTool(QWidget):
 
     # noinspection PyArgumentList
     def _initActions(self) -> None:
-        # self.moveItemUpAction = QAction(self.upIcon, 'Move clip up', self, statusTip='Move clip position up in list', triggered=self.moveItemUp, enabled=False)
-        # self.moveItemDownAction = QAction(self.downIcon, 'Move clip down', self, triggered=self.moveItemDown, statusTip='Move clip position down in list', enabled=False)
-        # self.editChapterAction = QAction(self.chapterIcon, 'Edit chapter', self, triggered=self.videoListDoubleClick, statusTip='Edit the selected chapter name', enabled=False)
         self.removeItemAction = QAction(self.removeIcon, 'Remove selected clip', self, triggered=self.removeItem, statusTip='Remove selected clip from list', enabled=False)
         self.removeAllAction = QAction(self.removeAllIcon, 'Remove all clips', self, triggered=self.clearList, statusTip='Remove all clips for current video', enabled=False)
         self.toggleVisibilityAction = QAction(self.removeAllIcon, 'Toggle clips visibility', self, triggered=self.toggleClipsVisibility, statusTip='Remove all clips for current video', enabled=False)
         self.turnVisibilityOnAction = QAction(self.removeAllIcon, 'Turn clips visibility ON', self, triggered=self.turnClipsVisibilityOn, statusTip='Remove all clips for current video', enabled=False)
         self.turnVisibilityOffAction = QAction(self.removeAllIcon, 'Turn clips visibility OFF', self, triggered=self.turnClipsVisibilityOff, statusTip='Remove all clips for current video', enabled=False)
 
-        # self.openProjectAction = QAction(self.openProjectIcon, 'Open project file', self, triggered=self.openProject, statusTip='Open a previously saved project file (*.vcp or *.edl)', enabled=True)
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)', enabled=False)
 
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoLabelingTool.viewLogs, statusTip='View the application\'s log file')
@@ -699,9 +693,10 @@ class VideoLabelingTool(QWidget):
             else:
                 return
 
-        self._dataFolder = QFileDialog.getExistingDirectory(parent=self.parent, caption='Select Folder', directory=QDir.currentPath())
-        filepath = os.path.join(self._dataFolder, self._dataFilename)
-        with open(filepath, 'rb') as f:
+        filepath = QFileDialog.getOpenFileName(parent=self.parent, caption='Select Data File', directory=QDir.currentPath(), filter="Pickle(*.pickle)")
+        self._dataFilepath = os.path.split(os.path.abspath(filepath[0]))[0]
+        # print(self._dataFilepath)
+        with open(filepath[0], 'rb') as f:
             self.videoList = pickle.load(f)
             self.scalableTimeline.timeline.videoListRef = self.videoList
 
@@ -718,8 +713,8 @@ class VideoLabelingTool(QWidget):
         self.mediaAvailable = False
         self.initMediaControls(False)
 
-        if self._dataFolder is not None:
-            self.lastFolder = QFileInfo(self._dataFolder).absolutePath()
+        if self._dataFilepath is not None:
+            self.lastFolder = QFileInfo(self._dataFilepath).absolutePath()
 
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
@@ -733,7 +728,7 @@ class VideoLabelingTool(QWidget):
             self.novideoWidget.hide()
             self.folderOpened = True
 
-        filepath = self.videoList.currentVideoFilepath(self._dataFolder)
+        filepath = self.videoList.currentVideoFilepath(self._dataFilepath)
         if not os.path.isfile(filepath):
             return
         self.currentMedia = filepath
@@ -786,8 +781,8 @@ class VideoLabelingTool(QWidget):
         if self.projectSaved:
             return
         self.parent.setEnabled(False)
-        data_filepath_temporary = os.path.join(self._dataFolder, self._dataFilenameTemp)
-        data_filepath = os.path.join(self._dataFolder, self._dataFilename)
+        data_filepath_temporary = os.path.join(self._dataFilepath, self._dataFilenameTemp)
+        data_filepath = os.path.join(self._dataFilepath, self._dataFilename)
         try:
             with open(data_filepath_temporary, 'wb') as f:
                 pickle.dump(self.videoList, f)
@@ -1125,7 +1120,7 @@ class VideoLabelingTool(QWidget):
 
     def captureImage(self, source: str, frametime: QTime, external: bool = False) -> QPixmapPickle:
         thumbnail = VideoService.captureFrame(self.settings, source, frametime.toString(self.timeformat),
-                                              external=external, thumbsize=QSize(64, 64))
+                                              external=external, thumbsize=QSize(48, 48))
         return QPixmapPickle(thumbnail)
 
     def complete(self, rename: bool = True, filename: str = None) -> None:

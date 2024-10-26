@@ -509,11 +509,11 @@ class TimeLine(QWidget):
             return
 
         modifierPressed = QApplication.keyboardModifiers()
-        if (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+        if event.button() == Qt.LeftButton and (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
             self._mousePressControlEvent(event)
-        elif (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
+        elif event.button() == Qt.LeftButton and (modifierPressed & Qt.AltModifier) == Qt.AltModifier:
             self._mousePressAltEvent(event)
-        elif (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
+        elif event.button() == Qt.LeftButton and (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
             self._mousePressShiftEvent(event)
         else:
             self._mousePressLeftButtonEvent(event)
@@ -530,10 +530,10 @@ class TimeLine(QWidget):
             self.pointerPixelPosition = self.clip(x, self.sliderAreaHorizontalOffset, self.width() - self.sliderAreaHorizontalOffset)
             self.pointerSecondsPosition = self._pixelPositionToSeconds(self.pointerPixelPosition)
 
-        elif (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier and (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+        elif event.button() == Qt.RightButton and modifierPressed == Qt.ShiftModifier:
             self.addTimestampToClip(event)
 
-        elif (modifierPressed & Qt.ControlModifier) == Qt.ControlModifier:
+        elif event.button() == Qt.LeftButton and modifierPressed == Qt.ControlModifier:
             self.applyEvent(event)
             self.videoListRef[self.videoListRef.currentVideoIndex].cleanClipsTimestamps()
             self.unsetCursor()
@@ -555,6 +555,7 @@ class TimeLine(QWidget):
             self.state = self.ClipEditMode.freeState
             self.freeCursorState = self.CursorStates.cursorIsOutsideClip
 
+
         self.sliderMoved.emit(self.pointerSecondsPosition)
         self.clicking = False  # Set clicking check to false
         self.update()
@@ -566,12 +567,13 @@ class TimeLine(QWidget):
             return
 
         modifierPressed = QApplication.keyboardModifiers()
-        if (modifierPressed & Qt.ShiftModifier) == Qt.ShiftModifier:
+        if event.button() == Qt.LeftButton and modifierPressed == Qt.ShiftModifier:
             index = self.mousePositionToClipIndex(event.pos())
             if index != -1:
                 clip = self.videoListRef.videos[self.videoListRef.currentVideoIndex].clips[index]
                 clipEndSeconds = 1e-3 * clip.timeEnd.msecsSinceStartOfDay()
                 self.setPositionFromSeconds(clipEndSeconds)
+
 
     def mouseCursorState(self, mouse_position) -> CursorStates:
         if len(self.clips):

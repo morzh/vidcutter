@@ -251,10 +251,10 @@ class MainWindow(QMainWindow):
     def cleanup():
         shutil.rmtree(MainWindow.WORKING_FOLDER, ignore_errors=True)
 
-    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-        if event.reason() in {QContextMenuEvent.Mouse, QContextMenuEvent.Keyboard}:
-            self.cutter.applicationMenu.popup(event.globalPos())
-        super(MainWindow, self).contextMenuEvent(event)
+    # def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+    #     if event.reason() in {QContextMenuEvent.Mouse, QContextMenuEvent.Keyboard}:
+    #         self.cutter.applicationMenu.popup(event.globalPos())
+    #     super(MainWindow, self).contextMenuEvent(event)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and self.cutter.mediaAvailable:
