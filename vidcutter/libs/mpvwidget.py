@@ -296,11 +296,13 @@ class mpvWidget(QOpenGLWidget):
                 self.parent.playMedia()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
+        """
         event.accept()
         if self.parent is None:
             self.originalParent.toggleFullscreen()
         else:
             self.parent.toggleFullscreen()
+        """
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         self.parent.scalableTimeline.wheelEvent(event)

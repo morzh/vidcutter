@@ -272,7 +272,7 @@ class TimeLine(QWidget):
         if not len(self.progressbars_):
             visible_region = self.visibleRegion().boundingRect()
             for index, clip in enumerate(self.clips):
-                currentClipAlpha = 150 if clip.visibility else 15
+                currentClipAlpha = 150 if clip.visibility else 20
                 currentClipRectangle = clip.rectangle
                 currentClipRectangle.setY(int((self.height() - self.regionHeight_) / 2) - 2 * self.clipRectangleOffset - 1)
                 currentClipRectangle.setHeight(self.regionHeight_)

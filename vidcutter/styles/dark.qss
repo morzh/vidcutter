@@ -873,6 +873,24 @@ VCToolBarButton QPushButton:pressed#toolbar-save {
 
 /* -------------------------------------------------------------------------- */
 
+VCToolBarButton QPushButton#toolbar-export {
+    border-image: url(:/images/dark/export.png);
+}
+
+VCToolBarButton QPushButton:disabled#toolbar-export {
+    border-image: url(:/images/dark/export.png);
+}
+
+VCToolBarButton QPushButton:hover#toolbar-export {
+    border-image: url(:/images/dark/export.png);
+}
+
+VCToolBarButton QPushButton:pressed#toolbar-export {
+    border-image: url(:/images/dark/export.png);
+}
+
+/* -------------------------------------------------------------------------- */
+
 VCToolBarButton QPushButton#toolbar-send {
     border-image: url(:/images/dark/toolbar-send.png);
 }

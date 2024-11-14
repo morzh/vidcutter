@@ -234,6 +234,10 @@ class VideoLabelingTool(QWidget):
         self.toolbarSave.setEnabled(False)
         self.toolbarSave.clicked.connect(self.saveProject)
 
+        self.toolbarExport = VCToolBarButton('Export', 'Exports clips to a JSON file', parent=self)
+        self.toolbarExport.setEnabled(False)
+        self.toolbarExport.clicked.connect(self.exportProject)
+
         toolbarLayout = QHBoxLayout()
         toolbarLayout.setContentsMargins(0, 0, 0, 0)
         toolbarLayout.addStretch(1)
@@ -248,6 +252,8 @@ class VideoLabelingTool(QWidget):
         toolbarLayout.addWidget(self.toolbarEnd)
         toolbarLayout.addStretch(1)
         toolbarLayout.addWidget(self.toolbarSave)
+        toolbarLayout.addStretch(1)
+        toolbarLayout.addWidget(self.toolbarExport)
 
         self.timelineMinusButton = VCToolBarButton('Minus', 'Increase timeline scale', parent=self, has_label=False)
         self.timelineMinusButton.button.setFixedSize(30, 32)
@@ -441,6 +447,7 @@ class VideoLabelingTool(QWidget):
         self.removeAllIcon = QIcon(':/images/remove-all.png')
         self.openProjectIcon = QIcon(':/images/open.png')
         self.saveProjectIcon = QIcon(':/images/save.png')
+        self.exportProjectIcon = QIcon(':/images/export.png')
         self.filtersIcon = QIcon(':/images/filters.png')
         self.mediaInfoIcon = QIcon(':/images/info.png')
         self.streamsIcon = QIcon(':/images/streams.png')
@@ -461,6 +468,7 @@ class VideoLabelingTool(QWidget):
         self.turnVisibilityOffAction = QAction(self.removeAllIcon, 'Turn clips visibility OFF', self, triggered=self.turnClipsVisibilityOff, statusTip='Remove all clips for current video', enabled=False)
 
         self.saveProjectAction = QAction(self.saveProjectIcon, 'Save project file', self, triggered=self.saveProject, statusTip='Save current work to a project file (*.vcp or *.edl)', enabled=False)
+        self.exportProjectAction = QAction(self.exportProjectIcon, 'Save project file', self, triggered=self.exportProject, statusTip='Save current work to a project file (*.vcp or *.edl)', enabled=False)
 
         self.viewLogsAction = QAction(self.viewLogsIcon, 'View log file', self, triggered=VideoLabelingTool.viewLogs, statusTip='View the application\'s log file')
         self.updateCheckAction = QAction(self.updateCheckIcon, 'Check for updates...', self, statusTip='Check for application updates', triggered=self.updater.check)
@@ -468,7 +476,7 @@ class VideoLabelingTool(QWidget):
         self.aboutAction = QAction('About {}'.format(qApp.applicationName()), self, triggered=self.aboutApp, statusTip='About {}'.format(qApp.applicationName()))
         self.keyRefAction = QAction(self.keyRefIcon, 'Keyboard shortcuts', self, triggered=self.showKeyRef, statusTip='View shortcut key bindings')
         self.settingsAction = QAction(self.settingsIcon, 'Settings', self, triggered=self.showSettings, statusTip='Configure application settings')
-        self.fullscreenAction = QAction(self.changelogIcon, 'Toggle fullscreen', self, triggered=self.toggleFullscreen, statusTip='Toggle fullscreen display mode', enabled=False)
+        # self.fullscreenAction = QAction(self.changelogIcon, 'Toggle fullscreen', self, triggered=self.toggleFullscreen, statusTip='Toggle fullscreen display mode', enabled=False)
         self.toggleConsoleAction = QAction(self.changelogIcon, 'Toggle console', self, triggered=self.toggleConsole, statusTip='Toggle console', enabled=True)
         self.quitAction = QAction(self.quitIcon, 'Quit', self, triggered=self.parent.close, statusTip='Quit the application')
 
@@ -755,6 +763,7 @@ class VideoLabelingTool(QWidget):
             self.timelineMinusButton.button.setEnabled(True)
             self.timelinePlusButton.button.setEnabled(True)
             self.toolbarPlaybackSpeed.setEnabled(True)
+            self.toolbarExport.setEnabled(True)
             self.timelineFactorLabel.setText('1')
             self.clipIsPlayingIndex = -1
             self.mediaAvailable = True
@@ -773,9 +782,15 @@ class VideoLabelingTool(QWidget):
 
         # self.mpvWidget.mpv.playbackSpeed(4.0)
 
+
     def buildClipsThumbnails(self, clips: SortedList[VideoItemClip]):
         for clip in clips:
             clip.thumbnail = self.captureImage(self.currentMedia, clip.timeStart)
+
+
+    def exportProject(self):
+        ...
+
 
     def saveProject(self, reboot: bool = False) -> None:
         if self.projectSaved:
@@ -856,7 +871,7 @@ class VideoLabelingTool(QWidget):
         self.toolbarEnd.setEnabled(False)
         self.toolbarSave.setEnabled(flag)
         # self.fullscreenButton.setEnabled(flag)
-        self.fullscreenAction.setEnabled(flag)
+        # self.fullscreenAction.setEnabled(flag)
         self.scalableTimeline.clearRegions()
         if flag:
             self.scalableTimeline.setRestrictValue(0)
@@ -1319,12 +1334,6 @@ class VideoLabelingTool(QWidget):
         if self.mediaAvailable:
             if event.key() == Qt.Key_Space:
                 self.playMedia()
-
-            elif event.key() == Qt.Key_Escape and self.isFullScreen():
-                self.toggleFullscreen()
-
-            elif event.key() == Qt.Key_F:
-                self.toggleFullscreen()
 
             elif event.key() == Qt.Key_Home:
                 self.setPosition(0.0)
