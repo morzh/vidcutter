@@ -868,21 +868,23 @@ VCToolBarButton QPushButton:pressed#toolbar-save {
 
 /* -------------------------------------------------------------------------- */
 
-VCToolBarButton QPushButton#toolbar-send {
-    border-image: url(:/images/light/toolbar-send.png);
+VCToolBarButton QPushButton#toolbar-export {
+    border-image: url(:/images/light/toolbar-export.png);
 }
 
-VCToolBarButton QPushButton:disabled#toolbar-send {
-    border-image: url(:/images/light/toolbar-send-disabled.png);
+VCToolBarButton QPushButton:disabled#toolbar-export {
+    border-image: url(:/images/light/toolbar-export.png);
 }
 
-VCToolBarButton QPushButton:hover#toolbar-send {
-    border-image: url(:/images/light/toolbar-send-hover.png);
+VCToolBarButton QPushButton:hover#toolbar-export {
+    border-image: url(:/images/light/toolbar-export.png);
 }
 
-VCToolBarButton QPushButton:pressed#toolbar-save {
-    border-image: url(:/images/light/toolbar-send-pressed.png);
+VCToolBarButton QPushButton:pressed#toolbar-export {
+    border-image: url(:/images/light/toolbar-export.png);
 }
+
+/* -------------------------------------------------------------------------- */
 
 /* -------------------------------------------------------------------------- */
 

@@ -145,7 +145,7 @@
         <file>images/dark/toolbar-save-disabled.png</file>
         <file>images/dark/toolbar-save-hover.png</file>
         <file>images/dark/toolbar-save-pressed.png</file>
-        <file>images/dark/export.png</file>
+        <file>images/dark/toolbar-export.png</file>
         <file>images/dark/toolbar-start.png</file>
         <file>images/dark/toolbar-start-disabled.png</file>
         <file>images/dark/toolbar-start-hover.png</file>
@@ -244,15 +244,11 @@
         <file>images/light/toolbar-save-disabled.png</file>
         <file>images/light/toolbar-save-hover.png</file>
         <file>images/light/toolbar-save-pressed.png</file>
-        <file>images/light/export.png</file>
+        <file>images/light/toolbar-export.png</file>
         <file>images/light/toolbar-start.png</file>
         <file>images/light/toolbar-start-disabled.png</file>
         <file>images/light/toolbar-start-hover.png</file>
         <file>images/light/toolbar-start-pressed.png</file>
-        <file>images/light/toolbar-send.png</file>
-        <file>images/light/toolbar-send-disabled.png</file>
-        <file>images/light/toolbar-send-hover.png</file>
-        <file>images/light/toolbar-send-pressed.png</file>
         <file>images/light/toolbar-plus.png</file>
         <file>images/light/toolbar-plus-disabled.png</file>
         <file>images/light/toolbar-plus-hover.png</file>

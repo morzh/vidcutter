@@ -447,7 +447,7 @@ class VideoLabelingTool(QWidget):
         self.removeAllIcon = QIcon(':/images/remove-all.png')
         self.openProjectIcon = QIcon(':/images/open.png')
         self.saveProjectIcon = QIcon(':/images/save.png')
-        self.exportProjectIcon = QIcon(':/images/export.png')
+        self.exportProjectIcon = QIcon(':/images/toolbar-export.png')
         self.filtersIcon = QIcon(':/images/filters.png')
         self.mediaInfoIcon = QIcon(':/images/info.png')
         self.streamsIcon = QIcon(':/images/streams.png')
@@ -789,7 +789,8 @@ class VideoLabelingTool(QWidget):
 
 
     def exportProject(self):
-        ...
+        filepath = QFileDialog.getOpenFileName(parent=self.parent, caption='Select Data File',
+                                               directory=QDir.currentPath(), filter="Pickle(*.pickle)")
 
 
     def saveProject(self, reboot: bool = False) -> None:
