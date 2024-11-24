@@ -14,6 +14,7 @@ class VideoItem:
         self._duration = QTime()
         self._currentCLipIndex = 0
         self._filename = ''
+        self._fps = 0
         self.description = ''
         self.youtubeId = ''
         self.issues: list[str] = []
@@ -40,6 +41,7 @@ class VideoItem:
             if self.clips[clip_index].timeStart == self.clips[clip_index].timeEnd:
                 del self.clips[clip_index]
 
+
     def cleanClipsTimestamps(self):
         for clip in self.clips:
             clip.cleanTimestamps()
@@ -50,8 +52,25 @@ class VideoItem:
         else:
             raise Exception
 
+
     def clipsLength(self):
         return len(self.clips)
+
+
+    def clipsTimepointsSeconds(self) -> dict[str, list]:
+        secondsTimepoints = {self._filename: []}
+        for clip in self.clips:
+            secondsTimepoints[self._filename].append(clip.timepointsSeconds())
+        return secondsTimepoints
+
+
+    def clipsTimepointsFrames(self) -> dict[str, list]:
+        framesTimepoints = {self._filename: []}
+        for clip in self.clips:
+            clipFrames = [int(round(self._fps * timestamp)) for timestamp in clip.timepointsSeconds()]
+            framesTimepoints[self._filename].append(clipFrames)
+        return framesTimepoints
+
 
     @property
     def filename(self) -> str:

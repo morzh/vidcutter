@@ -30,3 +30,8 @@ class VideoClipTimestamps:
     @timestamp_type.setter
     def timestamp_type(self, timestamp_type: TimestampType):
         self.timestamp_type_ = timestamp_type
+
+
+    @property
+    def seconds(self) -> float:
+        return self.timestamp_.msecsSinceStartOfDay() * 1e-3

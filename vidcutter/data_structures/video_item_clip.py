@@ -2,67 +2,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QTime
 from vidcutter.data_structures.qpixmap_pickle import QPixmapPickle
 from vidcutter.data_structures.video_clip_timestamps import VideoClipTimestamps
-
-
-class BoundingBox:
-    """
-    Image bounding box in normalized coordinates
-    """
-    def __init__(self):
-        self._x = 0.0
-        self._y = 0.0
-        self._width = 1.0
-        self._height = 1.0
-        self._confidence = 1.0
-
-    @staticmethod
-    def clamp_(value, minimum, maximum):
-        if value < minimum:
-            return minimum
-        elif value > maximum:
-            return maximum
-        else:
-            return value
-
-    @property
-    def x(self) -> float:
-        return self._x
-
-    @x.setter
-    def x(self, value) -> None:
-        self._x = self.clamp_(value, 0, 1)
-
-    @property
-    def y(self) -> float:
-        return self._y
-
-    @y.setter
-    def y(self, value) -> None:
-        self._y = self.clamp_(value, 0, 1)
-
-    @property
-    def width(self) -> float:
-        return self._width
-
-    @width.setter
-    def width(self, value) -> None:
-        self._width = self.clamp_(value, 0, 1)
-
-    @property
-    def height(self) -> float:
-        return self._height
-
-    @height.setter
-    def height(self, value) -> None:
-        self._height = self.clamp_(value, 0, 1)
-
-    @property
-    def confidence(self) -> float:
-        return self._confidence
-
-    @confidence.setter
-    def confidence(self, value) -> None:
-        self._confidence = self.clamp_(value, 0, 1)
+from vidcutter.data_structures.bounding_box import BoundingBox
 
 
 class VideoItemClip:
@@ -89,7 +29,6 @@ class VideoItemClip:
         clip_timestamps_string = 'Clip timestamps: '
         for clip in self.clip_timestamps:
             clip_timestamps_string += f'{clip.timestamp}, '
-
         return clip_string + clip_timestamps_string
 
     def __lt__(self, other):
@@ -104,12 +43,26 @@ class VideoItemClip:
     def __ge__(self, other):
         return self.timeStart >= other.timeStart
 
+
     def cleanTimestamps(self):
         clip_duration = self._timeEnd.msecsSinceStartOfDay() - self._timeStart.msecsSinceStartOfDay()
         for index in reversed(range(len(self.clip_timestamps))):
             current_milliseconds = self.clip_timestamps[index].timestamp.msecsSinceStartOfDay()
             if current_milliseconds > clip_duration or current_milliseconds == 0:
                 del self.clip_timestamps[index]
+
+
+    def timepointsSeconds(self) -> list[float]:
+        timepoints = [float] * (len(self.clip_timestamps) + 2)
+        startTiemstamp = self._timeStart.msecsSinceStartOfDay() * 1e-3
+
+        timepoints[0] = startTiemstamp
+        for index, timestamp in enumerate(self.clip_timestamps):
+            timepoints[index + 1] = timestamp.seconds + startTiemstamp
+        timepoints[-1] = self._timeEnd.msecsSinceStartOfDay() * 1e-3
+
+        return timepoints
+
 
     @property
     def timeStart(self) -> QTime:

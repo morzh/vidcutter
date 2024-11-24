@@ -288,7 +288,7 @@ class VideoService(QObject):
             os.replace(final_filename, source)
             return True
         return False
-
+    """
     def cut(self, source: str, output: str, frametime: str, duration: str, allstreams: bool=True, vcodec: str=None,
             run: bool=True) -> Union[bool, str]:
         self.checkDiskSpace(output)
@@ -320,7 +320,7 @@ class VideoService(QObject):
     def smartinit(self, clips: int):
         self.smartcut_jobs = []
         [self.smartcut_jobs.append(Munch(output='', bitrate=0, allstreams=True, procs={}, files={}, results={})) for index in range(clips)]
-
+    """
     def smartcut(self, index: int, source: str, output: str, start: float, end: float, allstreams: bool = True) -> None:
         output_file, output_ext = os.path.splitext(output)
         bisections = self.getGOPbisections(source, start, end)

@@ -229,6 +229,9 @@ class mpvWidget(QOpenGLWidget):
     def frameBackStep(self) -> None:
         self.mpv.command('frame-back-step')
 
+    def framesNumber(self) -> int:
+        return self.property("container-fps")
+
     def seek(self, pos, method='absolute+exact') -> None:
         # print('seek', 'pos:', pos)
         self.mpv.command('seek', pos, method)

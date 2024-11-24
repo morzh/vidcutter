@@ -15,6 +15,7 @@ class VideoList:
         self.actionClassesLabels: list[str] = actionLabels
         self.actionClassUnknownLabel = 'Other'
 
+
     def __str__(self):
         print('description:', self._description)
         print('video issues classes:', self._videoIssuesClasses)
@@ -24,16 +25,34 @@ class VideoList:
             print(video)
             print('-' * 50)
 
+
     def __getitem__(self, item):
         return self.videos[item]
+
 
     def deleteCurrentVideoClipsThumbs(self):
         clips = self.videos[self._currentVideoIndex].clips
         for clip in clips:
             clip.thumbnail = QPixmapPickle()
 
+
     def currentVideoClipTimeStart(self, clip_index: int) -> QTime:
         return self.videos[self._currentVideoIndex].clips[clip_index].timeStart
+
+
+    def videosTimePointsSeconds(self) -> dict[str, list]:
+        info = {}
+        for videoItem in self.videos:
+            info.update(videoItem.clipsTimepointsSeconds())
+        return info
+
+
+    def videosTimePointsFrames(self) -> dict[str, list]:
+        info = {}
+        for videoItem in self.videos:
+            info.update(videoItem.clipsTimepointsFrames())
+        return info
+
 
     @staticmethod
     def clamp(x, minimum, maximum):

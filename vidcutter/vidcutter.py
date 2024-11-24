@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import json
 import logging
 import os
+import pprint
 import sys
 import pickle
 import shutil
@@ -68,6 +70,7 @@ class VideoLabelingTool(QWidget):
         self._dataFilenameTemp = 'data.pickle.tmp'
         self.folderOpened = False
         self.duration = 0
+        self.currentVideoFramesNumber = 0
 
         self.initTheme()
         self.updater = Updater(self.parent)
@@ -703,6 +706,9 @@ class VideoLabelingTool(QWidget):
 
         filepath = QFileDialog.getOpenFileName(parent=self.parent, caption='Select Data File', directory=QDir.currentPath(), filter="Pickle(*.pickle)")
         self._dataFilepath = os.path.split(os.path.abspath(filepath[0]))[0]
+        self._dataFilename = os.path.basename(filepath[0])
+        self._dataFilenameTemp = os.path.basename(filepath[0])
+
         # print(self._dataFilepath)
         with open(filepath[0], 'rb') as f:
             self.videoList = pickle.load(f)
@@ -724,6 +730,7 @@ class VideoLabelingTool(QWidget):
         if self._dataFilepath is not None:
             self.lastFolder = QFileInfo(self._dataFilepath).absolutePath()
 
+
     def loadMedia(self, item) -> None:
         item_index = self.videoListWidget.row(item)
         # self.videoList.deleteCurrentVideoClipsThumbs()
@@ -744,13 +751,10 @@ class VideoLabelingTool(QWidget):
         self.scalableTimeline.setEnabled(False)
         self.initMediaControls(True)
         self.totalRuntime = 0
-        # self.setRunningTime(self.delta2QTime(self.totalRuntime).toString(self.runtimeformat))
         self.taskbar.init()
         self.parent.setWindowTitle(f'video #{item_index + 1}  ::  {os.path.basename(self.currentMedia)}')
-        # self.parent.setWindowTitle('{0} - {1}'.format(str(item_index), os.path.basename(self.currentMedia)))
 
         try:
-            # self.videoList.videos[self.videoList.currentVideoIndex].clips = SortedList(self.videoList.videos[self.videoList.currentVideoIndex].clips)
             self.mpvWidget.setEnabled(True)
             self.mpvWidget.play(self.currentMedia)
             self.videoService.setMedia(self.currentMedia)
@@ -767,7 +771,8 @@ class VideoLabelingTool(QWidget):
             self.timelineFactorLabel.setText('1')
             self.clipIsPlayingIndex = -1
             self.mediaAvailable = True
-            # self.buildClipsThumbnails(self.videoList.videos[self.videoList.currentVideoIndex].clips)
+
+
 
         except InvalidMediaException:
             qApp.restoreOverrideCursor()
@@ -780,8 +785,6 @@ class VideoLabelingTool(QWidget):
                                  'and make sure to include your operating system, video card, the invalid media file '
                                  'and the version of VidCutter you are currently using.</p>')
 
-        # self.mpvWidget.mpv.playbackSpeed(4.0)
-
 
     def buildClipsThumbnails(self, clips: SortedList[VideoItemClip]):
         for clip in clips:
@@ -789,8 +792,15 @@ class VideoLabelingTool(QWidget):
 
 
     def exportProject(self):
-        filepath = QFileDialog.getOpenFileName(parent=self.parent, caption='Select Data File',
-                                               directory=QDir.currentPath(), filter="Pickle(*.pickle)")
+        # filepath = QFileDialog.getOpenFileName(parent=self.parent, caption='Select JSON File',
+        #                                        directory=QDir.currentPath(), filter="JSON(*.json)")
+        videosTimepoints = self.videoList.videosTimePointsFrames()
+        jsonFilepath = os.path.join(self._dataFilepath, self._dataFilename + '.json')
+
+        # pprint.pprint(videosTimepoints)
+
+        with open(jsonFilepath, 'w') as file:
+            json.dump(videosTimepoints, file)
 
 
     def saveProject(self, reboot: bool = False) -> None:
@@ -913,6 +923,7 @@ class VideoLabelingTool(QWidget):
     @pyqtSlot(float, int)
     def on_durationChanged(self, duration: float, frames: int) -> None:
         self.duration = duration
+        self.currentVideoFramesNumber = frames
         self.scalableTimeline.setDuration(duration)
         self.scalableTimeline.factor = 1
         self.setPosition(0.0)
